@@ -1,0 +1,117 @@
+<div class="header mt-md-5">
+    <div class="header-body">
+      <div class="row align-items-center">
+        <div class="col-auto">
+          <!-- Pretitle -->
+          <h6 class="header-pretitle">Reportes</h6>
+
+          <!-- Title -->
+          <h1 class="header-title">Panel de estados</h1>
+        </div>
+      </div>
+      <!-- / .row -->
+      <div class="row align-items-center">
+        <div class="col">
+          <!-- Nav -->
+          <ul class="nav nav-tabs nav-overflow header-tabs">
+            <li class="nav-item">
+              <a
+                *ngIf="!load_estudiantes"
+                class="nav-link"
+                style="cursor: pointer"
+                (click)="estadoestudiante()"
+              >
+                ESTUDIANTES
+              </a>
+              <a
+                *ngIf="load_estudiantes"
+                class="nav-link active"
+                style="
+                  cursor: no-drop;
+                  background: rgba(255, 255, 255, 0.365);
+                "
+              >
+                ESTUDIANTES
+              </a>
+            </li>
+            <li class="nav-item" disabled>
+              <a
+                *ngIf="!load_ventas"
+                class="nav-link"
+                style="cursor: pointer"
+                (click)="estadoventas()"
+              >
+                PAGOS
+              </a>
+              <a
+                *ngIf="load_ventas"
+                class="nav-link active"
+                style="
+                  cursor: no-drop;
+                  background: rgba(255, 255, 255, 0.365);
+                "
+              >
+                PAGOS
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                *ngIf="!load_documentos"
+                class="nav-link"
+                style="cursor: pointer"
+                (click)="estadodocumento()"
+              >
+                DOCUMENTOS
+              </a>
+              <a
+                *ngIf="load_documentos"
+                class="nav-link active"
+                style="
+                  cursor: no-drop;
+                  background: rgba(255, 255, 255, 0.365);
+                "
+              >
+                DOCUMENTOS
+              </a>
+            </li>
+
+            <li class="nav-item" *ngIf="rol == 'admin'">
+              <a
+                *ngIf="!load_administrativo"
+                class="nav-link"
+                style="cursor: pointer"
+                (click)="estadoadministrativo()"
+              >
+                ADMINISTRATIVO
+              </a>
+              <a
+                *ngIf="load_administrativo"
+                class="nav-link active"
+                style="
+                  cursor: no-drop;
+                  background: rgba(255, 255, 255, 0.365);
+                "
+              >
+                ADMINISTRATIVO
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card" *ngIf="load_estudiantes == true">
+      <app-stundes-payments></app-stundes-payments>
+    </div>
+    <div class="card" *ngIf="load_ventas == true">
+      <app-sales-anual></app-sales-anual>
+    </div>
+    <div class="card" *ngIf="load_documentos == true">
+      <app-control-document></app-control-document>
+    </div>
+    <div class="card" *ngIf="load_administrativo == true&&rol=='admin'">
+      <app-control-admins></app-control-admins>
+    </div>
+  </div>

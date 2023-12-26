@@ -1,0 +1,186 @@
+
+
+        <div class="card-header">
+          <!-- Title -->
+          <h4 class="card-header-title">Registro</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col">
+              <div class="input-group input-group-merge">
+                <input
+                  type="text"
+                  class="form-control form-control-appended"
+                  placeholder="Buscar correo, Fecha, proceso"
+                  name="filtro"
+                  [(ngModel)]="filtro"
+                />
+                <div class="input-group-append">
+                  <button
+                    class="btn btn-primary"
+                    (click)="filtrar_documento()"
+                  >
+                    Buscar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <br>
+          <br>
+          <div class="row">
+            <div class="col-3">
+              <p> Desde: {{ desde | date:'short' }}</p>
+             <input type="date" class="form-control" name="desde" [(ngModel)]="desde" />
+            </div>
+            <div class="col-3">
+                  <p> Hasta: {{ hasta | date:'short' }}</p>
+                <input type="date" class="form-control" name="hasta" [(ngModel)]="hasta" />
+            </div>
+            <div class="col">
+                <button class="btn btn-primary btn-block" (click)="filtrar_fechas()">Buscar</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-danger btn-block" (click)="reset_data()">Reset</button>
+            </div>
+          </div>
+        </div>
+        <ng-container *ngIf="resgistro_arr.length != 0">
+          <div class="table-responsive">
+            <table class="table table-sm table-nowrap card-table table-hover">
+              <thead>
+                <tr>
+                  <th>Admin</th>
+                  <th>Fecha</th>
+                  <th>Proceso</th>
+                  <th>Accción</th>
+                </tr>
+              </thead>
+              <tbody class="font-size-base">
+                <ng-container
+                  *ngFor="
+                    let item of resgistro_arr
+                      | slice
+                        : (page - 1) * pageSize
+                        : (page - 1) * pageSize + pageSize
+                  "
+                >
+                  <tr *ngIf="resgistro_arr != undefined">
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="ms-3">
+                          <ng-container *ngIf="item.admin != null">
+                            <h4 class="fw-normal mb-1">
+                              {{ item.admin.nombres }}
+                              {{ item.admin.apellidos }}
+                            </h4>
+                            <!-- Text -->
+                            <span>{{ item.admin.email }} </span>
+                          </ng-container>
+                          <!-- Heading -->
+                          <ng-container *ngIf="item.admin == null">
+                            ADMIN INCORP
+                          </ng-container>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      {{ item.createdAt | date : "short" }}
+                    </td>
+                    <td>
+                      {{ item.tipo }}
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-primary"(click)="ver(item.descripcion)" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        VER
+                      </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Título del modal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <form *ngIf="formulario">
+                              <div *ngFor="let objeto of formulario">
+                                <div class="table table-responsive">
+                                  <table class="table table-bordered">
+                                    <tbody>
+                                      <tr *ngFor="let propiedad of getObjectKeys(objeto)">
+                                        <th class="propiedad">{{ propiedad }}</th>
+                                        <td class="valor" *ngIf="!isObject(objeto[propiedad])">{{ objeto[propiedad] }}</td>
+                                        <td class="subtabla" *ngIf="isObject(objeto[propiedad])">
+                                          <ng-container *ngIf="isObjectArray(objeto[propiedad])">
+                                            <table>
+                                              <tbody>
+                                                <tr *ngFor="let elemento of objeto[propiedad]; let i = index">
+                                                  <td colspan="2" class="subtitulo">Elemento {{ i + 1 }}</td>
+                                                </tr>
+                                                <tr *ngFor="let subPropiedad of getObjectKeys(objeto[propiedad][0])">
+                                                  <th>{{ subPropiedad }}</th>
+                                                  <td *ngFor="let elemento of objeto[propiedad]">{{ elemento[subPropiedad] }}</td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                          </ng-container>
+                                          <ng-container *ngIf="!isObjectArray(objeto[propiedad])">
+                                            <table>
+                                              <tbody>
+                                                <tr *ngFor="let subPropiedad of getObjectKeys(objeto[propiedad])">
+                                                  <th>{{ subPropiedad }}</th>
+                                                  <td>{{ objeto[propiedad][subPropiedad] }}</td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                          </ng-container>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </form>
+                            
+                            
+
+                            
+                            
+
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+
+          <ngb-pagination
+            *ngIf="resgistro_arr.length >= 1"
+            [(page)]="page"
+            [pageSize]="pageSize"
+            [maxSize]="10"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            [collectionSize]="resgistro_arr.length"
+          ></ngb-pagination>
+        </ng-container>
+
+        <ng-container *ngIf="resgistro_arr.length == 0">
+          <div
+            class="alert alert-danger"
+            *ngIf="resgistro_arr.length == 0"
+          >
+            <i class="fe fe-info mr-1"></i> No tienes Registro
+          </div>
+        </ng-container>
+
+

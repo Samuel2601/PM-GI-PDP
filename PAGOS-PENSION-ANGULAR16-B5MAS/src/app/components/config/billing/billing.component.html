@@ -1,0 +1,381 @@
+<div class="container">
+	<div class="sidebar">
+		<app-sidebar></app-sidebar>
+	</div>
+	
+	<div class="content">
+        <div class="container-fluid" >
+            <div class="row justify-content-center" >
+                <!-- Header -->
+                <div class="header mt-md-5">
+                    <div class="header-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <!-- Pretitle -->
+                                <h6 class="header-pretitle">Módulo</h6>
+
+                                <!-- Title -->
+                                <h1 class="header-title">Facturación</h1>
+                            </div>
+                        </div>
+                        <!-- / .row -->
+                    </div>
+                </div>
+
+                <form #actualizarForm="ngForm" (ngSubmit)="actualizar(actualizarForm)">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="col-auto">
+                                        <h4 class="header-title">Información de Emisor</h4>
+                                    </div>                            
+                                </div>
+                                <div class="card-body">
+                                    <div class="row justify-content-center">
+                                        <div class="col-md">
+                                            <div class="row g-2">
+                                                <label for="inputRUC" class="form-label">Número de RUC</label>
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                    >(Obligatorio)</span>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        class="form-control"
+                                                        name="ruc"
+                                                        [(ngModel)]="config.ruc"
+                                                        maxlength="13"
+                                                        minlength="13"
+                                                        pattern="[0-9]*"
+                                                    />
+                                                </div>
+                                            </div>                                        
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Dirección</label>
+                                                <div class="input-group mb-3">
+    
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                        >(Obligatorio)</span>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        class="form-control"
+                                                        name="dirMatriz"
+                                                        [(ngModel)]="config.dirMatriz"
+                                                    />
+                                                </div>
+                                            </div>                                       
+                                        </div>   
+                                        <div class="col-md">
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Nombre Comercial</label>
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                    >(Obligatorio)</span>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        class="form-control"
+                                                        name="nombreComercial"
+                                                        [(ngModel)]="config.nombreComercial"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Nombre o Razón Social</label>
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                    >(Obligatorio)</span>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        class="form-control"
+                                                        name="razonSocial"
+                                                        [(ngModel)]="config.razonSocial"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Teléfono</label>
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                    >(Obligatorio)</span>
+                                                    <input
+                                                        type="tel"
+                                                        required
+                                                        class="form-control"
+                                                        name="telefono"
+                                                        maxlength="10"
+                                                        minlength="10"
+                                                        [(ngModel)]="config.telefono"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                      
+                                    </div>
+                                    
+                                   
+    
+                                </div>
+                            </div>  
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="col-auto">
+                                        <h4 class="header-title">Información de Facturación</h4>
+                                    </div>                            
+                                </div>
+                                <div class="card-body">
+                                    <div class="row justify-content-center">
+                                        <div class="col-md">
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Tipo de comprobante</label>
+                                                <div class="input-group mb-3">                           
+                                                    <label class="input-group-text" for="inputGroupSelect01">Opciones (Obligatorio)</label>
+                                                    <select class="form-select" id="inputGroupSelect01" name="comprobante" [(ngModel)]="config.codDoc">
+                                                        <option selected>Seleccionar...</option>
+                                                        <ng-container *ngFor="let item of sri.tabla3">
+                                                            <option value="{{item['Código']}}">{{item['Código']}} {{item['Nombre comprobante']}}</option>
+                                                        </ng-container>
+                                                    </select>
+                                                </div>
+                                            </div>                                        
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Serie</label>
+                                                <div class="input-group mb-3">
+    
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                        >(Obligatorio)</span>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        class="form-control"
+                                                        name="serie"
+                                                        [(ngModel)]="config.serie"
+                                                        maxlength="6"
+                                                        minlength="6"
+                                                        pattern="[0-9]*"
+                                                    />
+                                                </div>
+                                            </div>                                      
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Número del comprobante (secuencial)</label>
+                                                <div class="input-group mb-3">
+    
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                        >(Obligatorio)</span>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        class="form-control"
+                                                        name="secuencial"
+                                                        [(ngModel)]="config.secuencial"
+                                                        maxlength="9"
+                                                        minlength="9"
+                                                        pattern="[0-9]*"
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                        </div>   
+                                        <div class="col-md">
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Tipo de ambiente</label>
+                                                <div class="input-group mb-3">                                                        
+                                                    <label class="input-group-text" for="inputGroupSelect02">Opciones (Obligatorio)</label>
+                                                    <select class="form-select" id="inputGroupSelect02" name="ambiente" [(ngModel)]="config.ambiente">
+                                                        <option selected>Seleccionar...</option>
+                                                        <ng-container *ngFor="let item of sri.tabla4">
+                                                            <option value="{{item['Código']}}">{{item['Código']}} {{item['Tipo de ambiente']}}</option>
+                                                        </ng-container>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Código numérico</label>
+                                                <div class="input-group mb-3">
+    
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                        >(Obligatorio)</span>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        class="form-control"
+                                                        name="codnum"
+                                                        [(ngModel)]="config.codnum"
+                                                        maxlength="8"
+                                                        minlength="8"
+                                                        pattern="[0-9]*"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Punto de Emisión</label>
+                                                <div class="input-group mb-3">
+    
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                        >(Obligatorio)</span>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        class="form-control"
+                                                        name="ptoEmi"
+                                                        [(ngModel)]="config.ptoEmi"
+                                                        maxlength="3"
+                                                        minlength="3"
+                                                        pattern="[0-9]*"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div class="row g-2">
+                                                <label for="inputEmail3" class="form-label">Código de Establecimiento</label>
+                                                <div class="input-group mb-3">
+    
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                        >(Obligatorio)</span>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        class="form-control"
+                                                        name="estab"
+                                                        [(ngModel)]="config.estab"
+                                                        maxlength="3"
+                                                        minlength="3"
+                                                        pattern="[0-9]*"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                   
+    
+                                </div>
+                            </div>  
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="col-auto">
+                                        <h4 class="header-title">Información de Firma Electronica</h4>
+                                    </div>                            
+                                </div>
+                                <div class="card-body">
+                                    <div class="row justify-content-center">
+                                        <div class="col-md">
+                                                <div class="row g-2">
+                                                    <label for="inputRUC" class="form-label">Archivo de Firma Electrónica</label>                                            
+                                                    <div class="custom-file">
+                                                        <input
+                                                            class="custom-file-input"
+                                                            type="file"
+                                                            id="file-input"
+                                                            accept=".p12"
+                                                            (change)="fileChangeEvent($event)"/>
+                                                        <label
+                                                            class="custom-file-label"
+                                                            id="input-portada"
+                                                            for="file-input"
+                                                            style="white-space: nowrap; overflow: hidden"
+                                                            >Selecciona tu archivo</label>
+                                                    </div>
+                                                </div>
+                                        </div>
+                                        <div class="col-md">
+                                            <div class="row g-2">
+    
+                                                <label for="inputRUC" class="form-label">Contraseña de archivo de Firma Electrónica</label>   
+                                                <!-- Input group -->
+                                                <div class="input-group mb-3">
+                                                    <!-- Input -->
+                                                    <input
+                                                        type="password"
+                                                        class="form-control form-control-appended"
+                                                        placeholder="Ingresa tu contraseña"
+                                                        id="password"
+                                                        #password="ngModel"
+                                                        name="password"
+                                                        [(ngModel)]="config.password"
+                                                    />
+                            
+                                                    <!-- Icon -->
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text" (click)="view_password('password')" style="cursor: pointer">
+                                                            <i class="bi bi-eye-slash-fill"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>  
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="col-auto">
+                                        <h4 class="header-title">Información de Servicio SMTP</h4>
+                                    </div>                            
+                                </div>
+                                <div class="card-body">
+                                    <div class="row justify-content-center">
+                                        <div class="col-md">                                        
+                                            <div class="row g-2">
+                                                <label for="inputRUC" class="form-label">Correo Electrónico de Emisión</label>
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text" id="basic-auxmescompleto"
+                                                    >(Obligatorio)</span>
+                                                    <input
+                                                        type="email"
+                                                        required
+                                                        class="form-control"
+                                                        name="correo"
+                                                        [(ngModel)]="config.correo"
+                                                        pattern="[0-9a-zA-Z@.]*"
+                                                    />
+                                                </div>
+                                            </div>    
+                                        </div>
+                                        <div class="col-md">
+                                            <div class="row g-2">
+    
+                                                <label for="inputRUC" class="form-label">Contraseña de archivo de Firma Electrónica</label>   
+                                                <!-- Input group -->
+                                                <div class="input-group mb-3">
+                                                    <!-- Input -->
+                                                    <input
+                                                        type="password"
+                                                        class="form-control form-control-appended"
+                                                        placeholder="Ingresa tu contraseña"
+                                                        id="correo_password"
+                                                        #password="ngModel"
+                                                        name="correo_password"
+                                                        [(ngModel)]="config.correo_password"
+                                                    />
+                            
+                                                    <!-- Icon -->
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text" (click)="view_password('correo_password')" style="cursor: pointer">
+                                                            <i class="bi bi-eye-slash-fill"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>         
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-primary btn-shadow" type="submit">Guardar</button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                   
+                </form>                    
+            </div>
+        </div>    
+    </div>
+ 
+</div>

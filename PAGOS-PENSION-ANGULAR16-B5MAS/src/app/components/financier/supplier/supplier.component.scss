@@ -1,0 +1,28 @@
+.ngx-file-drop-content {
+    text-align: center;
+    padding: 30px;
+    border: 2px dashed #ccc;
+    background-color: #f9f9f9;
+    color: #777;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .my-drop-zone {
+    width: 100%;
+    height: 300px;
+    border: 1px dashed rgb(94, 73, 251);
+    padding: 1em;
+    text-align: center;
+  }
+
+.ngx-file-drop__drop-zone ::before{
+  height: 100% !important;
+  margin: auto;
+  border: 2px dotted #0782d0;
+  border-radius: 30px;
+}
+
+.ngx-file-drop__content ::before{
+  height: 100% !important;
+}

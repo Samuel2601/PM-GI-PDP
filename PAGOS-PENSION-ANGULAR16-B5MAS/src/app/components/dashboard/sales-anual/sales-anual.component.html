@@ -1,0 +1,188 @@
+
+    <div
+      class="alert alert-danger"
+      *ngIf="ventas.length == 0 "
+    >
+      <i class="fe fe-info mr-1"></i> No tienes Pagos
+    </div>
+
+    <div class="card-body">
+      <div class="row">
+        <div class="col-12">
+          <canvas
+            id="myChart2"
+            width="20%"
+            height="5%"
+            style="
+              display: block;
+              box-sizing: border-box;
+             
+            "
+          ></canvas>
+        </div>
+      </div>
+    </div>
+    <ng-container *ngIf="ventas.length != 0">
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <!-- Card -->
+          <div class="card">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col">
+                  <!-- Title -->
+                  <h3 class="text-uppercase text-muted mb-2">
+                    PAGOS DE {{ arraymes[auxfactual] }}:
+
+                    <span class="h3 mb-0" >
+                      {{
+                        pagos[0].data[arraymes[auxfactual]]
+                          | number : "1.2"
+                      }}
+                    </span>
+                  </h3>
+
+                  <!-- Heading -->
+                </div>
+              </div>
+              <!-- / .row -->
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <!-- Card -->
+          <div class="card">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col">
+                  <!-- Title -->
+                  <h6 class="text-uppercase text-muted mb-1">
+                    PAGOS ANUALES {{ faux | date : "YYYY" }}:
+                    <span class="h3 mb-0" >
+                      <br />
+                      {{ totalfaux | number : "1.2" }}
+                    </span>
+                  </h6>
+
+                  <!-- Heading -->
+                </div>
+
+                <div class="col">
+                  <!-- Title -->
+                  <h6 class="text-uppercase text-muted mb-1">
+                    PAGOS ANUALES {{ factual | date : "YYYY" }}:
+                    <span class="h3 mb-0" >
+                      <br />{{ totalfactual | number : "1.2" }}
+                    </span>
+                  </h6>
+
+                  <!-- Heading -->
+                </div>
+              </div>
+              <!-- / .row -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <!-- Title -->
+          <h4 class="card-header-title">Pagos por Cursos</h4>
+
+          <select
+            class=""
+            [(ngModel)]="auxfactual"
+            (ngModelChange)="ordenarmes($event)"
+          >
+            <ng-container *ngFor="let item of arraymes; let index = index">
+              <option value="{{ index }}">{{ item }}</option>
+            </ng-container>
+          </select>
+          <button
+          id="btnimprimircompro"
+          mat-raised-button
+          class="btn btn-info btn-sm"
+          (click)="imprimir()"
+      >
+          Imprimir
+          </button>
+        </div>
+        <div class="table-responsive" id="imprimir">
+          <div class="card-header" style="display: none;" id="titulo">
+            <div class="row align-items-center">
+              <div class="col-3" style="text-align: center;width: 30%; ">
+                <img _ngcontent-twf-c49="" [src]="url + 'obtener_portada/' + imagen" alt="..." 
+                    class="navbar-brand-img mx-auto" style=" max-width: 40%; ">
+              </div>
+              <div class="col-auto" style="text-align: center; width: 40%;">
+                <h2><b>
+                  {{info.titulo| uppercase}}</b>
+                  <h4 style=" text-align:center;">
+                  Dirección: {{info.calle1}} y {{info.calle2}}<br>
+        
+                  Teléfono: {{info.telefonocon}}<br>
+        
+                  </h4>
+        
+                  </h2>
+              </div>
+              <div class="col-3" style="text-align: center;width: 20%;">
+                <img _ngcontent-twf-c49="" src="https://i.postimg.cc/ThvxfG15/nuevo-logo-Mineduc.jpg" alt="..." 
+                class="navbar-brand-img mx-auto" style="max-height: 4rem !important;" style="height: 2cm;"><br>
+                <img _ngcontent-twf-c49="" src="https://i.postimg.cc/ZYBybc0J/Politics-of-Ecuador-Guillermo-Lasso-Administration-logo-svg.png" alt="..." 
+                class="navbar-brand-img mx-auto" style="max-height: 4rem !important;" style="height: 2cm;">
+              </div>
+            </div>
+        
+          </div>
+          <table class="table table-sm table-nowrap card-table table-hover" style="text-align: center;">
+            <thead>
+              <tr>
+                <th>Curso</th>
+                <th>Valor ({{
+                  arraymes[auxfactual]
+                }})</th>
+              </tr>
+            </thead>
+            <tbody class="font-size-base">
+              <ng-container
+                *ngFor="
+                  let item of auxanio
+                "
+              >
+                <!--*ngIf="item.data[auxfactual]!=0"-->
+                <tr *ngIf="item.data[auxfactual]>0">
+                  <td>
+                    <a class="text-primary">{{ item.label }} </a>
+                  </td>
+                  <td>
+                    {{ item.data[auxfactual] | number : "1.2" }}
+                    
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+    </ng-container>
+
+
+  <ng-container *ngIf="ventas.length == 0 ">
+    <div class="card-body" style="cursor: progress">
+      <div class="row">
+        <div class="col-12 text-center">
+          <div
+            class="spinner-border"
+            style="width: 3rem; height: 3rem"
+            role="status"
+          >
+            <span class="visually-hidden"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>

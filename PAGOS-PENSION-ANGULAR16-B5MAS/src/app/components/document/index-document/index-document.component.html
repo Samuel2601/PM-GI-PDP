@@ -1,0 +1,384 @@
+<div class="container">
+	<div class="sidebar">
+		<app-sidebar></app-sidebar>
+	</div>
+	
+	<div class="content">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-12">
+                    <!-- Header -->
+                    <div class="header mt-md-5">
+                        <div class="header-body">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <!-- Pretitle -->
+                                    <h6 class="header-pretitle">Módulo</h6>
+    
+                                    <!-- Title -->
+                                    <h1 class="header-title">Documentos de deposito</h1>
+                                </div>
+                            </div>
+                            <!-- / .row -->
+                        </div>
+                    </div>
+    
+                    <!-- Alert -->
+    
+                    <!-- Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <!-- Title -->
+                            <h4 class="card-header-title">Mostrando todos tus documentos</h4>
+                        </div>
+                        <ng-container *ngIf="load_data_doc">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-12 text-center">
+                                        <div class="spinner-border" style="width: 3rem; height: 3rem" role="status">
+                                            <span class="visually-hidden"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngIf="!load_data_doc">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="input-group input-group-merge">
+                                            <input
+                                                type="text"
+                                                class="form-control form-control-appended"
+                                                placeholder="Buscar documento"
+                                                name="filtro"
+                                                [(ngModel)]="filtro"
+                                            />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" (click)="filtrar_documento()">Buscar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="col"
+                                        *ngIf="rol == 'direc' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'"
+                                        style="text-align: right"
+                                    >
+                                        <a
+                                            class="btn btn-danger"
+                                            data-bs-toggle="modal"
+                                            [attr.data-bs-target]="'#delete-todo'"
+                                            style="cursor: pointer; color: aliceblue"
+                                            >Eliminar</a
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-nowrap card-table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th *ngIf="rol == 'direc' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'">
+                                                <input
+                                                    type="checkbox"
+                                                    value="1"
+                                                    placeholder="total"
+                                                    [(ngModel)]="total"
+                                                    (click)="select_todo()"
+                                                />
+                                            </th>
+                                            <th>Documento</th>
+                                            <th>Valor</th>
+                                            <th>Cuenta</th>
+                                            <th>Fecha de creación</th>
+                                            <th>Opciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="font-size-base" *ngIf="!load">
+                                        <tr
+                                            *ngFor="
+                                                let item of documentos
+                                                    | slice : (page - 1) * pageSize : (page - 1) * pageSize + pageSize
+                                            "
+                                        >
+                                            <td *ngIf="rol == 'direc' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'">
+                                                <input type="checkbox" value="1" placeholder="item.ckechk" [(ngModel)]="item.ckechk" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <!-- Image -->
+    
+                                                    <div class="ms-3">
+                                                        <!-- Heading -->
+                                                        <a ><h4 class="fw-normal mb-1">{{ item.element.documento }}</h4></a>
+                                                        <!-- Text -->
+                                                        <span class="badge badge-success" *ngIf="item.element.npagos > 0">Asignado: </span>
+                                                        {{ item.element.npagos }}
+                                                        <span class="badge badge-warning" *ngIf="item.element.npagos == 0"
+                                                            >No Asignado</span
+                                                        >
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    class="btn btn-outline-info"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    [attr.data-bs-target]="'#collapseExample-' + item.element._id"
+                                                    aria-expanded="false"
+                                                    aria-controls="collapseExample"
+                                                    (click)="obtener(item.element._id)"
+                                                >
+                                                    <span class="badge badge-success" *ngIf="item.element.valor >= 0.01">Sobra: </span>
+                                                    {{ item.element.valor | currency : 'USD' }}
+                                                    <span class="badge badge-warning" *ngIf="item.element.valor < 0.01">Ya ocupado</span>
+                                                </button>
+                                                <div class="collapse" id="collapseExample-{{ item.element._id }}">
+                                                    <div class="card card-body" [innerHTML]="item.element.contenido">
+    
+                                                        
+                                                    </div>
+                                                    <h4>Facturas:</h4>
+                                                    <div class="card card-body" *ngIf="fact">
+                                                        <ng-container *ngFor="let items of fact">
+                                                            <ng-container *ngIf="items.id==item.element._id">
+                                                                <ng-container *ngFor="let fact of items.fact">
+                                                                     <br>
+                                                                    <a
+                                                                        class="text-muted"
+                                                                        [routerLink]="['/pagos/', fact]"
+                                                                        style="cursor: pointer"
+                                                                        target="_blank"
+                                                                    >
+                                                                    {{fact}}
+                                                                </a>
+                                                                </ng-container>
+                                                                
+                                                            </ng-container>
+                                                        </ng-container>
+                                                    </div>
+                                                </div>
+                                            </td>
+    
+                                            <td>
+                                                {{ item.element.cuenta }}
+                                                <br>
+                                                {{ item.element.f_deposito }}
+                                            </td>
+                                            <td>
+                                                <span>{{item.element.createdAt|date:'YYYY'}}-{{item.element.createdAt|date:'MM'}}-{{item.element.createdAt|date:'dd'}}</span>
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button
+                                                        class="btn btn-secondary dropdown-toggle"
+                                                        type="button"
+                                                        id="dropdownMenuButtonAlias"
+                                                        data-bs-toggle="dropdown"
+                                                        aria-haspopup="true"
+                                                        aria-expanded="false"
+                                                    >
+                                                        Opciones
+                                                    </button>
+    
+                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAlias">
+                                                        <li
+                                                            *ngIf="rol == 'direc' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'"
+                                                        >
+                                                            <a
+                                                                class="dropdown-item"
+                                                                style="cursor: pointer"
+                                                                data-bs-toggle="modal"
+                                                                [attr.data-bs-target]="'#edit-config-' + item.element._id"
+                                                                >Editar</a
+                                                            >
+                                                        </li>
+
+                                                        <li
+                                                            *ngIf="rol == 'direc' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'"
+                                                        >
+                                                            <a
+                                                                class="dropdown-item"
+                                                                style="cursor: pointer"
+                                                                data-bs-toggle="modal"
+                                                                [attr.data-bs-target]="'#delete-' + item.element._id"
+                                                                >Eliminar</a
+                                                            >
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="modal fade" id="edit-config-{{item.element._id}}" tabindex="-1" style="display: none;" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered" role="edit">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h4 class="modal-title">Editar Documento</h4>
+                                                                <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">×</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>Desea editar este documento? {{ item.element.documento }}</p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
+                                                                    Cancelar
+                                                                </button>
+                                                                <button
+                                                                    class="btn btn-primary btn-shadow btn-sm"                                                                        
+                                                                    type="button"
+                                                                    data-bs-toggle="modal"
+                                                                    [attr.data-bs-target]="'#edit-' + item.element._id"
+                                                                >
+                                                                    Si, editar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="modal fade" id="edit-{{item.element._id}}" tabindex="-1" style="display: none;" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered" role="edit">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h4 class="modal-title">Edición de Documento: {{ item.element.documento }}</h4>
+                                                                <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">×</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="card-body">
+                                                                    <div class="row">
+                                                                        <div class="col-auto">
+                                                                            <div class="form-group">
+                                                                                <label for="exampleInputLastName">Documento</label> 
+                                                                                <label class="form-control">{{item.element.documento}}</label>                                                                                        
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-auto">
+                                                                            <div class="form-group">
+                                                                                <label for="exampleInputLastName">Valor:</label>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    class="form-control"
+                                                                                    required
+                                                                                    min="0"
+                                                                                    
+                                                                                    placeholder="item.element.valor"
+                                                                                    pattern="^[0-9.]+$"
+                                                                                    name="item.element.valor"
+                                                                                    [(ngModel)]="item.element.valor"
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+
+                                                                    </div>    
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="modal-footer">
+                                                                <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
+                                                                    Cancelar
+                                                                </button>
+                                                                <button
+                                                                    class="btn btn-primary btn-shadow btn-sm"
+                                                                    (click)="editar(item.element)"
+                                                                    type="button"
+                                                                >
+                                                                    Si, eliminar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+    
+                                                <div
+                                                    class="modal fade"
+                                                    id="delete-{{ item.element._id }}"
+                                                    tabindex="-1"
+                                                    style="display: none"
+                                                    aria-hidden="true"
+                                                >
+                                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h4 class="modal-title">Eliminar documento</h4>
+                                                                <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">×</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>Desea eliminar este documento? {{ item.element.documento }}</p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
+                                                                    Cancelar
+                                                                </button>
+                                                                <button
+                                                                    class="btn btn-primary btn-shadow btn-sm"
+                                                                    (click)="eliminar(item.element._id)"
+                                                                    type="button"
+                                                                >
+                                                                    Si, eliminar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tbody *ngIf="load">
+                                        <tr>
+                                            <td colspan="5" class="text-center">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden"></span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <ngb-pagination
+                                *ngIf="documentos.length >= 1"
+                                [(page)]="page"
+                                [pageSize]="pageSize"
+                                [maxSize]="10"
+                                [rotate]="true"
+                                [boundaryLinks]="true"
+                                [collectionSize]="documentos.length"
+                            ></ngb-pagination>
+                        </ng-container>
+                    </div>
+                    <div class="modal fade" id="delete-todo" tabindex="-1" style="display: none" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Eliminación masiva</h4>
+                                    <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Desea eliminar estos documentos?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">Cancelar</button>
+                                    <button class="btn btn-primary btn-shadow btn-sm" (click)="eliminar_todo()" type="button">
+                                        Si, eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <br />
+                </div>
+            </div>
+            <!-- / .row -->
+        </div>
+    </div>
+</div>

@@ -1,0 +1,605 @@
+<div class="container">
+	<div class="sidebar">
+		<app-sidebar></app-sidebar>
+	</div>
+	
+	<div class="content">
+        <ng-container *ngIf="(rol != undefined && (rol == 'direc' || rol == 'admin')) ">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-10">
+                        <!-- Header -->
+                        <div class="header mt-md-5">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <!-- Pretitle -->
+                                    <h6 class="header-pretitle">Módulo</h6>
+
+                                    <!-- Title -->
+                                    <h1 class="header-title">Configuraciones</h1>
+                                    <ul class="nav nav-tabs">
+                                        <li class="nav-item" *ngIf="tip_conf != 1">
+                                          <a class="nav-link " aria-current="page" (click)="select_nav(1)">Años Lectivos</a>
+                                        </li>
+                                        <li class="nav-item" *ngIf="tip_conf == 1">
+                                          <a class="nav-link active" aria-disabled="true">Años Lectivos</a>
+                                        </li>
+                                        <li class="nav-item" *ngIf="tip_conf != 2">
+                                          <a class="nav-link" (click)="select_nav(2)">Institución</a>
+                                        </li>
+                                        <li class="nav-item" *ngIf="tip_conf == 2">
+                                          <a class="nav-link active" aria-disabled="true">Institución</a>
+                                        </li>
+                                        <li class="nav-item" *ngIf="tip_conf != 3">
+                                            <a class="nav-link" (click)="select_nav(3)">Configuración</a>
+                                        </li>
+                                        <li class="nav-item" *ngIf="tip_conf == 3">
+                                            <a class="nav-link active" aria-disabled="true">Configuración</a>
+                                        </li>
+                                    </ul>                                      
+                                </div>
+                            </div>
+                        </div>
+
+                       
+
+                        <div class="container" *ngIf="tip_conf==1">
+                            <div class="row" *ngIf="config_const">
+                                <div class="col-2">
+                                    <nav class="nav flex-column nav-tabs">
+                                        <ng-container *ngFor="let item of config_const; let index = index">
+                                            <a class="nav-link" *ngIf="config._id!=item._id" (click)="select_config(index)">{{ item.anio_lectivo | date:'MMMM' | uppercase }}  {{item.anio_lectivo|date:'YYYY'}}</a>
+                                            <a class="nav-link active disabled" aria-disabled="true" *ngIf="config._id==item._id">{{ item.anio_lectivo | date:'MMMM' | uppercase }}                                                {{item.anio_lectivo|date:'YYYY'}}</a>
+                                        </ng-container>
+                                      </nav>
+                                     
+                                </div>
+                                <div class="col-8 col-lg-8 col-xl-8">
+                                    <!-- Alert -->
+                                    <div class="alert alert-danger" *ngIf="bol !== ''">
+                                        <i class="bi bi-info-circle"></i> {{ bol }}
+                                    </div>
+                
+                                    <!-- Card -->
+                                    <form #actualizarForm="ngForm" (ngSubmit)="actualizar(actualizarForm)">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <!-- Title -->
+                                                <h4 class="card-header-title">Configuraciones del Año Lectivo</h4>
+                                            </div>
+                
+                                            <div class="card-body" *ngIf="!load_data">
+                
+                                                <div class="card-header-title">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <h4 class="card-header-title">Mese de cobro: {{ config.numpension }}</h4>
+                                                        </div>
+                                                        
+                                                        <div class="col-2">
+                                                                <button class="btn btn-primary" type="button"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalRubro">
+                                                                    Rubros
+                                                                </button>
+                                                            </div>
+                                                        
+                                                        
+                                                        <hr />
+                                                    </div>
+                                                </div>
+                
+                                                <div class="row mb-3">
+                                                    <label for="inputEmail3" class="form-label">Monto Matricula</label>
+                                                    <div class="input-group mb-3">
+                                                        <span class="input-group-text" id="basic-auxmescompleto" *ngIf="config.matricula"
+                                                            >{{ config.matricula }}
+                                                        </span>
+                                                        <span class="input-group-text" id="basic-auxmescompleto" *ngIf="!config.matricula"
+                                                            >(Obligatorio)</span
+                                                        >
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            required
+                                                            class="form-control"
+                                                            name="matricula"
+                                                            [(ngModel)]="config.matricula"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="inputEmail3" class="form-label">Monto Pensión</label>
+                                                    <div class="input-group mb-3">
+                                                        <span class="input-group-text" id="basic-auxmescompleto" *ngIf="config.pension"
+                                                            >{{ config.pension }}
+                                                        </span>
+                                                        <span class="input-group-text" id="basic-auxmescompleto" *ngIf="!config.pension"
+                                                            >(Obligatorio)</span
+                                                        >
+                                                        <input
+                                                            type="number"
+                                                            required
+                                                            step="0.01"
+                                                            class="form-control"
+                                                            name="pension"
+                                                            [(ngModel)]="config.pension"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3" style="display: none;">
+                                                    <label for="inputEmail3" class="form-label">Descuento por Pago Anticipado</label>
+                
+                                                    <div class="input-group mb-3">
+                                                        <span class="input-group-text" id="basic-auxmescompleto" *ngIf="config.descuento_anticipo"
+                                                            >{{ config.descuento_anticipo }}
+                                                        </span>
+                                                        <span
+                                                            class="input-group-text"
+                                                            id="basic-auxmescompleto"
+                                                            *ngIf="!config.descuento_anticipo"
+                                                            >(Opcional)</span
+                                                        >
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            class="form-control"
+                                                            name="descuento_anticipo"
+                                                            [(ngModel)]="config.descuento_anticipo"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="inputEmail3" class="form-label">Fecha de Año Lectivo</label>
+                                                    <div class="input-group mb-3">
+                                                        <span class="input-group-text" id="basic-anio_lectivo">
+                                                            <ng-container *ngIf="auxdate">
+                                                                {{ auxdate | date : 'longDate' }}
+                                                            </ng-container>
+                                                            <ng-container *ngIf="!auxdate && config.anio_lectivo"> (Ninguna) </ng-container>
+                                                            <ng-container *ngIf="!auxdate && !config.anio_lectivo"> (Obligatorio) </ng-container>
+                                                        </span>
+                
+                                                        <input
+                                                            required
+                                                            type="date"
+                                                            class="form-control"
+                                                            name="anio_lectivo"
+                                                            [(ngModel)]="config.anio_lectivo"
+                                                            (ngModelChange)="fechas($event)"
+                                                        />
+                                                    </div>
+                                                </div>
+                
+                                                <div class="row mb-3">
+                                                    <label for="inputEmail3" class="form-label">Mes de cobro completo</label>
+                                                    <div class="input-group mb-3">
+                                                        <span class="input-group-text" id="basic-auxmescompleto">
+                                                            <ng-container *ngIf="auxmescompleto">
+                                                                {{ (auxmescompleto | date : 'MMMM')?.toUpperCase() }}
+                                                            </ng-container>
+                                                            <ng-container *ngIf="!auxmescompleto && config.mescompleto"> (Ninguna) </ng-container>
+                                                            <ng-container *ngIf="!auxmescompleto && !config.mescompleto"> (Opcional) </ng-container>
+                                                        </span>
+                
+                                                        <select
+                                                            class="form-control custom-select"
+                                                            id="select-mescompleto"
+                                                            name="mescompleto"
+                                                            [(ngModel)]="config.mescompleto"
+                                                        >
+                                                            <option value="" selected disabled>Seleccionar</option>
+                                                            <option value="" selected>Ninguna</option>
+                                                            <option value="{{ item.date }}" *ngFor="let item of arr_meses">
+                                                                {{ item.date | date : 'MMMM' }}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3" style="display: none;">
+                                                    <label for="basic-url" class="form-label">Tu URL de API Facturación</label>
+                                                    <div class="input-group mb-3">
+                                                        <span class="input-group-text" id="basic-auxmescompleto" *ngIf="!config.facturacion"
+                                                            >(Opcional)</span
+                                                        >
+                                                        <span class="input-group-text" id="basic-facturacion"
+                                                            >https://example.com/index.xhtml?</span
+                                                        >
+                                                        <input
+                                                            type="url"
+                                                            class="form-control"
+                                                            id="basic-url"
+                                                            name="facturacion"
+                                                            aria-describedby="basic-facturacion"
+                                                            [(ngModel)]="config.facturacion"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                
+                                            <ng-container *ngIf="load_data">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-12 text-center">
+                                                            <div class="spinner-border" style="width: 3rem; height: 3rem" role="status">
+                                                                <span class="visually-hidden"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </ng-container>
+                                            <div class="card-footer">
+                                                <button
+                                                    *ngIf="!load_btn"
+                                                    class="btn btn-primary btn-shadow"
+                                                    type="button"
+                                                    data-bs-toggle="modal"
+                                                    [attr.data-bs-target]="'#modalConfirmar'"
+                                                >
+                                                    Iniciar
+                                                </button>
+                
+                                                <button disabled *ngIf="load_btn" type="button" class="btn btn-primary btn-shadow">
+                                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                    En Proceso...
+                                                </button>
+                
+                                                <div class="modal fade" id="modalConfirmar" style="display: none" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h4 class="modal-title">Iniciar</h4>
+                                                                <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">×</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>¿Desea Iniciar?</p>
+                                                                <b><i> este proceso no se podrá iniciar hasta que transcurra 10 meses</i></b>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
+                                                                    Cancelar
+                                                                </button>
+                                                                <button class="btn btn-primary btn-shadow btn-sm" type="submit">Si</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                
+                                    <div class="modal fade" id="modalRubro" style="display: none" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="documentrubro">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <div class="alert alert-danger" role="alert" *ngIf="!uniqueArray">
+                                                        No has guardado todavía
+                                                      </div>
+                                                    <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-header">
+                                                    <label for=""> <b>Rubros </b> </label>
+                                                    
+                
+                                                    
+                                                    
+                                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                        
+                                                        <button 
+                                                        class="btn btn-primary me-md-2"
+                                                        type="button"
+                                                        data-bs-target="#modalNuevoRubro"
+                                                        data-bs-toggle="modal"
+                                                        
+                                                    >
+                                                        Añadir Rubro
+                                                    </button>
+                                                      </div>
+                                                </div>
+                                                <div class="modal-content">
+                                                        <div class="table table-response">
+                                                            <table class="container-sm table-hover">
+                                                                <thead>
+                                                                    <th>Código</th>
+                                                                    <th>Descripción</th>
+                                                                    <th>Valor</th>
+                                                                    <th>Opción</th>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr *ngFor="let item of arr_rubro; let index = index">
+                                                                        <td> {{item.idrubro}}</td>
+                                                                        <td> {{item.descripcion}}</td>
+                                                                        <td> {{item.valor}}</td>
+                                                                        <td ><button type="button" class="btn btn-secondary" (click)="eliminarrubro(index)"> Eliminar</button> </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    
+                                            
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-primary" type="button" (click)="addrubro()">Guardar Rubro</button>
+                                                </div>
+                                                </div>
+                
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                    
+                                    <div class="modal fade" id="modalNuevoRubro" aria-hidden="true" tabindex="-1">
+                                        <div class="modal-dialog " role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title">Nuevo Rubro </h4>
+                                                    <button class="close" type="button" (click)="cerrar_add_rubro()">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form #addrubroForm="ngForm" (ngSubmit)="addarr_rubro(addrubroForm)">
+                                                        <div class="row">
+                                                            <div class="input-group">
+                                                                <div class="col-md-auto form-group">
+                                                                    <label for="" class="form-label"> Código de Rubro</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        max="98"
+                                                                        min="25"
+                                                                        class="form-control"
+                                                                        name="rubro.idrubro"
+                                                                        [(ngModel)]="rubro.idrubro"
+                                                                    />
+                                                                </div>
+                                                                <div class="col-lg-6 form-group">
+                                                                    <label for="" class="form-label"> Descripción del Rubro</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        class="form-control"
+                                                                        name="rubro.descripcion"
+                                                                        [(ngModel)]="rubro.descripcion"
+                                                                    />
+                                                                </div>
+                                                                <div class="col form-group">
+                                                                    <label for="" class="form-label"> Valor del Rubro</label>
+                                                                    <input
+                                                                        type="number"
+                                                                        class="form-control"
+                                                                        name="rubro.valor"
+                                                                        [(ngModel)]="rubro.valor"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
+                                                                Cancelar
+                                                            </button>
+                                                            <button class="btn btn-primary btn-shadow btn-sm" type="submit" >Añadir Rubro</button>
+                                                        </div>
+                                                    </form>
+                                                    
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container" *ngIf="tip_conf==2">
+                            <div class="row" >
+                                <div class="container mt-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            Información Institucional
+                                        </div>
+                                        <div class="card-body">                                           
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="mb-3">
+                                                        <label for="titulo" class="form-label">Título</label>
+                                                        <input type="text" class="form-control" id="titulo" [(ngModel)]="institucion.titulo" name="titulo" />
+                                                        </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                
+                                                    <div class="mb-3">
+                                                        <label for="pais" class="form-label">País</label>
+                                                        <input type="text" class="form-control" id="pais" [(ngModel)]="institucion.pais" name="pais" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="provincia" class="form-label">Provincia</label>
+                                                        <input type="text" class="form-control" id="provincia" [(ngModel)]="institucion.provincia" name="provincia" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="canton" class="form-label">Canton</label>
+                                                        <input type="text" class="form-control" id="canton" [(ngModel)]="institucion.canton" name="canton" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="parroquia" class="form-label">Parroquia</label>
+                                                        <input type="text" class="form-control" id="parroquia" [(ngModel)]="institucion.parroquia" name="parroquia" />
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="calle1" class="form-label">Calle 1</label>
+                                                        <input type="text" class="form-control" id="calle1" [(ngModel)]="institucion.calle1" name="calle1" />
+                                                    </div>
+                                                
+                                                </div>
+                                                <div class="col-md-6">                                            
+                                                
+                                                <div class="mb-3">
+                                                    <label for="calle2" class="form-label">Calle 2</label>
+                                                    <input type="text" class="form-control" id="calle2" [(ngModel)]="institucion.calle2" name="calle2" />
+                                                </div>
+                                                </div>
+                                            </div>        
+                                            <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="mb-3">
+                                                    <label for="referencia" class="form-label">Referencia</label>
+                                                    <input type="text" class="form-control" id="referencia" [(ngModel)]="institucion.referencia" name="referencia" />
+                                                    </div>
+                                            </div>
+                                            </div>                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="telefonocon" class="form-label">Teléfono Convencional</label>
+                                                        <input type="text" class="form-control" id="telefonocon" [(ngModel)]="institucion.telefonocon" name="telefonocon" />
+                                                    </div>
+                                                
+                                                </div>
+                                                <div class="col-md-6">                                            
+                                                
+                                                <div class="mb-3">
+                                                    <label for="telefonoinsti" class="form-label">Teléfono Institucional</label>
+                                                    <input type="text" class="form-control" id="telefonoinsti" [(ngModel)]="institucion.telefonoinsti" name="telefonoinsti" />
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <button type="button" class="btn btn-primary" (click)="guardarCambios()">Guardar Cambios</button>
+                                                </div>
+                                              </div>
+                                        </div>
+                                    </div>
+                                </div>                                  
+                            </div>
+                        </div>
+                        <div class="container" *ngIf="tip_conf==3">
+                            <div class="row" >
+                                <div class="container mt-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            Información Institucional
+                                        </div>
+                                        <div class="card-body">                                           
+                                            <form [formGroup]="configForm">
+                                                
+                                                <!-- Agregar cursos -->
+                                                <div formArrayName="cursos">
+                                                    <div *ngFor="let curso of cursos.controls; let i = index">
+                                                        <div [formGroupName]="i">
+                                                          <label>Curso {{ i + 1 }}</label>
+                                                          <input formControlName="nombre" placeholder="Nombre del curso" />
+                                                          
+                                                          <div formArrayName="paralelos">
+                                                            <div *ngFor="let paralelo of paralelosArray(i).controls; let j = index">
+                                                              <div [formGroupName]="j">
+                                                                <label>Paralelo {{ j + 1 }}</label>
+                                                                <input formControlName="nombre" placeholder="Nombre del paralelo" />
+                                                              </div>
+                                                            </div>
+                                                            <button type="button" (click)="agregarParalelo(i)">Agregar Paralelo</button>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    <button type="button" (click)="agregarCurso()">Agregar Cursos</button>
+                                                </div>
+                                                
+                                                  
+                                              
+                                                <!-- Agregar módulos únicos -->
+                                                <div formArrayName="modulosUnicos">
+                                                    <div *ngFor="let modulo of modulosUnicos.controls; let i = index">
+                                                      <div [formGroupName]="i">
+                                                        <label>Módulo Único {{ i + 1 }}</label>
+                                                        <input formControlName="nombre" placeholder="Nombre del módulo único" />
+                                                        <!-- Otros campos de ModuloUnicoSchema según sea necesario -->
+                                                      </div>
+                                                    </div>
+                                                    <button type="button" (click)="agregarModuloUnico()">Agregar Módulo Único</button>
+                                                </div>
+                                              
+                                                <!-- Campos de ConexionSistemasSchema -->
+                                                <div formGroupName="conexionSistemas">
+                                                  <label>URL de conexión</label>
+                                                  <input formControlName="url" placeholder="URL de conexión" />
+                                                  <!-- Otros campos de ConexionSistemasSchema según sea necesario -->
+                                                </div>
+                                              
+                                                <!-- Campos de ConfigSMTPSchema -->
+                                                <div formGroupName="configSMTP">
+                                                  <label>Correo</label>
+                                                  <input formControlName="correo" placeholder="Correo" />
+                                                  <label>Token</label>
+                                                  <input formControlName="token" placeholder="Token" />
+                                                  <!-- Otros campos de ConfigSMTPSchema según sea necesario -->
+                                                </div>
+                                              
+                                                <!-- Campos de ConfigEncabezadoPieSchema -->
+                                                <div formGroupName="configEncabezadoPie">
+                                                  <label>Encabezado</label>
+                                                  <input formControlName="encabezado" placeholder="Encabezado" />
+                                                  <label>Pie de Página</label>
+                                                  <input formControlName="piePagina" placeholder="Pie de Página" />
+                                                  <!-- Otros campos de ConfigEncabezadoPieSchema según sea necesario -->
+                                                </div>
+                                              
+                                                <!-- Botón para guardar configuración -->
+                                                <button type="button" (click)="guardarConfiguracion()">Guardar Configuración</button>
+                                              </form>
+                                              
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <button type="button" class="btn btn-primary" (click)="guardarCambios()">Guardar Cambios</button>
+                                                </div>
+                                              </div>
+                                        </div>
+                                    </div>
+                                </div>                                  
+                            </div>
+                        </div>
+                    </div>
+                    
+                   
+                </div>
+                <!-- / .row -->
+            </div>
+        </ng-container>
+        <ng-container *ngIf="rol != undefined && rol != 'direc' && rol != 'admin'">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-5 col-xl-4 my-5">
+                            <div class="text-center">
+                                <!-- Preheading -->
+                                <h6 class="text-uppercase text-muted mb-4">404 error</h6>
+        
+                                <!-- Heading -->
+                                <h1 class="display-4 mb-3">Está página no se cuentra habilitada 😭</h1>
+        
+                                <!-- Subheading -->
+                                <p class="text-muted mb-4">¿Parece que llegaste aquí por accidente?</p>
+        
+                                <!-- Button -->
+                                <a [routerLink]="['/estudiantes']" class="btn btn-lg btn-primary"> Regresar a pagos </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        
+    </div>
+</div>

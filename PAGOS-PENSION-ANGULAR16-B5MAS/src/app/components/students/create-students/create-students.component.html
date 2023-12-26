@@ -1,0 +1,722 @@
+<div class="container">
+	<div class="sidebar">
+		<app-sidebar></app-sidebar>
+	</div>
+	
+	<div class="content">
+        <ng-container *ngIf="rol != undefined && (rol == 'admin' || rol == 'secrt')">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-auto">
+                        <!-- Header -->
+                        <div class="header mt-md-5">
+                            <div class="header-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <!-- Pretitle -->
+                                        <h6 class="header-pretitle">Módulo</h6>
+    
+                                        <!-- Title -->
+                                        <h1 class="header-title">Estudiante</h1>
+                                    </div>
+                                </div>
+                                <!-- / .row -->
+                            </div>
+                        </div>
+    
+                        <!-- Alert -->
+    
+                        <!-- Card -->
+                        <ng-container *ngIf="vc == 1">
+                            <form #registroForm="ngForm" (ngSubmit)="registro(registroForm)">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <!-- Title -->
+                                        <h4 class="card-header-title">Registro de un nuevo Estudiante</h4>
+                                    </div>
+    
+                                    <div class="card-body">
+                                        <div class="card-header">
+                                            <!-- Title -->
+                                            <h4 class="card-header-title">Información Personal del Estudiante</h4>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputEmail1">Nombres (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Nombres"
+                                                                pattern="^[A-ZÁÉÍÓÚÑ ]+$"
+                                                                name="nombres"
+                                                                [(ngModel)]="estudiante.nombres"
+                                                            />
+                                                        </div>
+                                                    </div>
+    
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputEmail1">Apellidos (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Apellidos"
+                                                                pattern="^[A-ZÁÉÍÓÚÑ ]+$"
+                                                                name="apellidos"
+                                                                [(ngModel)]="estudiante.apellidos"
+                                                            />
+                                                        </div>
+                                                    </div>
+    
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputEmail1">Email (*)</label>
+                                                            <input
+                                                                type="email"
+                                                                class="form-control"
+                                                                required
+                                                                pattern="^[a-z0-9@.!#$%&’*+-/=?^_`{|}~]+$"
+                                                                placeholder="Email"
+                                                                name="email"
+                                                                [(ngModel)]="estudiante.email"
+                                                            />
+                                                        </div>
+                                                    </div>
+    
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputEmail1">Teléfono (*)</label>
+                                                            <input
+                                                                type="tel"
+                                                                class="form-control"
+                                                                required
+                                                                pattern="^[0-9]+$"
+                                                                maxlength="10"
+                                                                minlength="8"
+                                                                placeholder="Teléfono"
+                                                                name="telefono"
+                                                                [(ngModel)]="estudiante.telefono"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <!--
+                                                        <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPassword">Contraseña (*)</label>
+                                                            <input
+                                                                type="password"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder=""
+                                                                maxlength="50"
+                                                                minlength="8"
+                                                                name="password"
+                                                                [(ngModel)]="estudiante.password"
+                                                            />
+                                                        </div>
+                                                    </div>
+    
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPassword">Repite Contraseña (*)</label>
+                                                            <input
+                                                                type="password"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder=""
+                                                                maxlength="50"
+                                                                minlength="8"
+                                                                name="auxiliar"
+                                                                [(ngModel)]="estudiante.auxiliar"
+                                                            />
+                                                        </div>
+                                                    </div>
+    
+                                                     -->
+                                                    
+    
+                                                    <div class="col-lg-6 form-group">
+                                                        <label for="">Cédula (*)</label>
+    
+                                                        <input
+                                                            type="text"
+                                                            class="form-control"
+                                                            placeholder="Cédula"
+                                                            pattern="^[0-9]+$"
+                                                            maxlength="10"
+                                                            minlength="10"
+                                                            required
+                                                            name="dni"
+                                                            [(ngModel)]="estudiante.dni"
+                                                        />
+                                                    </div>
+                                                    <div class="col-lg-6 form-group">
+                                                        <label>Genero (*)</label>
+                                                        <select
+                                                            class="form-control custom-select"
+                                                            id="select-input"
+                                                            required
+                                                            name="genero"
+                                                            [(ngModel)]="estudiante.genero"
+                                                        >
+                                                            <option value="" selected disabled>Seleccionar</option>
+                                                            <option value="Masculino">Masculino</option>
+                                                            <option value="Femenino">Femenino</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputEmail1">Dirección (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Dirección"
+                                                                pattern="^[a-záéíóúA-ZÁÉÍÓÚÑ.,0-9 ]+$"
+                                                                name="direccion"
+                                                                [(ngModel)]="estudiante.direccion"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header">
+                                        <!-- Title -->
+                                        <h4 class="card-header-title">Información de Representante</h4>
+                                    </div>
+    
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputEmail1">Nombres del Representante (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Nombres"
+                                                                pattern="^[A-ZÁÉÍÓÚÑ ]+$"
+                                                                name="nombres_repre"
+                                                                [(ngModel)]="estudiante.nombres_padre"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputEmail1">Email del Representante</label>
+                                                            <input
+                                                                type="email"
+                                                                class="form-control"
+                                                                pattern="^[a-z0-9@.!#$%&’*+-/=?^_`{|}~]+$"
+                                                                placeholder="Email"
+                                                                name="email_padre"
+                                                                [(ngModel)]="estudiante.email_padre"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 form-group">
+                                                        <div class="form-group">
+                                                            <label for=""
+                                                                ><input type="radio" required name="ch_c" value="ruc" [(ngModel)]="ch_c" />
+                                                                RUC</label
+                                                            >
+                                                            &nbsp;&nbsp;&nbsp;<label for=""
+                                                                ><input
+                                                                    type="radio"
+                                                                    required
+                                                                    checked
+                                                                    name="ch_c"
+                                                                    value="dni"
+                                                                    [(ngModel)]="ch_c"
+                                                                />
+                                                                Cédula</label
+                                                            >
+    
+                                                            <input
+                                                                type="text"
+                                                                *ngIf="ch_c == 'dni'"
+                                                                class="form-control"
+                                                                placeholder="Cédula"
+                                                                pattern="^[0-9]+$"
+                                                                maxlength="10"
+                                                                minlength="10"
+                                                                required
+                                                                name="dni_otro"
+                                                                [(ngModel)]="estudiante.dni_padre"
+                                                            />
+    
+                                                            <input
+                                                                type="text"
+                                                                *ngIf="ch_c == 'ruc'"
+                                                                class="form-control"
+                                                                placeholder="RUC"
+                                                                pattern="^[0-9]+$"
+                                                                maxlength="13"
+                                                                minlength="13"
+                                                                required
+                                                                name="dni_otro"
+                                                                [(ngModel)]="estudiante.dni_padre"
+                                                            />
+                                                        </div>
+                                                    </div>
+    
+                                                    <div class="form-group">
+                                                        <label for="exampleInputEmail1">Factrurar a: &nbsp;&nbsp;&nbsp; </label>
+    
+                                                        <label for=""
+                                                            ><input
+                                                                type="radio"
+                                                                required
+                                                                checked
+                                                                name="facturar"
+                                                                value="repre"
+                                                                [(ngModel)]="ch_r"
+                                                            />
+                                                            Representante</label
+                                                        >
+                                                        &nbsp;&nbsp;&nbsp;<label for=""
+                                                            ><input type="radio" required name="facturar" value="otro" [(ngModel)]="ch_r" />
+                                                            Otro</label
+                                                        >
+                                                    </div>
+                                                    <ng-container *ngIf="ch_r == 'otro'">
+                                                        <div class="col-6">
+                                                            <div class="form-group">
+                                                                <label for="exampleInputEmail1">Nombres (*)</label>
+                                                                <input
+                                                                    type="text"
+                                                                    class="form-control"
+                                                                    required
+                                                                    placeholder="Nombres"
+                                                                    pattern="^[A-ZÁÉÍÓÚÑ ]+$"
+                                                                    name="nombres_otro"
+                                                                    [(ngModel)]="estudiante.nombres_factura"
+                                                                />
+                                                            </div>
+                                                        </div>
+    
+                                                        <div class="col-lg-6 form-group">
+                                                            <div class="form-group">
+                                                                <label for=""
+                                                                    ><input type="radio" required name="ch_co" value="ruc" [(ngModel)]="ch_co" />
+                                                                    RUC</label
+                                                                >
+                                                                &nbsp;&nbsp;&nbsp;<label for=""
+                                                                    ><input
+                                                                        type="radio"
+                                                                        checked
+                                                                        required
+                                                                        name="ch_co"
+                                                                        value="dni"
+                                                                        [(ngModel)]="ch_co"
+                                                                    />
+                                                                    Cédula</label
+                                                                >
+    
+                                                                <input
+                                                                    type="text"
+                                                                    *ngIf="ch_co == 'dni'"
+                                                                    class="form-control"
+                                                                    placeholder="Cédula"
+                                                                    pattern="^[0-9]+$"
+                                                                    maxlength="10"
+                                                                    minlength="10"
+                                                                    required
+                                                                    name="dni_otro"
+                                                                    [(ngModel)]="estudiante.dni_factura"
+                                                                />
+    
+                                                                <input
+                                                                    type="text"
+                                                                    *ngIf="ch_co == 'ruc'"
+                                                                    class="form-control"
+                                                                    placeholder="RUC"
+                                                                    pattern="^[0-9]+$"
+                                                                    maxlength="13"
+                                                                    minlength="13"
+                                                                    required
+                                                                    name="dni_otro"
+                                                                    [(ngModel)]="estudiante.dni_factura"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header">
+                                        <!-- Title -->
+                                        <h4 class="card-header-title">Información Estudiantil</h4>
+                                    </div>
+    
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="row">
+    
+    
+                                                    
+    
+                                                    <div class="col-lg-6 form-group">
+                                                        <label for="">Curso(*)</label>
+    
+                                                        <select
+                                                            class="form-control custom-select"
+                                                            id="select-input"
+                                                            required
+                                                            name="curso"
+                                                            [(ngModel)]="estudiante.curso"
+                                                            *ngIf="estudiante_pension.length==0"
+                                                        >
+                                                            <option value="" selected disabled>Selecciona uno</option>
+    
+                                                            <option value="1">1</option>
+                                                            <option value="2">2</option>
+                                                            <option value="3">3</option>
+                                                            <option value="4">4</option>
+                                                            <option value="5">5</option>
+                                                            <option value="6">6</option>
+                                                            <option value="7">7</option>
+                                                            <option value="8">8</option>
+                                                            <option value="9">9</option>
+                                                            <option value="10">10</option>
+                                                        </select>
+    
+                                                        <select
+                                                            class="form-control custom-select"
+                                                            id="select-input"
+                                                            required
+                                                            name="curso"
+                                                            disabled
+                                                            [(ngModel)]="estudiante.curso"
+                                                            *ngIf="estudiante_pension.length>0"
+                                                        >
+                                                            <option value="" selected disabled>Selecciona uno</option>
+    
+                                                            <option value="1">1</option>
+                                                            <option value="2">2</option>
+                                                            <option value="3">3</option>
+                                                            <option value="4">4</option>
+                                                            <option value="5">5</option>
+                                                            <option value="6">6</option>
+                                                            <option value="7">7</option>
+                                                            <option value="8">8</option>
+                                                            <option value="9">9</option>
+                                                            <option value="10">10</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-6 form-group">
+                                                        <label for="">Paralelo(*)</label>
+    
+                                                        <select
+                                                            class="form-control custom-select"
+                                                            id="select-input"
+                                                            required
+                                                            name="paralelo"
+                                                            [(ngModel)]="estudiante.paralelo"
+                                                        >
+                                                            <option value="" selected disabled>Selecciona uno</option>
+    
+                                                            <option value="A">A</option>
+                                                            <option value="B">B</option>
+                                                            <option value="C">C</option>
+                                                            <option value="D">D</option>
+                                                            <option value="E">E</option>
+                                                            <option value="F">F</option>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                        <div class="col-lg-6 form-group">
+                                                            <label for="" class="form-label">Año Lectivo (*)</label>
+                                                            <div class="input-group">
+                                                                <select
+                                                                    class="form-control custom-select"
+                                                                    id="select-input"
+                                                                    required
+                                                                    name="idp"
+                                                                    [(ngModel)]="idp"
+                                                                    (change)="selecct_pension()"
+                                                                >
+                                                                    <option value="-1" selected disabled>Seleccionar</option>
+                                                                    <ng-container *ngIf="config.length>0&&estudiante.curso&&estudiante.paralelo">
+                                                                        <ng-container *ngFor="let item of config; let val = index">
+                                                                            <option value="{{val}}" >
+                                                                                <b 
+                                                                                    >{{ item.curso}} {{ item.paralelo }} {{item.anio_lectivo|date:'YYYY'}}
+                                                                                </b>
+                                                                            </option>
+                                                                        </ng-container>
+                                                                    </ng-container>
+                                                                    
+                                                                </select>
+                                                                
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 form-group">
+                                                            <div class="ms-auto py-2">
+                                                                <ng-container *ngFor="let item of estudiante_pension; let indice = index">
+                                                                    <a
+                                                                        class="badge badge-primary text-white mr-3"
+                                                                        style="cursor: pointer"
+                                                                        (click)="eliminar_pension(indice)"
+                                                                    >
+                                                                    {{item.curso}} {{item.paralelo}}	{{ item.anio_lectivo.anio_lectivo | date : 'MMMM' }} {{ item.anio_lectivo.anio_lectivo | date : 'YYYY' }}
+                                                                    </a>
+                                                                </ng-container>
+                                                            </div>
+                                                        </div>
+                                                    <div class="col-lg-6 form-group">
+                                                        <label>Pensión (*)</label>
+                                                        
+                                                            <select
+                                                            class="form-control custom-select"
+                                                            id="select-input-pension"
+                                                            required
+                                                            name="pension"
+                                                            (ngModelChange)="quitar_fechas($event)"
+                                                            [(ngModel)]="idet"
+                                                            
+                                                        >
+                                                            <option value="" selected disabled>Seleccionar</option>
+                                                            <ng-container *ngIf="estudiante_pension.length>0">
+                                                                <ng-container *ngFor="let item of estudiante_pension; let val = index">
+                                                                    <option value="{{val}}" >
+                                                                        <b 
+                                                                            >{{ item.curso}} {{ item.paralelo }} {{item.anio_lectivo.anio_lectivo|date:'YYYY'}}
+                                                                        </b>
+                                                                    </option>
+                                                                </ng-container>
+                                                            </ng-container>
+                                                        </select>
+                                                        
+                                                        
+                                                        
+                                                    </div>
+                                                    <div class="col-lg-6 form-group">
+                                                        <label>Condición de Beca (*)</label>
+                                                        <select
+                                                            *ngIf="idet!=-1"
+                                                            class="form-control custom-select"
+                                                            id="select-input"
+                                                            required
+                                                            name="condicion_beca"
+                                                            [(ngModel)]="estudiante_pension[idet].condicion_beca"
+                                                        >
+                                                            <option value="" selected disabled>Seleccionar</option>
+                                                            <option value="Si">Si</option>
+                                                            <option value="No">No</option>
+                                                        </select>
+                                                    </div>
+    
+                                                    <form id="si" class="col-lg-12 form-group" *ngIf="idet!=-1&&estudiante_pension[idet].condicion_beca == 'Si'">
+                                                        <div class="row">
+                                                            <div class="col-lg-12 form-group">
+                                                                <div class="row">
+                                                                    <div class="col-lg-6">
+                                                                        <label><b>Meses con Beca</b></label>
+                                                                        <div class="input-group-append">
+                                                                            <select
+                                                                            class="form-control custom-select"
+                                                                            name="new_etiqueta"
+                                                                            [(ngModel)]="new_etiqueta"
+                                                                            (change)="agregar_etiqueta()"
+                                                                        >
+                                                                            <option value="" selected disabled>Seleccionar</option>
+                                                                            <option
+                                                                                value="{{ item.etiqueta }}_{{ item.titulo }}_{{ item.idpension }}_{{
+                                                                                    id
+                                                                                }}"
+                                                                                *ngFor="let item of etiquetas; let id = index"
+                                                                            >
+                                                                                {{ item.titulo | date : 'MMMM' }} {{ item.titulo | date : 'YYYY' }}
+                                                                            </option>
+                                                                        </select>
+    
+                                                                        <button type="button" class="btn btn-success" (click)="crear_fechas()">Generar</button>
+                                                                    
+                                                                        </div>
+                                                                        
+                                                                    </div>
+                                                                    <div class="col-lg-6 form-group" *ngIf="idet!=-1&&estudiante_pension[idet].condicion_beca == 'Si'">
+                                                                        <label>¿Paga Matricula? (*)</label>
+                                                                        <select
+                                                                            class="form-control custom-select"
+                                                                            id="select-input"
+                                                                            required
+                                                                            name="matricula"
+                                                                            [(ngModel)]="estudiante_pension[idet].matricula"
+                                                                        >
+                                                                            <option value="" selected disabled>Seleccionar</option>
+                                                                            <option value="0">Si</option>
+                                                                            <option value="1">No</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-lg-12">
+                                                                        <div class="ms-auto py-2">
+                                                                            <ng-container *ngFor="let item of estudiante_pension[idet].arr_etiquetas; let indice = index">
+                                                                                <a
+                                                                                    class="badge badge-secondary text-white mr-3"
+                                                                                    style="cursor: pointer"
+                                                                                    (click)="eliminar_etiqueta(indice)"
+                                                                                >
+                                                                                    {{ item.titulo | date : 'MMMM' }} {{ item.titulo | date : 'YYYY' }}
+                                                                                </a>
+                                                                            </ng-container>
+    
+                                                                            <!--
+    
+                                                   <ng-container *ngFor="let item of arr_etiquetas; let indice = index">
+    
+                                                    <a   *ngIf="item.etiqueta!=pagos[indice+1]?.tipo"  class="badge badge-secondary text-white mr-3" style="cursor: pointer;" (click)="eliminar_etiqueta(indice)">
+                                                      {{item.titulo|date :'MMMM'}} {{item.titulo |date :'YYYY'}}
+                                                    </a>
+    
+                                                  <a *ngIf="item.etiqueta==pagos[indice+1]?.tipo" class="badge badge-success text-white mr-3"  style="cursor: no-drop;" >
+                                                          {{item.titulo|date :'MMMM'}} {{item.titulo |date :'YYYY'}}
+                                                  </a>
+                                                    
+                                                      
+                                                  </ng-container>
+                                                 -->
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg form-group">
+                                                                <label for="">Descuento de Beca(*)</label>
+                                                                <div class="col-lg form-group">
+                                                                    %
+                                                                    <input
+                                                                        type="text"
+                                                                        *ngIf="idet!=-1"
+                                                                        [(ngModel)]="estudiante_pension[idet].desc_beca"
+                                                                        pattern="^[0-9.0-9]+$"
+                                                                        maxlength="5"
+                                                                        minlength="1"
+                                                                        (ngModelChange)="descuento_valor($event)"
+                                                                        class="form-control"
+                                                                        placeholder=""
+                                                                        required
+                                                                        name="desc_beca"
+                                                                    />
+                                                                </div>
+                                                            </div>
+    
+                                                            <div class="col-lg form-group" style="margin-left: 17%">
+                                                                <label for="">Valor de beca(*) ({{estudiante_pension[idet].anio_lectivo.pension| currency : 'USD'}})</label>
+                                                                <div class="col-lg form-group">
+                                                                    $
+                                                                    <input
+                                                                        type="text"
+                                                                        *ngIf="idet!=-1"
+                                                                        [(ngModel)]="estudiante_pension[idet].val_beca"
+                                                                        pattern="^[0-9.0-9]+$"
+                                                                        maxlength="5"
+                                                                        minlength="1"
+                                                                        (ngModelChange)="valor_descuento($event)"
+                                                                        class="form-control"
+                                                                        placeholder=""
+                                                                        required
+                                                                        name="val_beca"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a
+                                            class="btn btn-warning btn-shadow mr-3"
+                                            [routerLink]="['/estudiantes']"
+                                            routerLinkActive="router-link-active"
+                                            >Regresar</a
+                                        >
+                                        <button *ngIf="!load_btn" class="btn btn-primary btn-shadow" type="submit">Crear</button>
+    
+                                        <button disabled *ngIf="load_btn" type="button" class="btn btn-primary btn-shadow">
+                                            <span
+                                                class="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true"
+                                            ></span>
+                                            Creando...
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </ng-container>
+                        <ng-container *ngIf="vc == 0">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row justify-content-center">
+                                        <div class="col-12 col-md-5 col-xl-4 my-5">
+                                            <div class="text-center">
+                                                <!-- Preheading -->
+                                                <h6 class="text-uppercase text-muted mb-4">404 error</h6>
+    
+                                                <!-- Heading -->
+                                                <h1 class="display-4 mb-3">Está página no se cuentra habilitada 😭</h1>
+    
+                                                <!-- Subheading -->
+                                                <p class="text-muted mb-4">¿Parece que no has iniciado tu configuración?</p>
+    
+                                                <!-- Button -->
+                                                <a [routerLink]="['/configuraciones']" class="btn btn-lg btn-primary">
+                                                    Ir a configuración
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+                <!-- / .row -->
+            </div>
+        </ng-container>
+        <ng-container *ngIf="rol != undefined && rol != 'admin' && rol != 'secrt'">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-5 col-xl-4 my-5">
+                            <div class="text-center">
+                                <!-- Preheading -->
+                                <h6 class="text-uppercase text-muted mb-4">404 error</h6>
+        
+                                <!-- Heading -->
+                                <h1 class="display-4 mb-3">Está página no se cuentra habilitada 😭</h1>
+        
+                                <!-- Subheading -->
+                                <p class="text-muted mb-4">¿Parece que llegaste aquí por accidente?</p>
+        
+                                <!-- Button -->
+                                <a [routerLink]="['/estudiantes']" class="btn btn-lg btn-primary"> Regresar a pagos </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        
+    </div>
+</div>

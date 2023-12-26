@@ -1,0 +1,903 @@
+
+<div class="modal fade"
+  id="loding"
+  data-bs-keyboard="false"
+  tabindex="-1"
+  aria-labelledby="lodingLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lodingLabel">Pago de Servicios</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body" style="height:5cm">
+        <div class="position-fixed top-50 start-50; margin-left:50%;">
+          <div class="spinner-border text-primary" role="status" style="width: 5rem; height: 5rem;">
+            <span class="visually-hidden"></span>
+          </div>  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="estudiantetotal" class="card-body" *ngIf="!load_data" >
+  <div class="col-md-auto">
+    <!-- Alert -->
+    <div
+    class="alert alert-danger"
+    *ngIf="estudiantes?.length == 0"
+    >
+    <i class="fe fe-info mr-1"></i> No tienes Pagos realizados
+    </div>
+
+    <div class="card" >
+    <div class="card-body">
+      <ul class="nav nav-pills nav-overflow header-tabs">
+        <ng-container *ngFor="let pen1 of config; let val = index">
+          <li class="nav-item" *ngIf="active != val">
+            <a
+              class="nav-link"
+              style="cursor: pointer"
+              value="val"
+              (click)="detalle_data(val)"
+            >
+              {{ pen1.label }}</a
+            >
+          </li>
+
+          <li class="nav-item active" *ngIf="active == val">
+            <a
+              class="nav-link active"
+              style="cursor: no-drop"
+              value="val"
+            >
+              {{ pen1.label }}</a
+            >
+          </li>
+        </ng-container>
+      </ul>
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <p *ngIf="horaact">
+          <i>{{ horaact | date : "long" }}</i>
+        </p>
+        <button
+          class="btn btn-primary"
+          (click)="actualizar_estudiante()"
+        >
+          Actualizar
+        </button>
+      </div>
+    </div>
+    </div>
+    <!-- Div CANVAS -->
+    <div class="card-body">
+    <app-grafic-sp></app-grafic-sp>
+    </div>
+    <ng-container *ngIf="cursos != undefined">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-header-title">
+            Reportes
+          </h3>
+        </div>
+        <div class="card-body">
+          
+
+          <div class="row g-3 align-items-center">
+            <div class="col-md-auto">
+            <select name="tipreport" id="tipreport" class="form-select form-select-md"  [(ngModel)]="auxtiprep" (ngModelChange)="cargarContenido($event)" >
+              <option value="Genero">Genero</option>
+              <option value="Pension">Pension</option>
+              <option value="Rubro">Rubro</option>
+              <option value="PensionRubro">Pension+Rubro</option>
+              <option value="Becado">Becados</option>
+              <option value="Retirados">Retirados</option>                    
+            </select>
+          </div>
+          
+
+          <div class="col-md-auto">
+            <button *ngIf="tipreport=='Genero'" class="btn btn-primary mb-3" (click)="imprimir_reporte()">Impr. {{tipreport}}</button>
+            
+            <a *ngIf="tipreport == 'Pension' || tipreport == 'Rubro'|| tipreport == 'PensionRubro' ||tipreport=='Becado'||tipreport=='Retirados'" class="btn btn-primary mb-3"
+            [routerLink]="['/reporte', tipreport+' '+pdffecha]" target="_blank">
+            Impr. {{ tipreport }}
+          </a>
+          </div>
+          </div>
+        </div>
+
+    
+    </div>
+    </ng-container>
+
+    <ng-container *ngIf="estudiantes && estudiantes.length != 0">
+    <ng-container >
+      <div class="row">
+        <div class="col-12 col-md-12">
+          <!-- Card -->
+          <div class="card">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col">
+                  <!-- Title -->
+                  <h3 class="text-uppercase text-muted mb-2">
+                    Valor por pagar:
+                    <span class="h3 mb-0" >
+                      {{ porpagar | number : "1.2" }}
+                    </span>
+                  </h3>
+                  <h3 class="text-uppercase text-muted mb-2">
+                    Valor Recaudado:
+                    <span class="h3 mb-0">
+                      {{ pagado | number : "1.2" }}
+                    </span>
+                  </h3>
+                  <h3 class="text-uppercase text-muted mb-2">
+                    Mese transcurridos:
+                    <span class="h3 mb-0" >
+                      {{ nmt }}
+                    </span>
+                  </h3>
+                  <!-- Heading -->
+
+                  <button
+                    class="btn btn-primary text-white mr-3"
+                    style="cursor: pointer"
+                    (click)="exportTabletotal('Total')"
+                  >
+                    Descargar en PDF
+                  </button>
+                </div>
+              </div>
+              <!-- / .row -->
+            </div>
+          </div>
+        </div>
+      </div>            
+
+      <div id="Total">
+        <ng-container *ngIf="cursos != undefined">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-header-title">
+                DETALLE ECONOMICO DE PENSIONES
+              </h3>
+              <div
+                class="d-grid gap-2 d-md-flex justify-content-md-end"
+              >
+
+                <button
+                  id="btnpdf"
+                  type="button"
+                  mat-raised-button
+                  class="btn btn-primary"
+                  (click)="exportTable('detalleeconomico')"
+                >
+                  PDF
+                </button>
+
+                <button
+                  id="btncash"
+                  type="button"
+                  class="btn btn-primary"
+                  data-bs-toggle="modal"
+                  [attr.data-bs-target]="'#modalGenerarCash'"
+                >
+                  CASH
+                </button>
+              </div>
+            </div>
+            <div 
+              class="modal fade"
+              id="modalGenerarCash"
+              tabindex="-1"
+              aria-labelledby="exampleModalLabel"
+              aria-hidden="true"
+            >
+              <div
+                class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                role="documentrubro"
+              >
+                <div class="modal-content">
+                  <div class="modal-header">Generar CASH</div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <label for="">
+                        Selecciona los meses para generar el CASH
+                      </label>
+                      <select
+                        id="numcash"
+                        class="form-select form-select-sm"
+                        [(ngModel)]="mcash"
+                      >
+                        <option selected>Selecciona un mes</option>
+                        <ng-container
+                          *ngFor="let mes of arr_meses; let i = index"
+                        >
+                          <option [value]="i + 1">
+                            {{ mes.nombre }}
+                          </option>
+                        </ng-container>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      class="btn btn-primary"
+                      (click)="onCash()"
+                    >
+                      Generar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table
+                id="detalleeconomico"
+                class="table table-sm table-nowrap card-table"
+              >
+                <ng-container>
+                  <thead>
+                    <th>Descripción</th>
+                    <th
+                      *ngFor="
+                        let curso of cursos
+                        let idcurso = index
+                      "
+                    >
+                      {{ curso }}
+                    </th>
+                    <th>Total</th>
+                  </thead>
+                  <tbody>
+                    <tr
+                      *ngFor="
+                        let ct of deteconomico;
+                        let idxe = index
+                      "
+                      [ngClass]="idxe === 3 ? 'bg-info text-light' : ''"
+                    >
+                     
+                        <th *ngIf="idxe==1" class="bg-success text-light">
+                         
+                            {{ ct.label }}
+                                                        
+                        </th>
+                        <th *ngIf="idxe==2" class="bg-danger text-light">
+                          
+                            {{ ct.label }}
+                                                         
+                        </th>
+                        <th *ngIf="idxe!=1&&idxe!=2" class="bg-info text-light">
+                          
+                            {{ ct.label }}
+                                                        
+                        </th>
+
+                      
+                      <th
+                        *ngFor="
+                          let curso of cursos;
+                          let idcurso = index
+                        "
+                      >
+                        <span *ngIf="idxe == 0">
+                          {{ ct.data[idcurso] }}
+                        </span>
+                        <span *ngIf="idxe != 0">
+                          {{ ct.data[idcurso] | number : "1.2" }}
+                        </span>
+                       
+                      </th>
+                      <th >
+                        <ng-container *ngIf="idxe==0">{{sumarvaloresdetalle(ct.data)| number }}</ng-container>
+                        <ng-container *ngIf="idxe!=0">{{sumarvaloresdetalle(ct.data)| number : "1.2"}}</ng-container>
+                        
+                      </th>
+                    </tr>
+                  </tbody>
+                </ng-container>
+              </table>
+              
+            </div>
+
+
+        
+        </div>
+        </ng-container>
+
+      
+          <ng-container
+            *ngFor="let cuentas of cursos ; let idx = index"
+          >
+            <div class="card" *ngIf="pagospension != undefined">
+              <div class="card-header">
+                <!-- Title  class="btn btn-outline-primary"-->
+                <h4 class="card-header-title">
+                  <a
+                   
+                    type="button"
+                    data-bs-toggle="collapse"
+                    [attr.data-bs-target]="'#collapseExample-' + cuentas"
+                    aria-expanded="false"
+                    aria-controls="collapseExample"
+                  >
+                    Curso: {{ cuentas }}
+                  </a>
+                </h4>
+                <div
+                  class="d-grid gap-2 d-md-flex justify-content-md-end"
+                >
+                  <button
+                    id="btncursos{{ cuentas }}"
+                    class="btn btn-primary"
+                    (click)="exportTable(cuentas)"
+                  >
+                    <i class="fe fe-printer"> Impr.</i>
+                  </button>
+                </div>
+              </div>
+              <div
+                class="table-responsive collapse show"
+                id="collapseExample-{{ cuentas }}"
+              >
+                <table
+                  id="{{ cuentas }}"
+                  class="table table-sm table-nowrap card-table"
+                >
+                  <thead>
+                    <tr>
+                      <th>Curso</th>
+                      <th class="bg-info text-light">N° de Estudiantes</th>
+                      <th class="bg-success text-light">Valor Recaudado</th>
+                      <th class="bg-danger text-light">Valor por Cobrar</th>
+                      <th>Total General</th>
+                      <th>Matriculados</th>
+                      <th>No Matriculados</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    class="font-size-base"
+                  >
+                    <ng-container
+                      *ngFor="let ctpagos of pagospension"
+                    >
+                      <tr
+                        *ngIf="
+                        ctpagos.curso+ctpagos.paralelo == cuentas + 'A' ||
+                          ctpagos.curso+ctpagos.paralelo == cuentas + 'B' ||
+                          ctpagos.curso+ctpagos.paralelo == cuentas + 'C' ||
+                          ctpagos.curso+ctpagos.paralelo == cuentas + 'D' ||
+                          ctpagos.curso+ctpagos.paralelo == cuentas + 'E' ||
+                          ctpagos.curso+ctpagos.paralelo == cuentas + 'F' ||
+                          ctpagos.curso+ctpagos.paralelo == cuentas + 'G'
+                        "
+                      >
+                        <th>
+                          {{ ctpagos.curso+ctpagos.paralelo }}
+                          <!--
+<a
+                            class="btn btn-outline-primary"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            [attr.data-bs-target]="
+                              '#collapseExample-' + ctpagos.curso+ctpagos.paralelo
+                            "
+                            aria-expanded="false"
+                            aria-controls="collapseExample"
+                            >{{ ctpagos.curso+ctpagos.paralelo }}</a
+                          >
+                          -->
+                          
+                        </th>
+
+                        <td>
+                          {{ ctpagos.num }}
+                        </td>
+
+                        <td>
+                          {{ ctpagos.data[0] | number : "1.2" }}
+                        </td>
+                        <td>
+                          {{ ctpagos.data[1] | number : "1.2" }}
+                        </td>
+                        <td>
+                          {{ ctpagos.data[0] + ctpagos.data[1] | number : "1.2" }}
+                        </td>
+
+                        <td>
+                          {{ getCount(ctpagos.curso,ctpagos.paralelo) }}
+                        </td>
+
+                        <td>
+                          {{ getCountno(ctpagos.curso,ctpagos.paralelo) }}
+                        </td>
+                      </tr>
+                      <!--
+<ng-container *ngIf="mostar == 1">
+                        <tr
+                          id="{{ ctpagos.curso+ctpagos.paralelo }}"
+                          *ngIf="
+                            ctpagos.curso+ctpagos.paralelo == cuentas + 'A' ||
+                            ctpagos.curso+ctpagos.paralelo == cuentas + 'B' ||
+                            ctpagos.curso+ctpagos.paralelo == cuentas + 'C' ||
+                            ctpagos.curso+ctpagos.paralelo == cuentas + 'D' ||
+                            ctpagos.curso+ctpagos.paralelo == cuentas + 'E' ||
+                            ctpagos.curso+ctpagos.paralelo == cuentas + 'F' ||
+                            ctpagos.curso+ctpagos.paralelo == cuentas + 'G'
+                          "
+                          class="collapse"
+                          id="collapseExample-{{ ctpagos.curso+ctpagos.paralelo }}"
+                        >
+                          <td colspan="6">
+                            <div
+                              class="collapse"
+                              id="collapseExample-{{ ctpagos.curso+ctpagos.paralelo }}"
+                          
+                            >
+                            <table
+                            id="{{ ctpagos.curso+ctpagos.paralelo }}"
+                            class="table-responsive "
+                          >
+                            <thead>
+                              <th>N°</th>
+                              <th>
+                                Nombres
+                                <button
+                                  id="btncursos{{
+                                    ctpagos.curso+ctpagos.paralelo
+                                  }}"
+                                  type="button"
+                                  class="btn btn-outline-primary"
+                                  (click)="
+                                    exportTable(
+                                      ctpagos.curso+ctpagos.paralelo,
+                                      ctpagos.genero
+                                    )
+                                  "
+                                >
+                                  <i class="fe fe-printer">
+                                    Impr.</i
+                                  >
+                                </button>
+                              </th>
+                              <ng-container *ngFor="let item of pagos_estudiante[ctpagos.curso][ctpagos.paralelo][0].detalle;let idenx = index">
+                                <th >
+                                  <ng-container *ngIf="item.date=='Rubro'||item.date=='Matricula'">
+                                    {{item.date}}
+                                  </ng-container>
+                                  <ng-container *ngIf="item.date!='Rubro'&&item.date!='Matricula'">
+                                    {{item.date|date:'MMMM'}}
+                                  </ng-container>                                                 
+                                </th>
+                              </ng-container>
+                              
+                              <th>Total</th>
+                            </thead>
+                            <tbody >
+                            
+                                <tr *ngFor="let item of pagos_estudiante[ctpagos.curso][ctpagos.paralelo]; let idenx = index">
+                                  <td>{{ idenx+1 }}</td>
+
+                                  <td style="text-align: left">
+                                    {{ item.nombres }}
+                                    <ng-container *ngIf="item.estado =='Desactivado'">
+                                      <i>(Retirado)</i>
+                                    </ng-container>
+                                  </td>
+
+                                  <ng-container *ngFor="let detalle of item.detalle;let idetalle = index">
+                                    <td *ngIf="isNumber(detalle.valor)">
+                                      <p *ngIf="detalle.valor > 0">
+                                        {{detalle.valor | number : "1.2"}}
+                                      </p>
+
+                                      <p *ngIf="detalle.valor <= 0 && detalle.porpagar>0 ">
+                                        -
+                                      </p>
+                                      <p *ngIf="detalle.valor <= 0 && detalle.porpagar<=0 ">
+                                        (Becado)
+                                      </p>
+                                    </td>
+                                  </ng-container>
+
+                                  <td>
+                                    {{sumarvalores(item.detalle)| number : "1.2"}}
+                                  </td>
+                                </tr>
+                        
+                            </tbody>
+
+                            <tfoot>
+                              <tr>
+                                <td colspan="2">Total</td>
+                                <ng-container *ngFor="let item of pagos_estudiante[ctpagos.curso][ctpagos.paralelo][0].detalle;let idenx = index">
+                                  <td >
+                                    {{
+                                      sumarrecuadado(
+                                        idenx,
+                                        ctpagos.curso,ctpagos.paralelo
+                                      ) | number : "1.2"
+                                    }}                                            
+                                  </td>
+                                </ng-container>
+                                <td >
+                                  {{
+                                    sumarrecuadado(
+                                      pagos_estudiante[ctpagos.curso][ctpagos.paralelo][0].detalle.length ,
+                                      ctpagos.curso,ctpagos.paralelo
+                                    ) | number : "1.2"
+                                  }}                                            
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                          <ngb-pagination
+                            *ngIf="pagos_estudiante[ctpagos.curso][ctpagos.paralelo].length >= 1"
+                            [(page)]="page"
+                            [pageSize]="pageSize"
+                            [maxSize]="10"
+                            [rotate]="true"
+                            [boundaryLinks]="true"
+                            [collectionSize]="pagos_estudiante[ctpagos.curso][ctpagos.paralelo].length"
+                          ></ngb-pagination>
+                            </div>
+                          </td>
+                        </tr>
+                      </ng-container>
+                      -->
+                     
+                    </ng-container>
+                  </tbody>
+                  <tfoot class="bg-info text-light">
+                    <tr style="font-weight: bold;">
+                      <td colspan="1"><b>Total</b></td>
+                      <ng-container
+                        *ngFor="
+                          let cuentas of deteconomico;
+                          let idxe = index
+                        "
+                      >
+                        <td>
+                          <span *ngIf="idxe == 0">{{
+                            cuentas.data[idx]
+                          }}</span>
+                          <span *ngIf="idxe != 0">{{
+                            cuentas.data[idx] | number : "1.2"
+                          }}</span>
+                        </td>
+                      </ng-container>
+                      <td>
+                        {{ getCountTotal(cuentas) }}
+                      </td>
+                      <td>
+                        {{ getCountnoTotal(cuentas) }}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </ng-container>
+          
+
+      </div>
+
+<!--Retirados
+<div class="card">
+
+        <div class="card-header">
+          <h4 class="card-header-title">
+            <a
+              class="btn btn-outline-primary"
+              type="button"
+              data-bs-toggle="collapse"
+              [attr.data-bs-target]="'#collapseExample-Retirados'"
+              aria-expanded="false"
+              aria-controls="collapseExample"
+            >
+              Retirados
+            </a>
+          </h4>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button
+              id="btneliminados"
+              class="btn btn-primary"
+              (click)="exportTable('eliminados', [])"
+            >
+              <i class="fe fe-printer"> Impr.</i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive collapse"
+         
+          id="collapseExample-Retirados"
+        >
+          <table class="table table-sm table-nowrap card-table"
+            id="eliminados"
+            
+          >
+            <thead>
+              <tr>
+                <th>
+                  N°
+                </th>
+                <th
+                  (click)="ordenarPor('apellidos')"
+                  style="cursor: pointer"
+                >
+                  Apellidos
+                </th>
+                <th
+                  (click)="ordenarPor('nombres')"
+                  style="cursor: pointer"
+                >
+                  Nombres
+                </th>
+                <th
+                  (click)="ordenarPor('f_desac')"
+                  style="cursor: pointer"
+                >
+                  Fecha
+                </th>
+                <th
+                  (click)="ordenarPor('curso')"
+                  style="cursor: pointer"
+                >
+                  Curso
+                </th>
+                <th>Beca</th>
+                <th>Matricula</th>
+                <th>Meses con Beca</th>
+                <th>Usado</th>
+                <th>Detalles de Pago</th>
+              </tr>
+            </thead>
+            <tbody>                  
+                <tr *ngFor="let pensiones of retirados_arr; let index = index">
+                  <td>
+                    {{index+1}}
+                  </td>
+                  <td>
+                    {{ pensiones?.idestudiante?.apellidos }}
+                  </td>
+                  <td>
+                    {{ pensiones?.idestudiante?.nombres }}
+                  </td>
+                  <td>
+                    {{
+                      pensiones?.idestudiante?.f_desac
+                        | date : "short"
+                    }}
+                  </td>
+                  <td>
+                    {{ pensiones?.curso }}{{ pensiones?.paralelo }}
+                  </td>
+                  <td>
+                    <ng-container
+                      *ngIf="pensiones?.val_beca != undefined"
+                    >
+                      {{ pensiones?.val_beca | number : "1.2" }} (-{{
+                        pensiones?.desc_beca
+                      }}%)
+                    </ng-container>
+                    <ng-container
+                      *ngIf="pensiones?.val_beca == undefined"
+                    >
+                      No tiene Beca
+                    </ng-container>
+                  </td>
+                  <td>
+                    <span *ngIf="pensiones?.matricula == 1"
+                      ><i class="fe fe-check">Pagado</i>
+                    </span>
+
+                    <span *ngIf="pensiones?.matricula == 0"
+                      ><i class="fe fe-x">No Pagado</i></span
+                    >
+                  </td>
+                  <td>
+                    {{ pensiones?.num_mes_beca }}
+                  </td>
+                  <td>
+                    <ng-container
+                      *ngIf="pensiones?.val_beca != undefined"
+                    >
+                      {{
+                        pensiones?.num_mes_beca -
+                          pensiones?.num_mes_res
+                      }}
+                    </ng-container>
+                  </td>
+                  <td>
+                    <ng-container
+                        *ngIf="pensiones.pagos"
+                      >
+                      <ng-container
+                      *ngFor="let pagos of pensiones.pagos"
+
+                     
+                    >
+                      <span *ngIf="pagos.tipo == 0">
+                        Matricula:
+                        {{ pagos.valor | number : "1.2" }}
+                      </span>
+                      <span
+                        *ngIf="
+                          pagos.tipo > 0 && pagos.tipo < 20
+                        "
+                      >
+                        Mes {{ pagos.tipo }}:
+                        {{ pagos.valor | number : "1.2" }}
+                      </span>
+                      <span *ngIf="pagos.tipo > 25">
+                        Extra pagos:
+                        {{ pagos.valor | number : "1.2" }}
+                      </span>
+                       <a class="factura"
+                      style="cursor: pointer"
+                      [routerLink]="[
+                        '/pagos/',
+                        pagos._id
+                      ]"
+                    >
+                      {{ pagos._id }}</a
+                    ><br>
+                      </ng-container>
+                    </ng-container>
+                      
+                  </td>                        
+                </tr>                    
+            </tbody>
+          </table>
+        </div>
+        </div>
+        
+      </div>
+-->     
+      
+
+    </ng-container>
+    </ng-container>
+  </div>
+</div>
+
+<div class="card" id="impresion" style="display: none; margin-left: 85%; " *ngIf="tipreport=='Genero'&&load_data==false">
+  <div class="card-header">
+    <div class="row align-items-center">
+      <div class="col-3" style="text-align: center;width: 20%; ">
+        <img _ngcontent-twf-c49="" [src]="url + 'obtener_portada/' + imagen" alt="..." 
+            class="navbar-brand-img mx-auto" style=" max-width: 40%; ">
+      </div>
+      <div class="col-auto" style="text-align: center; width: 60%;">
+        <h2><b>
+          {{info.titulo| uppercase}}</b>
+          <h4 style=" text-align:center;">
+          Dirección: {{info.calle1}} y {{info.calle2}}<br>
+
+          Teléfono: {{info.telefonocon}}<br>
+
+          Año lectivo {{pdffecha}}
+          </h4>
+
+          </h2>
+      </div>
+      <div class="col-3" style="text-align: center;width: 20%;">
+        <img _ngcontent-twf-c49="" src="https://i.postimg.cc/ThvxfG15/nuevo-logo-Mineduc.jpg" alt="..." 
+        class="navbar-brand-img mx-auto" style="max-height: 4rem !important;" style="height: 2cm;"><br>
+        <img _ngcontent-twf-c49="" src="https://i.postimg.cc/ZYBybc0J/Politics-of-Ecuador-Guillermo-Lasso-Administration-logo-svg.png" alt="..." 
+        class="navbar-brand-img mx-auto" style="max-height: 4rem !important;" style="height: 2cm;">
+      </div>
+</div>
+    <h4 class="card-header-title">
+        Genero
+    </h4>
+  </div>
+  <div class="card-body">
+    <table class="table table-sm table-nowrap card-table"
+      id="genero">
+      <thead class="table-info">
+        <tr>
+          <th>
+            Curso
+          </th>
+          <th>
+            Paralelo
+          </th>
+          <th>
+            Masculino
+          </th>
+          <th>
+            Femenino
+          </th>
+          <th>
+            n/a
+          </th>
+          <th>
+            Total
+          </th>
+        </tr>
+      </thead>
+      <tbody>                  
+          <tr *ngFor="let item of pagospension; let index = index">
+            <td>
+              {{item.curso}}
+            </td>
+            <td>
+              {{item.paralelo}}
+            </td>
+            <td>
+              {{item.genero[0]}}
+            </td>
+            <td>
+              {{item.genero[1]}}
+            </td>
+            <td>
+              {{item.genero[2]}}
+            </td>
+            <td>
+              {{item.genero[0]+item.genero[1]+item.genero[2]}}
+            </td>                       
+          </tr> 
+          <tr style="border: 0">
+            <td colspan="5" style="border: 0; height: 100px;"></td>
+          </tr>                      
+      </tbody>
+      <tfoot style="border: 0;">
+        <div style="margin-right: auto;margin-left: auto;">
+          <table id="detalleeconomico" class="table table-sm table-nowrap card-table" style="width: 100%" >
+            
+              <thead style="border:0">
+                <th style="border:0"></th>
+                <th style="border:0"></th>
+                <th style="border:0"></th>
+              </thead>
+              <tbody>                 
+                <tr style="border: 0; text-align: center;">
+                  <th style="border: 0">
+                    <p>{{director}}</p>
+                    <p>Director(a)</p>
+                  </th>
+
+                  <th style="border: 0">
+                    <p>{{delegado}}</p>
+                    <p>Delegado del Obispo</p>
+                  </th>
+
+                  <th style="border: 0">
+                    <p>{{admin}}</p>
+                    <p>Responsable</p>
+                  </th>
+                </tr>
+              </tbody>
+              
+                            
+                            </table>                          
+                </div>
+      </tfoot> 
+    </table>
+  </div>
+</div>
+
+
+<div class="card-body"  *ngIf="load_data" style="cursor: progress;min-height: fit-content;">
+  <div class="row">
+    <div class="position-fixed top-50 start-50">
+      <div class="spinner-border text-primary" role="status" style="width: 5rem; height: 5rem;">
+        <span class="visually-hidden"></span>
+      </div>  
+    </div>
+  </div>
+</div>

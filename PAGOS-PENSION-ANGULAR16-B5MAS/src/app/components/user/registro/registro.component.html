@@ -1,0 +1,402 @@
+
+<div class="container">
+	<div class="sidebar">
+		<app-sidebar-log></app-sidebar-log>
+	</div>
+	<!--*ngIf="URLactual.hostname=='incorp.tk'"-->
+	<div class="content" >
+        <div class="card">
+            <div class="card-header-title">
+                <!-- Heading -->
+                <h1 class="display-4 text-center mb-3">Formulario de Registro</h1>
+                        
+                <!-- Subheading -->
+                <p class="text-muted text-center mb-5">Panel administrativo de Control de Pensiones.</p>
+
+                <!-- Form -->
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="text-start">
+                        <button class="btn btn-primary " data-bs-target="#carouselExampleIndicators" data-bs-slide="prev"><i class="bi bi-caret-left-fill"></i>Anterior</button>
+                       
+                    </div>
+                    <div class="text-end">
+                        <button class="btn btn-primary " data-bs-target="#carouselExampleIndicators" data-bs-slide="next">Siguiente <i class="bi bi-caret-right-fill"></i></button>
+                     
+                    </div>
+                </div>
+                <div id="carouselExampleIndicators" class="carousel carousel-dark slide carousel-fade" data-bs-ride="carousel" data-bs-interval="false">
+                    <div class="carousel-indicators">
+                      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                    </div>
+
+                    <form #registroForm="ngForm" (ngSubmit)="registrate(registroForm)">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <div class="container">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <!-- Title -->
+                                        <h4 class="card-header-title">Ingresa tus datos Personales</h4>
+                                    </div>
+        
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputName">Nombres (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Nombres"
+                                                                pattern="^[A-ZÁÉÍÓÚa-záéíóú ]+$"
+                                                                name="nombres"
+                                                                [(ngModel)]="admin.nombres"
+                                                            />
+                                                        </div>
+                                                    </div>
+        
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputLastName">Apellidos (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Apellidos"
+                                                                pattern="^[A-ZÁÉÍÓÚa-záéíóú ]+$"
+                                                                name="apellidos"
+                                                                [(ngModel)]="admin.apellidos"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 form-group">
+                                                        <label for="">Cédula (*)</label>
+                                                        <input
+                                                            type="text"
+                                                            class="form-control"
+                                                            placeholder="Cédula"
+                                                            pattern="^[0-9]+$"
+                                                            maxlength="10"
+                                                            minlength="10"
+                                                            required
+                                                            name="dni"
+                                                            [(ngModel)]="admin.dni"
+                                                        />
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPhone">Teléfono (*)</label>
+                                                            <input
+                                                                type="tel"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Teléfono"
+                                                                pattern="^[0-9]+$"
+                                                                maxlength="10"
+                                                                minlength="8"
+                                                                name="telefono"
+                                                                [(ngModel)]="admin.telefono"
+                                                            />
+                                                        </div>
+                                                    </div>
+        
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputEmail">Email (*)</label>
+                                                            <input
+                                                                type="email"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Email"
+                                                                pattern="^[a-z0-9@.!#$%&’*+-/=?^_`{|}~]+$"
+                                                                name="email"
+                                                                [(ngModel)]="admin.email"
+                                                            />
+                                                        </div>
+                                                    </div>
+        
+                                                    <div class="col-12">
+                                                        <label for="exampleInputPassword">Contraseña (*)</label>
+                                                        <div class="input-group input-group-merge">
+                                                            <!-- Input -->
+                                                            <input
+                                                                type="password"
+                                                                class="form-control form-control-appended"
+                                                                placeholder="Ingresa tu contraseña"
+                                                                maxlength="50"
+                                                                minlength="8"
+                                                                id="password"
+                                                                #password="ngModel"
+                                                                name="password"
+                                                                [(ngModel)]="admin.passwordadmin"
+                                                            />
+        
+                                                            <!-- Icon -->
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text" (click)="view_password()" style="cursor: pointer">
+                                                                    <i class="fe fe-eye"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+        
+                                                    <div class="col-12">
+                                                        <label for="exampleInputPassword">Repite Contraseña (*)</label>
+                                                        <div class="input-group input-group-merge">
+                                                            <!-- Input -->
+                                                            <input
+                                                                type="password"
+                                                                class="form-control form-control-appended"
+                                                                placeholder="Vuelve a escribir tu contraseña"
+                                                                maxlength="50"
+                                                                minlength="8"
+                                                                id="auxiliar"
+                                                                #password="ngModel"
+                                                                name="auxiliarauxiliar"
+                                                                [(ngModel)]="admin.auxiliar"
+                                                            />
+        
+                                                            <!-- Icon -->
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text" (click)="view_passworda()" style="cursor: pointer">
+                                                                    <i class="fe fe-eye"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+        
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputName">Nombre de la base de datos(*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="base de datos"
+                                                                pattern="^[A-Za-z0-9]+$"
+                                                                name="base"
+                                                                [(ngModel)]="admin.base"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                        
+                        </div>
+                        <div class="carousel-item">
+                            <div class="container">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <!-- Title -->
+                                        <h4 class="card-header-title">Ingresa los datos de tu Institución</h4>
+                                    </div>
+        
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputName">Nombre de la Institución (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="titulo"
+                                                                pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9 ]+$"
+                                                                name="titulo"
+                                                                [(ngModel)]="admin.titulo"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPhone">telefono convencional (*)</label>
+                                                            <input
+                                                                type="tel"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Teléfono Convencional"
+                                                                pattern="^[0-9]+$"
+                                                                maxlength="10"
+                                                                minlength="8"
+                                                                name="telefonocon"
+                                                                [(ngModel)]="admin.telefonocon"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPhone">telefono (*)</label>
+                                                            <input
+                                                                type="tel"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Teléfono"
+                                                                pattern="^[0-9]+$"
+                                                                maxlength="10"
+                                                                minlength="8"
+                                                                name="telefonoinsti"
+                                                                [(ngModel)]="admin.telefonoinsti"
+                                                            />
+                                                        </div>
+                                                    </div>
+        
+                                                    <div class="col-lg-6 form-group">
+                                                        <label for="">Portada (*)</label>
+                                                        <div class="custom-file">
+                                                            <input
+                                                                class="custom-file-input"
+                                                                type="file"
+                                                                id="file-input"
+                                                                (change)="fileChangeEvent($event)"
+                                                            />
+                                                            <label
+                                                                class="custom-file-label"
+                                                                id="input-portada"
+                                                                for="file-input"
+                                                                style="white-space: nowrap; overflow: hidden"
+                                                                >Seleccionar imagen</label
+                                                            >
+                                                        </div>
+                                                    </div>
+        
+                                                    <div class="col-lg-6">
+                                                        <img [src]="imgSelect" class="img-thumbnail" alt="Rounded image" />
+                                                    </div>
+        
+                                                    <div class="col-lg-6 form-group">
+                                                        <label for="">País (*)</label>
+                                                        <input
+                                                            type="text"
+                                                            class="form-control"
+                                                            placeholder="País"
+                                                            pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9 ]+$"
+                                                            required
+                                                            name="pais"
+                                                            [(ngModel)]="admin.pais"
+                                                        />
+                                                    </div>
+        
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputEmail">Provincia (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Provincia"
+                                                                pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9 ]+$"
+                                                                name="provincia"
+                                                                [(ngModel)]="admin.provincia"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPhone">Canton (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="Canton"
+                                                                pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9 ]+$"
+                                                                name="canton"
+                                                                [(ngModel)]="admin.canton"
+                                                            />
+                                                        </div>
+                                                    </div>
+        
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPhone">Codigo Postal (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="codigopostal"
+                                                                pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9 ]+$"
+                                                                name="codigopostal"
+                                                                [(ngModel)]="admin.codigopostal"
+                                                            />
+                                                        </div>
+                                                    </div>
+        
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPhone">Calle Principal (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="calle1"
+                                                                pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9., ]+$"
+                                                                name="calle1"
+                                                                [(ngModel)]="admin.calle1"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPhone">Calle Secundaria (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="calle2"
+                                                                pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9., ]+$"
+                                                                name="calle2"
+                                                                [(ngModel)]="admin.calle2"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <label for="exampleInputPhone">Referencia (*)</label>
+                                                            <input
+                                                                type="text"
+                                                                class="form-control"
+                                                                required
+                                                                placeholder="referencia"
+                                                                pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9., ]+$"
+                                                                name="referencia"
+                                                                [(ngModel)]="admin.referencia"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                           
+                        </div>
+                        </div>
+                        <button class="btn btn-primary" type="submit">enviar</button>
+                    </form>
+                
+                  </div>
+                  
+                  
+            </div>
+           
+        </div>
+    </div>
+    <div class="content" *ngIf="URLactual.hostname!='incorp.tk'">
+        <div class="card">
+            <div class="card-body">
+                Solo es posible registrarse a través de la página oficial de  <a href="https://incorp.tk/login">Incorp.tk</a>
+            </div>
+        </div>
+    </div>
+</div>

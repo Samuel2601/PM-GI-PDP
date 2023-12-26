@@ -1,0 +1,35 @@
+
+
+.example-form {
+    min-width: 150px;
+    max-width: 500px;
+    width: 100%;
+  }
+  
+  .example-full-width {
+    width: 100%;
+  }
+
+
+  .my-autocomplete .mat-option {
+    white-space: nowrap;
+  }
+  
+  .my-autocomplete .mat-option .mat-option-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+ .cdk-overlay-container{
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .my-autocomplete-panel .mat-autocomplete-panel {
+    position: relative;
+  }
+  input:invalid {
+    border: 2px solid red;
+  }
+  
+  input:valid {
+    border: 2px solid black;
+  }

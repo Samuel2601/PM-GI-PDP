@@ -1,0 +1,681 @@
+<div class="container">
+	<div class="sidebar">
+		<app-sidebar></app-sidebar>
+	</div>
+	
+	<div class="content">
+        <ng-container *ngIf="(rol != undefined && (rol == 'secrt' || rol == 'admin')) || yo == 1">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-10">
+                        <!-- Header -->
+                        <!-- Header -->
+                        <div class="header mt-md-5">
+                            <div class="header-body">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <!-- Pretitle -->
+                                        <h6 class="header-pretitle">Módulo</h6>
+    
+                                        <!-- Title -->
+                                        <h1 class="header-title">Pago de Pensiones</h1>
+                                    </div>
+                                </div>
+                                <!-- / .row -->
+                            </div>
+                        </div>
+    
+                        <!-- Alert -->
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-10">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <!-- Title -->
+                                            <h4 class="card-header-title">Pago manual</h4>
+                                        </div>                            
+                
+                                        <div class="card-body">
+                                            <div class="row form-group">
+                                                <div class="col-lg-6">
+                                                    <label for="validationCustom01" class="form-label"><b>Estudiante</b></label> <br />
+                                                    <div class="input-group">
+                                                        <input
+                                                            class="form-control"
+                                                            type="text"
+                                                            id="input-estudiante"
+                                                            placeholder="Seleccionar estudiante"
+                                                            disabled
+                                                        />
+                                                        <button
+                                                            id="btnBuscarEstudiante"
+                                                            class="btn btn-primary"
+                                                            type="button"
+                                                            data-bs-toggle="modal"
+                                                            [attr.data-bs-target]="'#modalEstudiante'"
+                                                        >
+                                                            Buscar!
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <div
+                                                        class="modal fade"
+                                                        id="modalEstudiante"
+                                                        tabindex="-1"
+                                                        role="dialog"
+                                                        aria-labelledby="exampleModalCenterTitle"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="exampleModalLongTitle">Seleccion el estudiante</h5>
+                                                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body" style="max-height: 600px; overflow: hidden; overflow-y: auto">
+                                                                    <div class="input-group">
+                                                                        <input
+                                                                            class="form-control"
+                                                                            type="text"
+                                                                            placeholder="Busca el estudiante"
+                                                                            name="filtro_estudiante"
+                                                                            [(ngModel)]="filtro_estudiante"
+                                                                        />
+                                                                        <button class="btn btn-primary" type="button" (click)="func_filtro_estudiante()">
+                                                                            Buscar
+                                                                        </button>
+                                                                    </div>
+                                                                    <table class="table table-hover">
+                                                                        <thead>
+                                                                            <th>Estudiante</th>
+                                                                            <th>Cedula</th>
+                                                                            <th>Acción</th>
+                                                                        </thead>
+                                                                        <tbody *ngIf="!load_estudiantes">
+                                                                            <tr
+                                                                                *ngFor="
+                                                                                    let item of estudiantes
+                                                                                        | slice
+                                                                                            : (pageEstudiante - 1) * pageSizeEstudiante
+                                                                                            : (pageEstudiante - 1) * pageSizeEstudiante + pageSizeEstudiante;
+                                                                                    let indice = index
+                                                                                "
+                                                                            >
+                                                                                <ng-container>
+                                                                                    <td>{{ item.nombres }} {{ item.apellidos }}</td>
+                                                                                    <td>{{ item.dni }}</td>
+                                                                                    <td>
+                                                                                        <a
+                                                                                            style="cursor: pointer"
+                                                                                            class="text-success"
+                                                                                            (click)="select_estudiante(item)"
+                                                                                            >[Seleccionar]</a
+                                                                                        >
+                                                                                    </td>
+                                                                                </ng-container>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                        <tbody *ngIf="load_estudiantes">
+                                                                            <tr>
+                                                                                <td colspan="2" class="text-center">
+                                                                                    <div class="spinner-border" role="status">
+                                                                                        <span class="visually-hidden"></span>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <ngb-pagination
+                                                                        *ngIf="estudiantes.length >= 1"
+                                                                        [(page)]="pageEstudiante"
+                                                                        [pageSize]="pageSizeEstudiante"
+                                                                        [maxSize]="5"
+                                                                        [rotate]="true"
+                                                                        [boundaryLinks]="true"
+                                                                        [collectionSize]="estudiantes.length"
+                                                                    ></ngb-pagination>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="col-lg-8">
+                                                        <label for="" class="form-label"><b>Año Lectivo (*)</b></label>
+                                                        <div class="input-group">
+                                                            <select
+                                                                class="form-control custom-select"
+                                                                id="select-input"
+                                                                required
+                                                                name="idp"
+                                                                [(ngModel)]="idp"
+                                                                disabled
+                                                                *ngIf="dpago.length!=0"
+                                                            >
+                                                                <option value="-1" selected disabled>Seleccionar</option>
+                                                                <ng-container *ngIf="pension.length>0">
+                                                                    <ng-container *ngFor="let item of pension; let val = index">
+                                                                        <option value="{{val}}"   >
+                                                                            <b 
+                                                                                >{{ item.curso}} {{ item.paralelo }} {{item.anio_lectivo|date:'YYYY'}}
+                                                                            </b>
+                                                                        </option>
+                                                                    </ng-container>
+                                                                </ng-container>
+                                                                
+                                                            </select>
+                
+                                                            <select
+                                                                class="form-control custom-select"
+                                                                id="select-input"
+                                                                required
+                                                                name="idp"
+                                                                
+                                                                [(ngModel)]="idp"
+                                                                
+                                                                *ngIf="dpago.length==0"
+                                                            >
+                                                                <option value="-1" selected disabled>Seleccionar</option>
+                                                                <ng-container *ngIf="pension.length>0">
+                                                                    <ng-container *ngFor="let item of pension; let val = index">
+                                                                        <option value="{{val}}"   >
+                                                                            <b 
+                                                                                >{{ item.curso}} {{ item.paralelo }} {{item.anio_lectivo|date:'YYYY'}}
+                                                                            </b>
+                                                                        </option>
+                                                                    </ng-container>
+                                                                </ng-container>
+                                                                
+                                                            </select>
+                                                            <!--(ngModelChange)="selecct_pension($event)"-->
+                                                            <button class="btn btn-primary" (click)="selecct_pension()"> Cargar</button>
+                
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                        <hr />                
+                                        <div class="card-body">
+                                            <div class="row form-group">
+                                                <div class="col-lg-6">
+                                                    <label for="validationCustom01" class="form-label"><b>Documento</b></label> <br />
+                
+                                                    <div class="input-group">
+                                                        <input
+                                                            class="form-control"
+                                                            type="text"
+                                                            placeholder="Seleccionar el documento"
+                                                            disabled
+                                                            id="input-documento"
+                                                        />
+                                                        <button
+                                                            id="btnbuscardocumento"
+                                                            class="btn btn-primary"
+                                                            type="button"
+                                                            data-bs-toggle="modal"
+                                                            [attr.data-bs-target]="'#modalDocumento'"
+                                                        >
+                                                            Buscar!
+                                                        </button>
+                                                        <button
+                                                            id="btnnuevodocumento"
+                                                            class="btn btn-primary"
+                                                            type="button"
+                                                            data-bs-toggle="modal"
+                                                            [attr.data-bs-target]="'#modalNuevoDocumento'"
+                                                        >
+                                                            Nuevo!
+                                                        </button>
+                                                    </div>                
+                                                    <div
+                                                        class="modal fade"
+                                                        id="modalDocumento"
+                                                        tabindex="-1"
+                                                        role="dialog"
+                                                        aria-labelledby="exampleModalCenterTitle"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 550px">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="exampleModalLongTitle">Seleccion Documento</h5>
+                                                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body" style="max-height: 600px; overflow: hidden; overflow-y: auto">
+                                                                    <div class="input-group">
+                                                                        <input
+                                                                            class="form-control"
+                                                                            type="text"
+                                                                            placeholder="Busca el documento"
+                                                                            name="filtro_documento"
+                                                                            [(ngModel)]="filtro_documento"
+                                                                        />
+                                                                        <button class="btn btn-primary" type="button" (click)="func_filtro_documento()">
+                                                                            Buscar
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-hover">
+                                                                            <thead>
+                                                                                <th>Documento</th>
+                                                                                <th>Monto</th>
+                                                                                <th>Acción</th>
+                                                                            </thead>
+                                                                            <tbody *ngIf="!load_documento">
+                                                                                <tr
+                                                                                    *ngFor="
+                                                                                        let item of documento
+                                                                                            | slice
+                                                                                                : (pageVariedad - 1) * pageSizeVariedad
+                                                                                                : (pageVariedad - 1) * pageSizeVariedad + pageSizeVariedad;
+                                                                                        let indice = index
+                                                                                    "
+                                                                                >
+                                                                                    <td>{{ item.documento }}</td>
+                                                                                    <td>{{ item.valor | currency : 'USD' }}</td>
+                                                                                    
+                                                                                    <td>
+                                                                                        <a
+                                                                                            style="cursor: pointer"
+                                                                                            *ngIf="item.valor >= 0.01"
+                                                                                            class="text-success"
+                                                                                            (click)="select_documento(item)"
+                                                                                            >[Seleccionar]</a
+                                                                                        >
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            *ngIf="item.valor <= 0.009"
+                                                                                            class="text-success"
+                                                                                            disabled
+                                                                                        >
+                                                                                            [No Selecionable]
+                                                                                        </button>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                
+                                                                            </tbody>
+                                                                            <tbody *ngIf="load_documento">
+                                                                                <tr>
+                                                                                    <td colspan="2" class="text-center">
+                                                                                        <div class="spinner-border" role="status">
+                                                                                            <span class="visually-hidden"></span>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                            
+                                                                        </table>
+                                                                    </div>
+                                                                
+                                                                    
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <ngb-pagination
+                                                                        [(page)]="pageVariedad"
+                                                                        [pageSize]="pageSizeVariedad"
+                                                                        [maxSize]="7"
+                                                                        [collectionSize]="documento.length"
+                                                                    ></ngb-pagination>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>                
+                                                    <div
+                                                        class="modal fade"
+                                                        id="modalNuevoDocumento"
+                                                        tabindex="-1"
+                                                        role="dialog"
+                                                        aria-labelledby="exampleModalCenterTitle"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 550px">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="exampleModalLongTitle">Nuevo Documento</h5>
+                                                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body" style="max-height: 700px; overflow: hidden; overflow-y: auto">
+                                                                    <form #registroForm="ngForm" (ngSubmit)="registro(registroForm)">
+                                                                        <div class="card">
+                                                                            <div class="card-header">
+                                                                                <!-- Title -->
+                                                                                <h4 class="card-header-title">Registro de un nuevo documento</h4>
+                                                                            </div>
+                
+                                                                            <div class="card-body">
+                                                                                <div class="row">
+                                                                                    <div class="col-lg-8">
+                                                                                        <div class="row">
+                                                                                            <div class="col-12">
+                                                                                                <div class="form-group">
+                                                                                                    <label for="exampleInputEmail1">Número de Documento (*)</label>
+                                                                                                    <input
+                                                                                                        type="text"
+                                                                                                        class="form-control"
+                                                                                                        required
+                                                                                                        placeholder="Titulo del documento"
+                                                                                                        pattern="^[0-9]+$"
+                                                                                                        name="titulo"
+                                                                                                        [(ngModel)]="documentocreate.documento"
+                                                                                                    />
+                                                                                                </div>
+                                                                                            </div>
+                
+                                                                                            <div class="col-12 form-group">
+                                                                                                <tinymce
+                                                                                                    name="contenido"
+                                                                                                    [(ngModel)]="documentocreate.contenido"
+                                                                                                    [config]="500"
+                                                                                                ></tinymce>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-lg-4">
+                                                                                        <div class="row">
+                                                                                            <div class="col-lg-12 form-group">
+                                                                                                <label class="form-label">Valor(*)</label>
+                                                                                                <input
+                                                                                                    type="text"
+                                                                                                    class="form-control"
+                                                                                                    placeholder="Valor"
+                                                                                                    pattern="^[0-9.]+$"
+                                                                                                    required
+                                                                                                    name="valor"
+                                                                                                    [(ngModel)]="documentocreate.valor"
+                                                                                                />
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="row">
+                                                                                            <div class="col-lg-12 form-group">
+                                                                                                <label class="form-label">Fecha de Deposito(*)</label>
+                                                                                                <input
+                                                                                                    type="date"
+                                                                                                    class="form-control"
+                                                                                                    placeholder="Valor"
+                                                                                                    required
+                                                                                                    name="fechadeposito"
+                                                                                                    [(ngModel)]="documentocreate.f_deposito"
+                                                                                                />
+                                                                                            </div>
+                                                                                        </div>
+                
+                                                                                        <label class="form-label"><b>Cuenta (*)</b></label> <br />
+                                                                                        <select
+                                                                                            class="form-control"
+                                                                                            id="select-input"
+                                                                                            name="cuenta"
+                                                                                            required
+                                                                                            [(ngModel)]="documentocreate.cuenta"
+                                                                                        >
+                                                                                            <option selected disabled value="">Seleccionar</option>
+                                                                                            <option value="Efectivo">Efectivo</option>
+                                                                                            <option value="304">304</option>
+                                                                                            <option value="604">604</option>
+                                                                                            <option value="Banco Vecino">Banco Vecino</option>
+                                                                                            <option value="Transferencia Directa">Transferencia Directa</option>
+                                                                                            <option value="Transferencia Interbancaria">
+                                                                                                Transferencia Interbancaria
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="card-footer">
+                                                                                <button *ngIf="!load_btn" class="btn btn-primary btn-shadow" type="submit">
+                                                                                    Crear
+                                                                                </button>
+                
+                                                                                <button
+                                                                                    disabled
+                                                                                    *ngIf="load_btn"
+                                                                                    type="button"
+                                                                                    class="btn btn-primary btn-shadow"
+                                                                                >
+                                                                                    <span
+                                                                                        class="spinner-border spinner-border-sm me-2"
+                                                                                        role="status"
+                                                                                        aria-hidden="true"
+                                                                                    ></span>
+                                                                                    Creando...
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="col-lg-8">
+                                                        <label for="" class="form-label"><b>Valor (*)</b></label>
+                                                        <div class="input-group">
+                                                            <select
+                                                                class="form-control custom-select"
+                                                                id="select-input"
+                                                                required
+                                                                name="tipo"
+                                                                [(ngModel)]="tipo"
+                                                            >
+                                                                <option value="-1" selected disabled>Seleccionar</option>
+                                                                
+                                                                <ng-container *ngFor="let rubros of arr_rubro; let val = index">
+                                                                    <option value="{{ rubros.idrubro }}" >
+                                                                        <b
+                                                                            >{{ rubros.descripcion}} ({{rubros.valor| currency : 'USD'}})
+                                                                        </b>
+                                                                    </option>
+                                                                </ng-container>
+            
+                                                                <option value="0" *ngIf="matricula_pago == 0">Matricula</option>
+                                                                <ng-container *ngFor="let fecha of fecha; let val = index">
+                                                                    <ng-container *ngIf="val>=0 && val<11">
+                                                                        <option value="{{ val + 1 }}" *ngIf="fecha != '' && val != 10">
+                                                                            <b
+                                                                                >{{ fecha.date | date : 'MMMM' }} {{ fecha.date | date : 'YYYY' }}
+                                                                                <ng-container *ngIf="fecha.beca == 1"> (Beca) </ng-container>
+                                                                            </b>
+                                                                        </option>
+                                                                    </ng-container>
+                                                                    
+                                                                </ng-container>
+                                                                
+                                                            </select>
+                                                            <button id="btnAgregar" class="btn btn-primary" (click)="addDocumento()">
+                                                                Agregar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                
+                                            <div class="card-body">
+                                                <div class="row form-group">
+                                                    <div class="col-lg-12 form-group">
+                                                        <div class="table-responsive">
+                                                            <table class="table table-striped table-hover">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>N° Documento</th>
+                                                                        <th>Descripción</th>
+                                                                        <th>Valor</th>
+                                                                        <th>Eliminar</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr *ngFor="let item of dpago; let idx = index">
+                                                                        <th>{{ item.titulo_documento }}</th>
+                                                                        <td>
+                                                                            <p *ngIf="item.tipo == 0"><b>Matricula</b></p>
+                                                                            <ng-container *ngIf="item.tipo <=10">
+                                                                                <p *ngFor="let fecha2 of fecha2; let val = index">
+                                                                                    <b *ngIf="val + 1 == item.tipo">
+                                                                                        Pensión {{ item.tipo }} {{ fecha2.date | date : 'MMMM' }}
+                                                                                        {{ fecha2.date | date : 'YYYY' }}
+                                                                                        <ng-container *ngIf="fecha2?.beca"> (Beca) </ng-container>
+                                                                                    </b>
+                                                                                </p>
+                                                                            </ng-container>
+                                                                            <b>{{item.descripcion}}</b>
+                                                                            <b>{{ item.estado }}</b>
+                                                                        </td>
+                                                                        <td>{{ item.valor | currency : 'USD' }}</td>
+                
+                                                                        <td>
+                                                                            <a
+                                                                                style="cursor: pointer"
+                                                                                class="text-danger"
+                                                                                (click)="quitar(idx, item.valor, item.tipo)"
+                                                                                >[Eliminar]</a
+                                                                            >
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <td colspan="2"><b>Total</b></td>
+                                                                        <td>{{ total_pagar | currency : 'USD' }}</td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                
+                                                            <table class="table table-striped table-hover" id="detalle" style="display: none">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>N° Documento</th>
+                                                                        <th>Descripción</th>
+                                                                        <th>Valor</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr *ngFor="let item of dpago; let idx = index">
+                                                                        <th>{{ item.titulo_documento }}</th>
+                                                                        <td>
+                                                                            <p *ngIf="item.tipo == 0"><b>Matricula</b></p>
+                                                                            <p *ngFor="let fecha2 of fecha2; let val = index">
+                                                                                <b *ngIf="val + 1 == item.tipo">
+                                                                                    Pensión {{ item.tipo }} {{ fecha2.date | date : 'MMMM' }}
+                                                                                    {{ fecha2.date | date : 'YYYY' }}</b
+                                                                                >
+                                                                            </p>
+                                                                            <b *ngIf="item.abono == 1">Abono</b>
+                                                                        </td>
+                                                                        <td style="text-align: center">{{ item.valor | currency : 'USD' }}</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <td colspan="2" style="text-align: right">
+                                                                            <b style="text-align: right">Total</b>
+                                                                        </td>
+                                                                        <td style="text-align: center">{{ total_pagar | currency : 'USD' }}</td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-5">
+                                                        <label for="validationCustom01" class="form-label"><b>Total a pagar: (*)</b></label>
+                                                        <h3>{{ total_pagar | currency : 'USD' }}</h3>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <a
+                                                class="btn btn-warning btn-shadow mr-3"
+                                                [routerLink]="['/pagos']"
+                                                routerLinkActive="router-link-active"
+                                                >Regresar</a
+                                            >
+                                            <button
+                                                id="btnCrear"
+                                                *ngIf="!load_btn"
+                                                class="btn btn-primary btn-shadow"
+                                                type="button"
+                                                (click)="registrar_pago()"
+                                            >
+                                                Crear
+                                            </button>
+                
+                                            <button disabled *ngIf="load_btn" type="button" class="btn btn-primary btn-shadow">
+                                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                Creando...
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-2" >
+                                    <div class="alert alert-primary" role="alert" style="text-align: center;">
+                                        Matricula <b>{{ valor_matricula | currency : 'USD' }}</b> 
+                                    </div>
+                                    <div class="alert alert-info" role="alert" style="text-align: center;">
+                                    Pensión <b>{{ aux_valor_pension | currency : 'USD' }}</b> 
+                                    </div>
+                                    <div class="alert alert-info" role="alert" *ngIf="aux_valor_pension!=valores_pensiones" style="text-align: center;">
+                                    Beca <b>{{ valores_pensiones | currency : 'USD' }}</b>
+                                    </div>
+                                    <hr /> 
+
+                                    <div class="alert alert-primary" role="alert" *ngIf="auxvalordeposito>0" style="text-align: center;">
+                                        Documento <b>{{ auxvalordeposito | currency : 'USD' }}</b> 
+                                    </div>
+
+                                    <div class="alert alert-info" role="alert" *ngIf="auxvalordeposito>0 && auxvalordeposito - valorigualdocumento>1" style="text-align: center;">
+                                        Restante
+                                        <b>{{auxvalordeposito - valorigualdocumento | currency : 'USD'}}</b>
+                                    </div>
+
+                                    <div class="alert alert-warning" role="alert" *ngIf="auxvalordeposito>0 && auxvalordeposito - valorigualdocumento<1&&auxvalordeposito - valorigualdocumento>=0.01" style="text-align: center;">
+                                        Restant
+                                        <b>{{auxvalordeposito - valorigualdocumento | currency : 'USD'}}</b>
+                                    </div>
+
+                                    <div class="alert alert-danger" role="alert" *ngIf="auxvalordeposito>0 && auxvalordeposito - valorigualdocumento<0.01" style="text-align: center;">
+                                        Restante
+                                        <b>{{auxvalordeposito - valorigualdocumento | currency : 'USD'}}</b>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                       
+                    </div>
+                </div>
+                <!-- / .row -->
+            </div>
+        </ng-container>        
+        <ng-container *ngIf="rol != undefined && rol != 'secrt' && rol != 'admin' && yo == 0">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-5 col-xl-4 my-5">
+                            <div class="text-center">
+                                <!-- Preheading -->
+                                <h6 class="text-uppercase text-muted mb-4">404 error</h6>
+        
+                                <!-- Heading -->
+                                <h1 class="display-4 mb-3">Está página no se cuentra habilitada 😭</h1>
+        
+                                <!-- Subheading -->
+                                <p class="text-muted mb-4">¿Parece que llegaste aquí por accidente?</p>
+        
+                                <!-- Button -->
+                                <a [routerLink]="['/estudiantes']" class="btn btn-lg btn-primary"> Regresar a pagos </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>        
+    </div>
+</div>

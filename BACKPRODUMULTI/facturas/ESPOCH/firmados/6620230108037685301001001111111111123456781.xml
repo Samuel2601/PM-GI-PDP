@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<factura>
+  <_id>comprobante</_id>
+  <_version>1.0.0</_version>
+  <infoTributaria>
+    <ambiente>1</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <ruc>0803768530</ruc>
+    <claveAcceso>66202301080376853010010011111111111234567813</claveAcceso>
+    <codDoc>01</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>111111111</secuencial>
+  </infoTributaria>
+  <infoFactura>
+    <fechaEmision>6/6/2023</fechaEmision>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>2</codigoPorcentaje>
+      </totalImpuesto>
+      <totalImpuesto>
+        <codigo>3</codigo>
+        <codigoPorcentaje>3072</codigoPorcentaje>
+      </totalImpuesto>
+      <totalImpuesto>
+        <codigo>5</codigo>
+        <codigoPorcentaje>5001</codigoPorcentaje>
+      </totalImpuesto>
+    </totalConImpuestos>
+  </infoFactura>
+  <detalles>
+    <detalle>
+      <detallesAdicionales>
+        <detAdicional>
+          <_nombre></_nombre>
+          <_valor></_valor>
+        </detAdicional>
+      </detallesAdicionales>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>2</codigoPorcentaje>
+          <tarifa>12</tarifa>
+        </impuesto>
+        <impuesto>
+          <codigo>3</codigo>
+          <codigoPorcentaje>3072</codigoPorcentaje>
+          <tarifa>5</tarifa>
+        </impuesto>
+        <impuesto>
+          <codigo>5</codigo>
+          <codigoPorcentaje>5001</codigoPorcentaje>
+          <tarifa>0.02</tarifa>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+  <infoAdicional>
+    <campoAdicional>
+      <_nombre>Codigo Impuesto ISD</_nombre>
+      <__text>4580</__text>
+    </campoAdicional>
+    <campoAdicional>
+      <_nombre>Impuesto ISD</_nombre>
+      <__text>15.42x</__text>
+    </campoAdicional>
+  </infoAdicional>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+<SignedInfo>
+<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></CanonicalizationMethod>
+<SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"></SignatureMethod>
+<Reference URI="">
+<Transforms>
+<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"></Transform>
+<Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"></Transform>
+</Transforms>
+<DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"></DigestMethod>
+<DigestValue>20OFm7X0hWBmW+lJyv4MLHO1nmCazuQySovQjUFjhy0=</DigestValue>
+</Reference>
+</SignedInfo>
+<SignatureValue>roBG86jQBeXvqOPN+0YaZAdUWQg6zLzkcV72VpWWg4U2DGxnupL5TpTnZZg+IPFtAXiLSsx/0x9R54pdGosLNjTevIZ2VrDkVTb1CwKP7Z3FyoEWlWAavkl0P6p2TlN3ZM+TirWhjc85FVFG9BvlXDPSFLNZgu26cQUVwFee6AJUUC7kjv5ekDugWZ2gI8SLUP5ev6p7rAcDoWhakxCTYQdoihUCwj2b8EnM9A7gR2NfjRRV/vgM2ePYOqlynlsgDK2dgm9uAKEdPzPSP8/IKmVWVg2vywuuq92khduTwxny2fDP9y5KxzSSKSvioDfPtF+GDDlN8NZ01/2zv4l/Ow==</SignatureValue>
+<KeyInfo>
+<X509Data>
+<X509Certificate>
+MIILyjCCCbKgAwIBAgIEAwsD/zANBgkqhkiG9w0BAQsFADCBmTELMAkGA1UEBhMC
+RUMxHTAbBgNVBAoMFFNFQ1VSSVRZIERBVEEgUy5BLiAyMTAwLgYDVQQLDCdFTlRJ
+REFEIERFIENFUlRJRklDQUNJT04gREUgSU5GT1JNQUNJT04xOTA3BgNVBAMMMEFV
+VE9SSURBRCBERSBDRVJUSUZJQ0FDSU9OIFNVQkNBLTIgU0VDVVJJVFkgREFUQTAe
+Fw0yMzAyMDIyMTMyMzFaFw0yNTAyMDEyMTMyMzFaMIGcMSUwIwYDVQQDDBxEQVZJ
+RCBEQU5JRUwgUEFOQ0hJIENBTkRPTkdBMRUwEwYDVQQFEwwwMjAyMjMxNjQyMDgx
+MDAuBgNVBAsMJ0VOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBERSBJTkZPUk1BQ0lP
+TjEdMBsGA1UECgwUU0VDVVJJVFkgREFUQSBTLkEuIDIxCzAJBgNVBAYTAkVDMIIB
+IjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt9lnrANpr/qSNvJRL4XzYLbv
+TkTlDe1acmzlpLPzTxMWbUbwoCh9bouivEKVlJ2Fpi8dtceM0y/pRV5W56HMvwk7
+fK62aLcupM0fda1QHn2vyFCIIptxfQibkTM2Zq1cKulIfV1lXxzxGJuooHPDqcLe
+j3cOFZYfmQwLMDAg5vhPj6SE2D3B0MzWQiux7SH3M9yveMR+8UU0eEWYzZSqg7uV
+wrxIg1tJUBk6/xzZsZAVWJCJgkC1dX7RYU5zTcpd4IrlypocR/a7Oc+ZZogZwQPi
+AAjtzyllKDtA7khW04SsAHxr1YKXfnEzlHBSsOvCkWYIdrrmH6QhOnU6uGSRAwID
+AQABo4IHEzCCBw8wDAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBSMusoRV3glgB1r
+CktVv42uYt29jzBZBggrBgEFBQcBAQRNMEswSQYIKwYBBQUHMAGGPWh0dHA6Ly9v
+Y3NwZ3cuc2VjdXJpdHlkYXRhLm5ldC5lYy9lamJjYS9wdWJsaWN3ZWIvc3RhdHVz
+L29jc3Awgc8GA1UdLgSBxzCBxDCBwaCBvqCBu4aBuGxkYXA6Ly9sZGFwc2RjYTIu
+c2VjdXJpdHlkYXRhLm5ldC5lYy9DTj1BVVRPUklEQUQgREUgQ0VSVElGSUNBQ0lP
+TiBTVUJDQS0yIFNFQ1VSSVRZIERBVEEsT1U9RU5USURBRCBERSBDRVJUSUZJQ0FD
+SU9OIERFIElORk9STUFDSU9OLE89U0VDVVJJVFkgREFUQSBTLkEuIDIsQz1FQz9k
+ZWx0YVJldm9jYXRpb25MaXN0P2Jhc2UwIAYDVR0RBBkwF4EVZGF2aWQucGMzQG91
+dGxvb2suY29tMIIBBgYDVR0gBIH+MIH7MFoGCisGAQQBgqZyAgcwTDBKBggrBgEF
+BQcCAjA+HjwAQwBlAHIAdABpAGYAaQBjAGEAZABvACAAZABlACAAUABlAHIAcwBv
+AG4AYQAgAE4AYQB0AHUAcgBhAGwwgZwGCisGAQQBgqZyAgEwgY0wgYoGCCsGAQUF
+BwIBFn5odHRwczovL3d3dy5zZWN1cml0eWRhdGEubmV0LmVjL3dwLWNvbnRlbnQv
+ZG93bmxvYWRzL05vcm1hdGl2YXMvUF9kZV9DZXJ0aWZpY2Fkb3MvUG9saXRpY2Fz
+IGRlIENlcnRpZmljYWRvIFBlcnNvbmEgTmF0dXJhbC5wZGYwggKiBgNVHR8EggKZ
+MIIClTCB5aBBoD+GPWh0dHA6Ly9vY3NwZ3cuc2VjdXJpdHlkYXRhLm5ldC5lYy9l
+amJjYS9wdWJsaWN3ZWIvc3RhdHVzL29jc3CigZ+kgZwwgZkxOTA3BgNVBAMMMEFV
+VE9SSURBRCBERSBDRVJUSUZJQ0FDSU9OIFNVQkNBLTIgU0VDVVJJVFkgREFUQTEw
+MC4GA1UECwwnRU5USURBRCBERSBDRVJUSUZJQ0FDSU9OIERFIElORk9STUFDSU9O
+MR0wGwYDVQQKDBRTRUNVUklUWSBEQVRBIFMuQS4gMjELMAkGA1UEBhMCRUMwgceg
+gcSggcGGgb5sZGFwOi8vbGRhcHNkY2EyLnNlY3VyaXR5ZGF0YS5uZXQuZWMvQ049
+QVVUT1JJREFEIERFIENFUlRJRklDQUNJT04gU1VCQ0EtMiBTRUNVUklUWSBEQVRB
+LE9VPUVOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBERSBJTkZPUk1BQ0lPTixPPVNF
+Q1VSSVRZIERBVEEgUy5BLiAyLEM9RUM/Y2VydGlmaWNhdGVSZXZvY2F0aW9uTGlz
+dD9iYXNlMIHgoIHdoIHahoHXaHR0cHM6Ly9wb3J0YWwtb3BlcmFkb3IyLnNlY3Vy
+aXR5ZGF0YS5uZXQuZWMvZWpiY2EvcHVibGljd2ViL3dlYmRpc3QvY2VydGRpc3Q/
+Y21kPWNybCZpc3N1ZXI9Q049QVVUT1JJREFEIERFIENFUlRJRklDQUNJT04gU1VC
+Q0EtMiBTRUNVUklUWSBEQVRBLE9VPUVOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBE
+RSBJTkZPUk1BQ0lPTixPPVNFQ1VSSVRZIERBVEEgUy5BLiAyLEM9RUMwHQYDVR0O
+BBYEFAH0nHoIxXZ8AOwz/Ed9i0eLB92CMCsGA1UdEAQkMCKADzIwMjMwMjAyMjEz
+MjMxWoEPMjAyNTAyMDEyMTMyMzFaMAsGA1UdDwQEAwIF4DAaBgorBgEEAYKmcgMB
+BAwMCjA4MDIwMDk4NjAwGgYKKwYBBAGCpnIDCQQMDApFU01FUkFMREFTMBEGCisG
+AQQBgqZyAyIEAwwBLjAoBgorBgEEAYKmcgMHBBoMGEFWIFNVQ1JFIDE2IFkgMjQg
+REUgTUFZTzAcBgorBgEEAYKmcgMCBA4MDERBVklEIERBTklFTDAfBgorBgEEAYKm
+cgMgBBEMDzAwMTAwMjAwMDM0ODA5MjARBgorBgEEAYKmcgMjBAMMAS4wEwYKKwYB
+BAGCpnIDIQQFDANQRlgwFwYKKwYBBAGCpnIDDAQJDAdFQ1VBRE9SMBYGCisGAQQB
+gqZyAwMECAwGUEFOQ0hJMBEGCisGAQQBgqZyAx4EAwwBLjAdBgorBgEEAYKmcgML
+BA8MDTA4MDIwMDk4NjAwMDEwEQYKKwYBBAGCpnIDHQQDDAEuMBgGCisGAQQBgqZy
+AwQECgwIQ0FORE9OR0EwGgYKKwYBBAGCpnIDCAQMDAowOTkxMjU4OTgxMA0GCSqG
+SIb3DQEBCwUAA4ICAQC8XlevsaBGilZekviW2Iw133uH45qnYwr1I/vyOfQjqTn6
+jiJuthOLWNTFGPy1B8NgREpKowM2zolqDwyKOROsf7A2kwnoKE7YN6/dXsm4j5x2
+XjiH63bNLv8l/vl19VQIRONXlzx2ipM6JcAnPWJM6RKB+Qm+qdPZiK8PvTEbK64d
+LiBmfj9L4Id0FcD7oCmiGPTKjUkibs6aHS90WoZnMg3WSv8mR/0MsRa0hcZstbWf
+r8xYJ8zbEshrcBHlvW9P9WuL3CDwTBh2sE/YogkFb0epmTseWQV5fDO1H3A5GjOt
+tdS56OW4yQsg3v/+JlWn2RudtS5n787Dmp/F3SHv8fNm6HY2sHPEPOTM0pcf5ikb
+ka/E5Aq3RC0MlZB0/FfpPFVp4K7vVslxCE7x7H6D6jKUkkNYPTCML+iQSdIXnVuJ
+s3Z8tCxtPwZ8k1eX6SRWFWYXD3VVqQt9Ocn0Piq66FaniviUjyNMPoFvUclYfPAR
+ujyPZ4+V+V3O+WDXfTAfkGJpC1HLJyy/Pf2FSGDUvwLkelbeECDZWPLHTb3CAn3F
+vRGYYKE8bdClFl2axyJMeDwR7r2p9aufmEgxkbYuM10Q963duOdFnBUfJsP7bEtQ
+4W4E/6z3IkkEV1D751d9VjcQuIjRlufBzvUAAY50N/dT1E21/qkxMWMsewKRow==</X509Certificate>
+</X509Data>
+</KeyInfo>
+</Signature></factura>

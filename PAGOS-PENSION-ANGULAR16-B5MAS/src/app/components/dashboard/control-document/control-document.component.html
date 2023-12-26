@@ -1,0 +1,95 @@
+
+    <!-- Alert -->
+    <div
+      class="alert alert-danger"
+      *ngIf="documentos.length == 0 "
+    >
+      <i class="fe fe-info mr-1"></i> No tienes Documentos
+    </div>
+
+    <div class="card-body">
+      <div class="row">
+        <div class="col-12">
+          <canvas
+            id="myChart2"
+            width="20%"
+            height="5%"
+            style="
+              display: block;
+              box-sizing: border-box;
+            "
+          ></canvas>
+        </div>
+      </div>
+    </div>
+    <ng-container *ngIf="documentos.length != 0">
+      <ng-container >
+        <div class="row">
+          <div class="col-12 col-md-12">
+            <!-- Card -->
+            <div class="card">
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <div class="col">
+                    <!-- Title -->
+                    <h3 class="text-uppercase text-muted mb-2">
+                      Valor sin Asignar del año:
+                      <span class="h3 mb-0" style="color: black">
+                        {{ sobrante | currency:'$' }}
+                      </span>
+                    </h3>
+
+                    <!-- Heading -->
+                  </div>
+                </div>
+                <!-- / .row -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+    
+    <div class="card-body" *ngIf="documentos.length != 0">
+      <div class="table-responsive">
+        <table class="table table-sm table-nowrap card-table table-hover">
+          <thead>
+            <th>N°</th>
+            <th>Documento</th>
+            <th>Cuenta</th>
+            <th>Valor</th>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="
+                let item of documentos
+                  | slice
+                    : (page - 1) * pageSize
+                    : (page - 1) * pageSize + pageSize;
+                let index = index
+              "
+            >
+              <td>{{ index + 1 }}</td>
+              <td>
+                {{ item.documento }}
+              </td>
+              <td>
+                {{ item.cuenta }}
+              </td>
+              <td>
+                {{ item.valor | number : "1.2" }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <ngb-pagination
+          *ngIf="documentos.length >= 1"
+          [(page)]="page"
+          [pageSize]="pageSize"
+          [maxSize]="10"
+          [rotate]="true"
+          [boundaryLinks]="true"
+          [collectionSize]="documentos.length"
+        ></ngb-pagination>
+      </div>
+    </div>

@@ -1,0 +1,642 @@
+<div class="container">
+	<div class="sidebar">
+		<app-sidebar></app-sidebar>
+	</div>
+	
+	<div class="content">
+        <div class="main-content">
+            <div class="container-fluid">
+              <div class="row justify-content-center">
+                <div class="col-md-10">
+                  <!-- Header -->
+                  <div class="header mt-md-5">
+                    <div class="header-body">
+                      <div class="row align-items-center">
+                        <div class="col">
+                          <!-- Pretitle -->
+                          <h6 class="header-pretitle">Módulo</h6>
+          
+                          <!-- Title -->
+                          <h1 class="header-title">Proveedores</h1>
+                        </div>
+                      </div>
+                      <!-- / .row -->
+                    </div>
+                  </div>
+          
+                  <!-- Alert -->
+          
+                  <div class="card mb-3 mb-lg-5">
+                    <!-- Header -->
+                    <div class="card-header">
+                      <div
+                        class="row justify-content-between align-items-center flex-grow-1"
+                      >
+                        <div class="col-lg">
+                          <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-header-title">Proveedores</h4>
+          
+                            <!-- Datatable Info -->
+                            <div id="datatableCounterInfo" style="display: none">
+                              <div class="d-flex align-items-center">
+                                <span class="fs-6 me-3">
+                                  <span id="datatableCounter">: 0</span>
+                                  Selected
+                                </span>
+                                <a
+                                  class="btn btn-outline-danger btn-sm"
+                                  href="javascript:;"
+                                >
+                                  <i class="tio-delete-outlined"></i> Delete
+                                </a>
+                              </div>
+                            </div>
+                            <!-- End Datatable Info -->
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button
+                              class="btn btn-primary"
+                              type="button"
+                              data-bs-toggle="modal"
+                              [attr.data-bs-target]="'#modalAddProv'"
+                            >
+                              Añadir
+                            </button>
+          
+                            <button
+                              class="btn btn-primary"
+                              type="button"
+                              data-bs-toggle="modal"
+                              [attr.data-bs-target]="'#modalAddProvMasivo'"
+                            >
+                              Añadir Masivo
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- FILTROS:
+                    -->
+                    <!-- End Header -->
+          
+                    <!-- Table -->
+                    <div class="table-responsive datatable-custom">
+                      <div id="datatable_wrapper" class="dataTables_wrapper no-footer">
+                        <table
+                          id="datatable"
+                          class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table dataTable no-footer"
+                          data-hs-datatables-options='{
+                               "columnDefs": [{
+                                  "targets": [0, 1, 4],
+                                  "orderable": false
+                                }],
+                               "order": [],
+                               "info": {
+                                 "totalQty": "#datatableWithPaginationInfoTotalQty"
+                               },
+                               "search": "#datatableSearch",
+                               "entries": "#datatableEntries",
+                               "pageLength": 8,
+                               "isResponsive": false,
+                               "isShowPaging": false,
+                               "pagination": "datatablePagination"
+                             }'
+                          role="grid"
+                          aria-describedby="datatable_info"
+                        >
+                          <thead class="thead-light">
+                            <tr role="row">
+                              <th
+                                scope="col"
+                                class="table-column-pe-0 sorting_disabled"
+                                rowspan="1"
+                                colspan="1"
+                                aria-label=""
+                                style="width: 32.4688px"
+                              >
+                                <div class="form-check">
+                                  <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value=""
+                                    id="datatableCheckAll"
+                                  />
+                                  <label
+                                    class="form-check-label"
+                                    for="datatableCheckAll"
+                                  ></label>
+                                </div>
+                              </th>
+                              <th
+                                class="table-column-ps-0 sorting_disabled"
+                                rowspan="1"
+                                colspan="1"
+                                aria-label="Full name"
+                                style="width: 218.422px"
+                              >
+                                Nombres
+                              </th>
+                              <th
+                                class="sorting"
+                                tabindex="0"
+                                aria-controls="datatable"
+                                rowspan="1"
+                                colspan="1"
+                                aria-label="Status: activate to sort column ascending"
+                                style="width: 111.312px"
+                              >
+                                Status
+                              </th>
+                              <th
+                                class="sorting"
+                                tabindex="0"
+                                aria-controls="datatable"
+                                rowspan="1"
+                                colspan="1"
+                                aria-label="Type: activate to sort column ascending"
+                                style="width: 144.391px"
+                              >
+                                Cedula/RUC
+                              </th>
+                              <th
+                                class="sorting_disabled"
+                                rowspan="1"
+                                colspan="1"
+                                aria-label="Email"
+                                style="width: 152.719px"
+                              >
+                                Dirección
+                              </th>
+                              <th
+                                class="sorting"
+                                tabindex="0"
+                                aria-controls="datatable"
+                                rowspan="1"
+                                colspan="1"
+                                aria-label="Signed up: activate to sort column ascending"
+                                style="width: 116.016px"
+                              >
+                                Teléfono
+                              </th>
+                              <th
+                                class="sorting"
+                                tabindex="0"
+                                aria-controls="datatable"
+                                rowspan="1"
+                                colspan="1"
+                                aria-label="User ID: activate to sort column ascending"
+                                style="width: 85.672px"
+                              >
+                                Email
+                              </th>
+                            </tr>
+                          </thead>
+          
+                          <tbody>
+                            <tr
+                              role="row"
+                              class="odd"
+                              *ngFor="
+                                let proveedor of proveedor_arr
+                                  | slice
+                                    : (page - 1) * pageSize
+                                    : (page - 1) * pageSize + pageSize
+                              "
+                            >
+                              <td class="table-column-pe-0">
+                                <div class="form-check">
+                                  <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value=""
+                                    id="usersDataCheck2"
+                                  />
+                                  <label
+                                    class="form-check-label"
+                                    for="usersDataCheck2"
+                                  ></label>
+                                </div>
+                              </td>
+                              <td class="table-column-ps-0">
+                                <a
+                                  class="d-flex align-items-center"
+                                  href="./user-profile.html"
+                                >
+                                  <div class="flex-shrink-0">
+                                    <div class="avatar avatar-sm avatar-circle">
+                                      <img
+                                        class="avatar-img"
+                                        src="../../assets/img/01.jpg"
+                                        alt="Image Description"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div class="flex-grow-1 ms-3">
+                                    <h5 class="text-inherit mb-0">
+                                      {{ proveedor.nombre }}{{ proveedor.apellido }}
+                                      <i
+                                        class="bi-patch-check-fill text-primary"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        aria-label="Top endorsed"
+                                        data-bs-original-title="Top endorsed"
+                                      >
+                                      </i>
+                                    </h5>
+                                  </div>
+                                </a>
+                              </td>
+                              <td>
+                                <span class="legend-indicator bg-success"></span
+                                >{{ proveedor.estado }}
+                              </td>
+                              <td>{{ proveedor.ruc }}</td>
+                              <td>{{ proveedor.direccion }}</td>
+                              <td>{{ proveedor.telefono }}</td>
+                              <td>{{ proveedor.email }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!-- End Table -->
+          
+                    <!-- Footer -->
+                    <div class="card-footer">
+                      <!-- Pagination -->
+                      <div
+                        class="row justify-content-center justify-content-sm-between align-items-sm-center"
+                      >
+                        <div class="col-sm mb-2 mb-sm-0">
+                          <div
+                            class="d-flex justify-content-center justify-content-sm-start align-items-center"
+                          >
+                            <span class="me-2">Showing: {{ pageSize }} </span>
+          
+                            <!-- Select -->
+                            <div class="tom-select-custom">
+                              <select
+                                id="datatableEntries"
+                                [(ngModel)]="selectedPageSize"
+                                class="js-select form-select form-select-borderless w-auto tomselected ts-hidden-accessible"
+                                autocomplete="off"
+                                data-hs-tom-select-options='{
+                                        "searchInDropdown": false,
+                                        "hideSearch": true
+                                      }'
+                                tabindex="-1"
+                                (ngModelChange)="onPageSizeChange()"
+                              >
+                                <option value="4">4</option>
+                                <option value="6">6</option>
+                                <option value="8">8</option>
+                                <option value="12">12</option>
+                              </select>
+                            </div>
+                            <!-- End Select -->
+          
+                            <span class="text-secondary me-2">of</span>
+          
+                            <!-- Pagination Quantity -->
+                            <span id="datatableWithPaginationInfoTotalQty">{{
+                              proveedores.length
+                            }}</span>
+                          </div>
+                        </div>
+                        <!-- End Col -->
+          
+                        <div class="col-sm-auto">
+                          <ngb-pagination
+                            *ngIf="proveedor_arr.length >= 1"
+                            [(page)]="page"
+                            [pageSize]="pageSize"
+                            [maxSize]="10"
+                            [rotate]="true"
+                            [boundaryLinks]="true"
+                            [collectionSize]="collectionSize"
+                          ></ngb-pagination>
+                        </div>
+                        <!-- End Col -->
+                      </div>
+                      <!-- End Pagination -->
+                    </div>
+                    <!-- End Footer -->
+                  </div>
+          
+                  <div
+                    class="modal fade"
+                    id="modalAddProvMasivo"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
+                      role="documentrubro"
+                    >
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <!-- Title -->
+                          <h4 class="card-header-title">Adjunto tu archivo CSV</h4>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
+                        </div>
+                        <div class="modal-body">
+                          <input
+                            type="file"
+                            class="form-control-file custom-file-input"
+                            id="fileInput"
+                            style="display: none"
+                            accept=".csv,.xlsx"
+                            (change)="onFileChange($event)"
+                          />
+                          <div #dropZone ngx-file-drop class="ratio ratio-4x3">
+                            <ngx-file-drop
+                              (onFileDrop)="onFileDrop($event)"
+                              [allowedFileTypes]="['csv', 'xlsx']"
+                              [dragOverClass]="'file-drop-target'"
+                              style="height: 100%"
+                            >
+                              <ng-template
+                                ngx-file-drop-content-tmp
+                                let-openFileSelector="openFileSelector"
+                              >
+                                <div class="row">
+                                  <div class="file-drop-container" style="height: 100%">
+                                    <div class="file-drop-message" style="height: 100%">
+                                      <div class="container">
+                                        <div
+                                          class="row align-items-center"
+                                          style="text-align: center"
+                                        >
+                                          <h2>Arrastra y suelta un archivo aquí</h2>
+                                        </div>
+          
+                                        <div
+                                          class="row align-items-center"
+                                          style="text-align: center"
+                                        >
+                                          <div class="col"></div>
+                                          <div class="col">
+                                            <img
+                                              src="../../assets/img/df7da3c208654b4766e2.svg"
+                                            />
+                                          </div>
+                                          <div class="col">
+                                            <img
+                                              src="../../assets/img/22df49cc5ff888ef9788.svg"
+                                            />
+                                          </div>
+                                          <div class="col"></div>
+                                        </div>
+                                        <div class="row align-items-center">
+                                          <span style="text-align: center">o</span>
+                                        </div>
+                                        <div class="row align-items-center">
+                                          <div
+                                            class="custom-file"
+                                            style="text-align: center"
+                                          >
+                                            <button
+                                              class="btn btn-primary"
+                                              (click)="seleccionarArchivo()"
+                                            >
+                                              Selecciona un archivo
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </ng-template>
+                            </ngx-file-drop>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="modal fade"
+                    id="modalErrados"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                      role="documentrubro"
+                    >
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <!-- Title -->
+                          <h4 class="card-header-title">
+                            Filas que no coninciden: {{ proveedores_erro.length }}
+                          </h4>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
+                        </div>
+                        <div class="modal-content">
+                          <button
+                            class="btn btn-primary"
+                            (click)="descargar_correccion()"
+                          >
+                            Descargar archivo
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+          
+                  <div
+                    class="modal fade"
+                    id="modalGuardar"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                      role="documentrubro"
+                    >
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <!-- Title -->
+                          <h4 class="card-header-title">
+                            Filas que coninciden: {{ proveedores.length }}
+                          </h4>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
+                        </div>
+                        <div class="modal-body">
+                          Deseas Guardar estos Proveedores? ({{ proveedores.length }})
+                        </div>
+                        <div class="modal-footer">
+                          <button class="btn btn-primary" (click)="guardarProveedor()">
+                            Guardar Proveedores
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+          
+                  <!-- Card -->
+                  <div
+                    class="modal fade"
+                    id="modalAddProv"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                      role="documentrubro"
+                    >
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <!-- Title -->
+                          <h4 class="card-header-title">Agregar nuevo Proveedor</h4>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-content">
+                          <form
+                            (ngSubmit)="guardarProveedoruno()"
+                            #proveedorForm="ngForm"
+                          >
+                            <div class="card">
+                              <div class="card-body">
+                                <div>
+                                  <label class="form-label" for="nombre">Nombre:</label>
+          
+                                  <input
+                                    class="form-control"
+                                    type="text"
+                                    id="nombre"
+                                    name="nombre"
+                                    [(ngModel)]="proveedor.nombre"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" for="nombre">Apellido:</label>
+          
+                                  <input
+                                    class="form-control"
+                                    type="text"
+                                    id="nombre"
+                                    name="nombre"
+                                    [(ngModel)]="proveedor.apellido"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" for="ruc">RUC:</label>
+                                  <input
+                                    class="form-control"
+                                    type="text"
+                                    id="ruc"
+                                    name="ruc"
+                                    [(ngModel)]="proveedor.ruc"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" for="direccion"
+                                    >Dirección:</label
+                                  >
+                                  <input
+                                    class="form-control"
+                                    type="text"
+                                    id="direccion"
+                                    name="direccion"
+                                    [(ngModel)]="proveedor.direccion"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" for="telefono"
+                                    >Teléfono:</label
+                                  >
+                                  <input
+                                    class="form-control"
+                                    type="text"
+                                    id="telefono"
+                                    name="telefono"
+                                    [(ngModel)]="proveedor.telefono"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" for="email">Email:</label>
+                                  <input
+                                    class="form-control"
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    [(ngModel)]="proveedor.email"
+                                    required
+                                  />
+                                </div>
+                              </div>
+                              <div class="card-footer">
+                                <button
+                                  class="btn btn-primary btn-shadow"
+                                  type="submit"
+                                  [disabled]="!proveedorForm.valid"
+                                >
+                                  Guardar
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="modal fade"
+                    id="modalEsperar"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                      role="documentrubro"
+                    >
+                      <div class="modal-content">
+                        <div class="card-body" style="cursor: progress">
+                          <div class="row">
+                            <div class="col-12 text-center">
+                              <div
+                                class="spinner-border"
+                                style="width: 3rem; height: 3rem"
+                                role="status"
+                              >
+                                <span class="visually-hidden"></span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+          
+                        
+          
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+    </div>
+</div>

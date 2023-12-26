@@ -1,0 +1,31 @@
+
+<div class="modal-header" >
+    <h4 class="modal-title">Vincular Encabezado</h4>
+    <button type="button" class="btn-close" (click)="cerrarVentana()"></button>     
+  </div>
+  <div class="modal-body">
+    <p>Selecciona el encabezado correspondiente para cada campo del archivo:</p>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Encabezado</th>
+          <th>Nombre del Campo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let proveedor of proveedores">
+          <td>
+            <select [(ngModel)]="proveedor.encabezado" class="form-control" [class.select-rojo]="proveedor.obligatorio && !proveedor.encabezado">
+              <option value="" disabled>-- Seleccione un Encabezado --</option>
+              <option *ngFor="let encabezado of encabezados" [value]="encabezado">{{encabezado}}</option>
+            </select>
+          </td>
+          <td>{{proveedor.label}} <i class="bi bi-regex" *ngIf="proveedor.obligatorio"></i> </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cerrarVentana()">Cerrar</button>
+    <button type="button" class="btn btn-primary" (click)="guardar()">Guardar</button>
+  </div>
