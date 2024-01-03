@@ -220,7 +220,13 @@ export class EditStudentsComponent implements OnInit {
 			);
 		});
 	}
-
+	buscar_usado(){
+		let val  = true;
+		val = this.arr_etiquetas.some((element: any) => {
+			return element.usado !== 0;
+		});
+		return val;
+	}
 	agregar_etiqueta() {
 		let arr_label = this.new_etiqueta.split('_');
 		var ir: any = arr_label[3];

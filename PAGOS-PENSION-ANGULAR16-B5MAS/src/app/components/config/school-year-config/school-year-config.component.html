@@ -493,67 +493,212 @@
                                         </div>
                                         <div class="card-body">                                           
                                             <form [formGroup]="configForm">
-                                                
-                                                <!-- Agregar cursos -->
+                                                <!-- MODALIDAD POR CURSOS-->
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="card-header-title">
+                                                            <div class="row">
+                                                                <div class="col-lg-8">
+                                                                    <h3>Modalidad por Cursos y Paralelos</h3>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <button type="button" class="btn btn-primary" (click)="agregarCurso()">Nuevo</button>
+                                                                </div>
+                                                            </div>                                                          
+                                                        </div>
+                                                        <div class="card-body">
+                                                           
+                                                            <table class="table table-hover">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">N°</th>
+                                                                        <th scope="col">Curso</th>
+                                                                        <th scope="col">Paralelo</th>
+                                                                        <th></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody *ngIf="cursos.controls">
+                                                                    <tr *ngFor="let curso of cursos.controls; let i = index">
+                                                                        <td>{{ i + 1 }}</td>
+                                                                        <td><label class="col-form-label" *ngIf="curso.value.nombre">{{curso.value.nombre}}</label></td>
+
+                                                                        <td>
+                                                                            <ng-container *ngIf="paralelosArray(i).controls">
+                                                                                <ng-container *ngFor="let paralelo of paralelosArray(i).controls; let j = index" >
+                                                                                    <label class="col-form-label"*ngIf="paralelo.value.nombre">{{paralelo.value.nombre}}</label>
+                                                                                    <label *ngIf="paralelosArray(i).controls.length>1&&j!=paralelosArray(i).controls.length-1">/</label>
+                                                                                </ng-container>
+                                                                            </ng-container>                                                                            
+                                                                            
+                                                                        </td>
+
+                                                                        <td>
+                                                                            <button type="button" class="btn btn-success" (click)="agregarParalelo(i)">
+                                                                                <i class="bi bi-plus-lg"></i>
+                                                                            </button>
+                                                                            <button class="btn btn-warning" 
+                                                                            type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#exampleModal-'+i">
+                                                                                <i class="bi bi-pen"></i>
+                                                                            </button>
+                                                                        </td>
+
+                                                                        <div class="modal fade" id="exampleModal-{{i}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                                            <div class="modal-dialog">
+                                                                              <div class="modal-content">
+                                                                                <div class="modal-header">
+                                                                                  <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Cuso ({{i+1}}): {{curso.value.nombre}}</h1>
+                                                                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                                </div>
+                                                                                <div class="modal-body">
+                                                                                    <!-- Agregar cursos -->
+                                                                                    <div formArrayName="cursos">
+                                                                                        <div *ngFor="let curso of cursos.controls; let imodal = index">
+                                                                                            <div [formGroupName]="imodal" *ngIf="imodal==i">
+                                                                                                <div class="input-group mb-3">
+                                                                                                    <label class="col-form-label">Curso:</label>
+                                                                                                    <input type="text" class="form-control" formControlName="nombre" placeholder="Nombre del curso"
+                                                                                                    aria-label="Nombre del curso" aria-describedby="button-addon2">
+                                                                                                    <button type="button" class="btn btn-info" (click)="agregarParalelo(i)">Agregar Paralelo</button>
+                                                                                                  </div>
+
+                                                                                               
+                                                                                                <div formArrayName="paralelos" class="card-body">
+                                                                                                    <div *ngFor="let paralelo of paralelosArray(imodal).controls; let j = index">
+                                                                                                        <div [formGroupName]="j">
+                                                                                                            <label class="col-form-label">Paralelo {{ j + 1 }}</label>
+                                                                                                            <input class="form-control" formControlName="nombre" placeholder="Nombre del paralelo" />
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="modal-footer">
+                                                                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                                                </div>
+                                                                              </div>
+                                                                            </div>
+                                                                          </div>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                               
+
+                                                <!-- Agregar cursos 
                                                 <div formArrayName="cursos">
                                                     <div *ngFor="let curso of cursos.controls; let i = index">
                                                         <div [formGroupName]="i">
-                                                          <label>Curso {{ i + 1 }}</label>
-                                                          <input formControlName="nombre" placeholder="Nombre del curso" />
+                                                          <label class="col-form-label">Curso {{ i + 1 }}</label>
+                                                          <input class="form-control" formControlName="nombre" placeholder="Nombre del curso" />
                                                           
                                                           <div formArrayName="paralelos">
                                                             <div *ngFor="let paralelo of paralelosArray(i).controls; let j = index">
                                                               <div [formGroupName]="j">
-                                                                <label>Paralelo {{ j + 1 }}</label>
-                                                                <input formControlName="nombre" placeholder="Nombre del paralelo" />
+                                                                <label class="col-form-label">Paralelo {{ j + 1 }}</label>
+                                                                <input class="form-control" formControlName="nombre" placeholder="Nombre del paralelo" />
                                                               </div>
                                                             </div>
-                                                            <button type="button" (click)="agregarParalelo(i)">Agregar Paralelo</button>
+                                                            <button type="button" class="btn btn-secondary" (click)="agregarParalelo(i)">Agregar Paralelo</button>
                                                           </div>
                                                         </div>
                                                       </div>
-                                                    <button type="button" (click)="agregarCurso()">Agregar Cursos</button>
+                                                    <button type="button" class="btn btn-primary" (click)="agregarCurso()">Agregar Cursos</button>
+                                                </div>
+                                                -->
+
+                                                <!-- Agregar módulos únicos -->
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="card-header-title">
+                                                            <div class="row">
+                                                                <div class="col-lg-8">
+                                                                    <h3>Modalidad por Modulos Únicos</h3>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <button type="button" class="btn btn-primary" (click)="agregarModuloUnico()">Nuevo</button>
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div formArrayName="modulosUnicos">
+                                                                <div *ngFor="let modulo of modulosUnicos.controls; let i = index">
+                                                                  <div [formGroupName]="i">
+                                                                    <label class="col-form-label">Módulo Único {{ i + 1 }}</label>
+                                                                    <input class="form-control" formControlName="nombre" placeholder="Nombre del módulo único" />
+                                                                    <!-- Otros campos de ModuloUnicoSchema según sea necesario -->
+                                                                  </div>
+                                                                </div>
+                                                                
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                   
                                                 </div>
                                                 
-                                                  
-                                              
-                                                <!-- Agregar módulos únicos -->
-                                                <div formArrayName="modulosUnicos">
-                                                    <div *ngFor="let modulo of modulosUnicos.controls; let i = index">
-                                                      <div [formGroupName]="i">
-                                                        <label>Módulo Único {{ i + 1 }}</label>
-                                                        <input formControlName="nombre" placeholder="Nombre del módulo único" />
-                                                        <!-- Otros campos de ModuloUnicoSchema según sea necesario -->
-                                                      </div>
+                                              <div class="card">
+                                                <div class="card-body">
+                                                    <div class="card-header-title">
+                                                        <h3>Servicio de Emisión / Email</h3>
                                                     </div>
-                                                    <button type="button" (click)="agregarModuloUnico()">Agregar Módulo Único</button>
+                                                    <div class="card-body">
+                                                        <!-- Campos de ConexionSistemasSchema -->
+                                                        <div formGroupName="conexionSistemas">
+                                                            <label class="col-form-label">URL de conexión</label>
+                                                            <input class="form-control" formControlName="url" placeholder="URL de conexión" />
+                                                            <!-- Otros campos de ConexionSistemasSchema según sea necesario -->
+                                                        </div>
+                                                        
+                                                        <!-- Campos de ConfigSMTPSchema -->
+                                                        <div formGroupName="configSMTP">
+                                                            <label class="col-form-label">Correo</label>
+                                                            <input class="form-control" formControlName="correo" placeholder="Correo" />
+                                                            <label class="col-form-label">Token</label>
+                                                            <input class="form-control" formControlName="token" placeholder="Token" />
+                                                            <!-- Otros campos de ConfigSMTPSchema según sea necesario -->
+                                                        </div>
+                                                    </div>
                                                 </div>
+                                              </div>
+                                                
                                               
-                                                <!-- Campos de ConexionSistemasSchema -->
-                                                <div formGroupName="conexionSistemas">
-                                                  <label>URL de conexión</label>
-                                                  <input formControlName="url" placeholder="URL de conexión" />
-                                                  <!-- Otros campos de ConexionSistemasSchema según sea necesario -->
-                                                </div>
-                                              
-                                                <!-- Campos de ConfigSMTPSchema -->
-                                                <div formGroupName="configSMTP">
-                                                  <label>Correo</label>
-                                                  <input formControlName="correo" placeholder="Correo" />
-                                                  <label>Token</label>
-                                                  <input formControlName="token" placeholder="Token" />
-                                                  <!-- Otros campos de ConfigSMTPSchema según sea necesario -->
-                                                </div>
-                                              
-                                                <!-- Campos de ConfigEncabezadoPieSchema -->
-                                                <div formGroupName="configEncabezadoPie">
-                                                  <label>Encabezado</label>
-                                                  <input formControlName="encabezado" placeholder="Encabezado" />
-                                                  <label>Pie de Página</label>
-                                                  <input formControlName="piePagina" placeholder="Pie de Página" />
-                                                  <!-- Otros campos de ConfigEncabezadoPieSchema según sea necesario -->
-                                                </div>
-                                              
+                                                   <!-- Campos de ConfigEncabezadoPieSchema -->
+                                                    <div formGroupName="configEncabezadoPie">
+                                                        <label>Encabezado</label>
+                                                        <editor apiKey="1114vt4jrew4c1wlpnxy38e06x3h22hrrn3x7f8l3urhaxgk"
+                                                        formControlName="encabezado"
+                                                        [init]="{
+                                                            height: 200,
+                                                            menubar: true,
+                                                            plugins: ['link', 'paste', 'table','code'],
+                                                            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table',
+                                                            content_css: [
+                                                            '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+                                                            ]
+                                                        }"
+                                                        ></editor>
+                                                    
+                                                        <label>Pie de Página</label>
+                                                        <editor apiKey="1114vt4jrew4c1wlpnxy38e06x3h22hrrn3x7f8l3urhaxgk"
+                                                        formControlName="piePagina"
+                                                        [init]="{
+                                                            height: 200,
+                                                            menubar: true,
+                                                            plugins: ['link', 'paste', 'table','code'],
+                                                            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table',
+                                                            content_css: [
+                                                            '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+                                                            ]
+                                                        }"
+                                                        ></editor>
+                                                    
+                                                        <!-- Otros campos de ConfigEncabezadoPieSchema según sea necesario -->
+                                                    </div>
+  
+  
                                                 <!-- Botón para guardar configuración -->
                                                 <button type="button" (click)="guardarConfiguracion()">Guardar Configuración</button>
                                               </form>

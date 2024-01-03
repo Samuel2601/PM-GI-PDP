@@ -54,6 +54,8 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { GraficSpComponent } from './components/dashboard/stundes-payments/grafic-sp/grafic-sp.component';
 import { ReporPensionComponent } from './components/dashboard/stundes-payments/repor-pension/repor-pension.component';
 
+import { EditorModule } from '@tinymce/tinymce-angular';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -90,7 +92,8 @@ import { ReporPensionComponent } from './components/dashboard/stundes-payments/r
     GraficSpComponent,
     ReporPensionComponent
   ],
-  imports: [    
+  imports: [  
+    EditorModule,  
     NgxFileDropModule,
     BrowserModule,
     AppRoutingModule,

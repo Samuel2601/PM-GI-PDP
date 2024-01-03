@@ -3,6 +3,7 @@ import { AdminService } from 'src/app/service/admin.service';
 import { ConfigService } from 'src/app/service/config.service';
 import { FormGroup, FormBuilder, Validators, FormArray, AbstractControl } from '@angular/forms';
 import iziToast from 'izitoast';
+
 declare var $: any;
 
 @Component({
@@ -292,14 +293,24 @@ export class SchoolYearConfigComponent implements OnInit {
 	  getParalelosArray(curso: AbstractControl): FormArray {
 		return curso.get('paralelos') as FormArray;
 	  }
-	  
-	  
-
+	  listacurso=[
+		'1er',
+		'2do',
+		'3ro',
+		'4to',
+		'5to',
+		'6to',
+		'7mo',
+		'8vo',
+		'9no',
+		'10mo',
+		'11vo'
+	  ]
 
 	// Función para agregar un nuevo curso al formulario
 	agregarCurso(): void {
 		this.cursos.push(this.fb.group({
-		  nombre: [''],
+		  nombre: [this.listacurso.find((element,index)=>index==this.cursos.length)||(this.cursos.length+1).toString()+'vo'],
 		  paralelos: this.fb.array([])
 		  // Otros campos de CursoSchema según sea necesario
 		}));
@@ -315,9 +326,12 @@ export class SchoolYearConfigComponent implements OnInit {
 	  }
 	  agregarParalelo(cursoIndex: number): void {
 		const paralelos = (this.cursos.controls[cursoIndex].get('paralelos') as FormArray);
-		
+
+		// Obtén la letra siguiente en la secuencia
+		const siguienteLetra = String.fromCharCode(65 + paralelos.length); // 65 es el código ASCII para 'A'
+
 		paralelos.push(this.fb.group({
-			nombre: ['']
+			nombre: [siguienteLetra]
 			// Otros campos de ModuloUnicoSchema según sea necesario
 		  }));
 		console.log('Nuevo paralelo añadido:', paralelos.value);

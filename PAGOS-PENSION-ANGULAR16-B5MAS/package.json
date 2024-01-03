@@ -21,6 +21,7 @@
     "@auth0/angular-jwt": "^5.1.2",
     "@ng-bootstrap/ng-bootstrap": "^14.2.0",
     "@popperjs/core": "^2.11.7",
+    "@tinymce/tinymce-angular": "^7.0.0",
     "@types/chart.js": "^2.9.37",
     "chart.js": "^4.3.0",
     "file-saver": "^2.0.5",

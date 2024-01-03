@@ -458,14 +458,14 @@ armado_matriz(val:any,costosextrapagos:any,costopension:any,costomatricula:any){
                               });
                               this.pagopension.push({
                                 date: "Matricula",
-                                valor: valor,
+                                valor: this.redondearNumeros(valor,2),
                                 tipo: tipo,
-                                porpagar: porpagar,
+                                porpagar: this.redondearNumeros(porpagar,2),
                               });
-                              this.porpagar+=porpagar;
-                              this.pagado +=valor;
-                              auxpagos.data[1]+=porpagar;
-                              auxpagos.data[0]+= valor;
+                              this.porpagar+= this.redondearNumeros(porpagar,2);
+                              this.pagado += this.redondearNumeros(valor,2);
+                              auxpagos.data[1]+= this.redondearNumeros(porpagar,2);
+                              auxpagos.data[0]+= this.redondearNumeros(valor,2);
                             }else{
                               porpagar=0;
                               valor=0;
@@ -500,17 +500,17 @@ armado_matriz(val:any,costosextrapagos:any,costopension:any,costomatricula:any){
                             });
                             this.pagopension.push({
                               date: new Date(f).setMonth(new Date(f).getMonth() + i - 1),
-                              valor: valor,
+                              valor: this.redondearNumeros(valor,2),
                               tipo: tipo,
-                              porpagar: porpagar,
+                              porpagar: this.redondearNumeros(porpagar,2),
                             });
   
-                            if(i<= this.nmt){
-                              this.porpagar+=porpagar;
-                              this.pagado +=valor;
-                              auxpagos.data[1]+=porpagar;
-                              auxpagos.data[0]+= valor;
-                            }
+                            
+                              this.porpagar+= this.redondearNumeros(porpagar,2);
+                              this.pagado += this.redondearNumeros(valor,2);
+                              auxpagos.data[1]+= this.redondearNumeros(porpagar,2);
+                              auxpagos.data[0]+= this.redondearNumeros(valor,2);
+                            
                           }else{                       
                               porpagar=extrapa[i-11].valor;
                               valor = 0;
@@ -525,14 +525,14 @@ armado_matriz(val:any,costosextrapagos:any,costopension:any,costomatricula:any){
   
                               this.pagopension.push({
                                 date: extrapa[i-11].descripcion,
-                                valor: valor,
+                                valor: this.redondearNumeros(valor,2),
                                 tipo: tipo,
-                                porpagar: porpagar,
+                                porpagar: this.redondearNumeros(porpagar,2),
                               });
-                              this.porpagar+=porpagar;
-                              this.pagado +=valor;
-                              auxpagos.data[1]+=porpagar;
-                              auxpagos.data[0]+= valor;
+                              this.porpagar+= this.redondearNumeros(porpagar,2);
+                              this.pagado += this.redondearNumeros(valor,2);
+                              auxpagos.data[1]+= this.redondearNumeros(porpagar,2);
+                              auxpagos.data[0]+= this.redondearNumeros(valor,2);
                           }                        
                         }
                         var result={
@@ -652,6 +652,14 @@ armado_matriz(val:any,costosextrapagos:any,costopension:any,costomatricula:any){
 
     });
   }
+}
+redondearNumeros(numero: number, decimales: number): number {
+  const factor = Math.pow(10, decimales);
+  let resultadoRedondeado=Math.round(numero * factor) / factor
+  if (Math.abs(resultadoRedondeado) < 1e-15) {
+    resultadoRedondeado = 0;
+}
+  return resultadoRedondeado;
 }
 cambiarSeleccionTodo(val:any) {
   if(val=='paralelo'){
@@ -954,6 +962,7 @@ retirados(){
 exportarcash(){
   const json:any=[]
   var j=1;
+  //console.log(j,this.pagos_estudiante,);
   this.pagos_estudiante.forEach((element:any) => {
     for (const key in element) {
       if (Object.prototype.hasOwnProperty.call(element, key)) {
@@ -962,7 +971,7 @@ exportarcash(){
           if(this.sumarcash(element2.detalle)>0 &&element2.estado!='Desactivado'){
             var auxsuma=this.sumarcash(element2.detalle)
             auxsuma= parseFloat((auxsuma).toFixed(2))*100
-            json.push({'Item':j,'Ref':'CO','Cedula':element2.dni,'Modena':'USD','Valor':auxsuma,'Ref1':'REC','Ref2':'','Ref3':'','Concepto':'PENSION DE '+ (this.meses[ new Date(new Date(this.fbeca).setMonth( new Date(this.fbeca).getMonth()+this.mcash-1)).getMonth()]).toUpperCase(),'Ref4':'C','Cedula2':element2.dni,'Alumno':element2.nombres});
+            json.push({'Item':j,'Ref':'CO','Cedula':element2.dni,'Modena':'USD','Valor':auxsuma,'Ref1':'REC','Ref2':'','Ref3':'','Concepto':'PENSION DE '+ (this.meses[ new Date(new Date(this.fbeca).setMonth( new Date(this.fbeca).getMonth()+this.mcash)).getMonth()]).toUpperCase(),'Ref4':'C','Cedula2':element2.dni,'Alumno':element2.nombres});
             j++;
           }
         });
@@ -1349,7 +1358,7 @@ getCount(name:any,name2?:any) {
   try {
   var aux=Object.assign(this.pagos_estudiante[name][name2]);
 
-    return aux.filter((o:any) => o.detalle[1].porpagar==0).length;
+    return aux.filter((o:any) => o.detalle[0].porpagar==0).length;
   } catch (error) {
   }
   
@@ -1357,7 +1366,7 @@ getCount(name:any,name2?:any) {
   getCountno(name:any,name2?:any) {
     try {
       var aux=Object.assign(this.pagos_estudiante[name][name2]);
-      return aux.filter((o:any) => o.detalle[1].porpagar!=0).length;
+      return aux.filter((o:any) => o.detalle[0].porpagar!=0).length;
     } catch (error) {
     }
 
@@ -1368,7 +1377,7 @@ getCount(name:any,name2?:any) {
     for (const key in this.pagos_estudiante[name]) {
       if (Object.prototype.hasOwnProperty.call(this.pagos_estudiante[name], key)) {
         const element = this.pagos_estudiante[name][key];
-        suma=suma+element.filter((o:any) => o.detalle[1].porpagar==0).length;
+        suma=suma+element.filter((o:any) => o.detalle[0].porpagar==0).length;
       }
     }
 
@@ -1381,7 +1390,7 @@ getCount(name:any,name2?:any) {
     for (const key in this.pagos_estudiante[name]) {
       if (Object.prototype.hasOwnProperty.call(this.pagos_estudiante[name], key)) {
         const element = this.pagos_estudiante[name][key];
-        suma=suma+element.filter((o:any) => o.detalle[1].porpagar!=0).length;
+        suma=suma+element.filter((o:any) => o.detalle[0].porpagar!=0).length;
       }
     }
 
@@ -1409,7 +1418,7 @@ getCount(name:any,name2?:any) {
   public mcash=0;
   sumarcash(valores:any){
   var suma=0;
-  for(var i=0; i<=this.mcash+1;i++){
+  for(var i=0; i<=this.mcash;i++){
     suma=valores[i].porpagar+suma;
   }
   return suma
