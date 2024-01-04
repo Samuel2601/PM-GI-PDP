@@ -43,6 +43,7 @@ var ConfigEncabezadoPieSchema = new Schema({
 });
 
 var ConfigPSchema = Schema({
+    tipo: {type:Boolean, required: true},
     cursos: [CursoSchema],  // Lista de cursos
     modulosUnicos: [ModuloUnicoSchema],  // Lista de módulos únicos sin paralelos
     conexionSistemas: ConexionSistemasSchema,  // Información de conexión con otros sistemas

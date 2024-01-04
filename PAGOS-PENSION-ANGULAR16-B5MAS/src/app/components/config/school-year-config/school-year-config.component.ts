@@ -43,6 +43,7 @@ export class SchoolYearConfigComponent implements OnInit {
   	constructor(private _adminService: AdminService, private _configService: ConfigService,private fb: FormBuilder) {
 		// Inicializar el formulario con validaciones si es necesario
 		this.configForm = this.fb.group({
+			tipo:true,
 			cursos: this.fb.array([]),
 			modulosUnicos: this.fb.array([]),
 			conexionSistemas: this.fb.group({
@@ -55,12 +56,26 @@ export class SchoolYearConfigComponent implements OnInit {
 				// Otros campos de configSMTPSchema según sea necesario
 			}),
 			configEncabezadoPie: this.fb.group({
-				encabezado: [''],
+				encabezado: ['', Validators.required],
 				piePagina: ['']
 				// Otros campos de configEncabezadoPieSchema según sea necesario
 			})
 		});
 	}
+	modalidadCursosParalelos: boolean = false;
+	modalidadModulos: boolean = true;  // Puedes establecer el valor inicial según tus necesidades
+	activarModalidadCursosParalelos() {
+		this.modalidadCursosParalelos = true;
+		this.modalidadModulos = false;
+		this.configForm.get('tipo')?.setValue(true);
+	}
+	
+	activarModalidadModulos() {
+		this.modalidadCursosParalelos = false;
+		this.modalidadModulos = true;
+		this.configForm.get('tipo')?.setValue(false);
+	}
+	  
 
 	ngOnInit(): void {
 		let aux = this._configService.getConfig()as { imagen: string, identity: string, token: string , rol:string};
@@ -315,7 +330,16 @@ export class SchoolYearConfigComponent implements OnInit {
 		  // Otros campos de CursoSchema según sea necesario
 		}));
 	  }
+	  quitarCurso(cursoIndex: number): void {
+		const cursos = this.cursos;
 	  
+		if (cursos.length > cursoIndex) {
+		  cursos.removeAt(cursoIndex);
+		  console.log('Curso eliminado:', cursos.value);
+		} else {
+		  console.error('Índice de curso fuera de rango:', cursoIndex);
+		}
+	  }	  
 	
 	  // Función para agregar un nuevo módulo único al formulario
 	  agregarModuloUnico(): void {
@@ -324,6 +348,18 @@ export class SchoolYearConfigComponent implements OnInit {
 		  // Otros campos de ModuloUnicoSchema según sea necesario
 		}));
 	  }
+	  quitarModuloUnico(moduloIndex: number): void {
+		const modulosUnicos = this.modulosUnicos;
+	  
+		if (modulosUnicos.length > moduloIndex) {
+		  modulosUnicos.removeAt(moduloIndex);
+		  console.log('Módulo único eliminado:', modulosUnicos.value);
+		} else {
+		  console.error('Índice de módulo único fuera de rango:', moduloIndex);
+		}
+	  }
+	  
+
 	  agregarParalelo(cursoIndex: number): void {
 		const paralelos = (this.cursos.controls[cursoIndex].get('paralelos') as FormArray);
 
@@ -336,6 +372,18 @@ export class SchoolYearConfigComponent implements OnInit {
 		  }));
 		console.log('Nuevo paralelo añadido:', paralelos.value);
 	  } 
+
+	  quitarParalelo(cursoIndex: number, paraleloIndex: number): void {
+		const paralelos = (this.cursos.controls[cursoIndex].get('paralelos') as FormArray);
+	  
+		if (paralelos.length > paraleloIndex) {
+		  paralelos.removeAt(paraleloIndex);
+		  console.log('Paralelo eliminado:', paralelos.value);
+		} else {
+		  console.error('Índice de paralelo fuera de rango:', paraleloIndex);
+		}
+	  }
+	  
 	  
 	
 	  // Función para enviar el formulario al backend (simulado)

@@ -489,228 +489,261 @@
                                 <div class="container mt-4">
                                     <div class="card">
                                         <div class="card-header">
-                                            Información Institucional
+                                            Configuración General
                                         </div>
                                         <div class="card-body">                                           
                                             <form [formGroup]="configForm">
-                                                <!-- MODALIDAD POR CURSOS-->
-                                                <div class="card">
-                                                    <div class="card-body">
-                                                        <div class="card-header-title">
-                                                            <div class="row">
-                                                                <div class="col-lg-8">
-                                                                    <h3>Modalidad por Cursos y Paralelos</h3>
-                                                                </div>
-                                                                <div class="col-auto">
-                                                                    <button type="button" class="btn btn-primary" (click)="agregarCurso()">Nuevo</button>
-                                                                </div>
-                                                            </div>                                                          
-                                                        </div>
-                                                        <div class="card-body">
-                                                           
-                                                            <table class="table table-hover">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th scope="col">N°</th>
-                                                                        <th scope="col">Curso</th>
-                                                                        <th scope="col">Paralelo</th>
-                                                                        <th></th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody *ngIf="cursos.controls">
-                                                                    <tr *ngFor="let curso of cursos.controls; let i = index">
-                                                                        <td>{{ i + 1 }}</td>
-                                                                        <td><label class="col-form-label" *ngIf="curso.value.nombre">{{curso.value.nombre}}</label></td>
 
-                                                                        <td>
-                                                                            <ng-container *ngIf="paralelosArray(i).controls">
-                                                                                <ng-container *ngFor="let paralelo of paralelosArray(i).controls; let j = index" >
-                                                                                    <label class="col-form-label"*ngIf="paralelo.value.nombre">{{paralelo.value.nombre}}</label>
-                                                                                    <label *ngIf="paralelosArray(i).controls.length>1&&j!=paralelosArray(i).controls.length-1">/</label>
-                                                                                </ng-container>
-                                                                            </ng-container>                                                                            
-                                                                            
-                                                                        </td>
-
-                                                                        <td>
-                                                                            <button type="button" class="btn btn-success" (click)="agregarParalelo(i)">
-                                                                                <i class="bi bi-plus-lg"></i>
-                                                                            </button>
-                                                                            <button class="btn btn-warning" 
-                                                                            type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#exampleModal-'+i">
-                                                                                <i class="bi bi-pen"></i>
-                                                                            </button>
-                                                                        </td>
-
-                                                                        <div class="modal fade" id="exampleModal-{{i}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                                                            <div class="modal-dialog">
-                                                                              <div class="modal-content">
-                                                                                <div class="modal-header">
-                                                                                  <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Cuso ({{i+1}}): {{curso.value.nombre}}</h1>
-                                                                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                                </div>
-                                                                                <div class="modal-body">
-                                                                                    <!-- Agregar cursos -->
-                                                                                    <div formArrayName="cursos">
-                                                                                        <div *ngFor="let curso of cursos.controls; let imodal = index">
-                                                                                            <div [formGroupName]="imodal" *ngIf="imodal==i">
-                                                                                                <div class="input-group mb-3">
-                                                                                                    <label class="col-form-label">Curso:</label>
-                                                                                                    <input type="text" class="form-control" formControlName="nombre" placeholder="Nombre del curso"
-                                                                                                    aria-label="Nombre del curso" aria-describedby="button-addon2">
-                                                                                                    <button type="button" class="btn btn-info" (click)="agregarParalelo(i)">Agregar Paralelo</button>
-                                                                                                  </div>
-
-                                                                                               
-                                                                                                <div formArrayName="paralelos" class="card-body">
-                                                                                                    <div *ngFor="let paralelo of paralelosArray(imodal).controls; let j = index">
-                                                                                                        <div [formGroupName]="j">
-                                                                                                            <label class="col-form-label">Paralelo {{ j + 1 }}</label>
-                                                                                                            <input class="form-control" formControlName="nombre" placeholder="Nombre del paralelo" />
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                    
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="modal-footer">
-                                                                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
-                                                                                </div>
-                                                                              </div>
-                                                                            </div>
-                                                                          </div>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                               
-
-                                                <!-- Agregar cursos 
-                                                <div formArrayName="cursos">
-                                                    <div *ngFor="let curso of cursos.controls; let i = index">
-                                                        <div [formGroupName]="i">
-                                                          <label class="col-form-label">Curso {{ i + 1 }}</label>
-                                                          <input class="form-control" formControlName="nombre" placeholder="Nombre del curso" />
-                                                          
-                                                          <div formArrayName="paralelos">
-                                                            <div *ngFor="let paralelo of paralelosArray(i).controls; let j = index">
-                                                              <div [formGroupName]="j">
-                                                                <label class="col-form-label">Paralelo {{ j + 1 }}</label>
-                                                                <input class="form-control" formControlName="nombre" placeholder="Nombre del paralelo" />
-                                                              </div>
-                                                            </div>
-                                                            <button type="button" class="btn btn-secondary" (click)="agregarParalelo(i)">Agregar Paralelo</button>
-                                                          </div>
-                                                        </div>
-                                                      </div>
-                                                    <button type="button" class="btn btn-primary" (click)="agregarCurso()">Agregar Cursos</button>
-                                                </div>
-                                                -->
-
-                                                <!-- Agregar módulos únicos -->
-                                                <div class="card">
-                                                    <div class="card-body">
-                                                        <div class="card-header-title">
-                                                            <div class="row">
-                                                                <div class="col-lg-8">
-                                                                    <h3>Modalidad por Modulos Únicos</h3>
-                                                                </div>
-                                                                <div class="col-auto">
-                                                                    <button type="button" class="btn btn-primary" (click)="agregarModuloUnico()">Nuevo</button>
-                                                                </div>
-                                                            </div> 
-                                                        </div>
-                                                        <div class="card-body">
-                                                            <div formArrayName="modulosUnicos">
-                                                                <div *ngFor="let modulo of modulosUnicos.controls; let i = index">
-                                                                  <div [formGroupName]="i">
-                                                                    <label class="col-form-label">Módulo Único {{ i + 1 }}</label>
-                                                                    <input class="form-control" formControlName="nombre" placeholder="Nombre del módulo único" />
-                                                                    <!-- Otros campos de ModuloUnicoSchema según sea necesario -->
+                                                <div class="accordion" id="accordionExample">
+                                                    <div class="accordion-item">
+                                                      <h2 class="accordion-header">
+                                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                            Continuidad de Estudiante:
+                                                        </button>
+                                                      </h2>
+                                                      <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                                                        <div class="accordion-body">
+                                                            <div class="card">
+                                                                <div class="card-body">
+                                                                  <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" name="modalidad" id="modalidadCursos" [checked]="modalidadCursosParalelos" (change)="activarModalidadCursosParalelos()">
+                                                                    <label class="form-check-label" for="modalidadCursos">Cursos y Paralelos</label>
+                                                                  </div>
+                                                                  <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" name="modalidad" id="modalidadModulos" [checked]="modalidadModulos" (change)="activarModalidadModulos()">
+                                                                    <label class="form-check-label" for="modalidadModulos">Modulos</label>
                                                                   </div>
                                                                 </div>
-                                                                
+                                                              </div>
+                                                         <!-- MODALIDAD POR CURSOS-->
+                                                            <div class="card"  [hidden]="!modalidadCursosParalelos">
+                                                                <div class="card-body">
+                                                                    <div class="card-header-title">
+                                                                        <div class="row">
+                                                                            <div class="col-lg-8">
+                                                                                <h3>Modalidad por Cursos y Paralelos</h3>
+                                                                            </div>
+                                                                            <div class="col-auto">
+                                                                                <button type="button" class="btn btn-primary" (click)="agregarCurso()">Nuevo</button>
+                                                                            </div>
+                                                                        </div>                                                          
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                    
+                                                                        <table class="table table-hover">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th scope="col">N°</th>
+                                                                                    <th scope="col">Curso</th>
+                                                                                    <th scope="col">Paralelo</th>
+                                                                                    <th></th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody *ngIf="cursos.controls">
+                                                                                <tr *ngFor="let curso of cursos.controls; let i = index">
+                                                                                    <td>{{ i + 1 }}</td>
+                                                                                    <td><label class="col-form-label" *ngIf="curso.value.nombre">{{curso.value.nombre}}</label></td>
+
+                                                                                    <td>
+                                                                                        <ng-container *ngIf="paralelosArray(i).controls">
+                                                                                            <ng-container *ngFor="let paralelo of paralelosArray(i).controls; let j = index" >
+                                                                                                <label class="col-form-label"*ngIf="paralelo.value.nombre">{{paralelo.value.nombre}}</label>
+                                                                                                <label *ngIf="paralelosArray(i).controls.length>1&&j!=paralelosArray(i).controls.length-1">/</label>
+                                                                                            </ng-container>
+                                                                                        </ng-container>                                                                            
+                                                                                        
+                                                                                    </td>
+
+                                                                                    <td>
+                                                                                        <button type="button" class="btn btn-success" (click)="agregarParalelo(i)">
+                                                                                            <i class="bi bi-plus-lg"></i>
+                                                                                        </button>
+                                                                                        <button class="btn btn-warning" 
+                                                                                        type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#exampleModal-'+i">
+                                                                                            <i class="bi bi-pen"></i>
+                                                                                        </button>
+                                                                                        <button type="button" class="btn btn-danger" (click)="quitarCurso(i)"><i class="bi bi-trash3-fill"></i></button>
+
+                                                                                    </td>
+
+                                                                                    <div class="modal fade" id="exampleModal-{{i}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                                                        <div class="modal-dialog">
+                                                                                        <div class="modal-content">
+                                                                                            <div class="modal-header">
+                                                                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Editar Cuso ({{i+1}}): {{curso.value.nombre}}</h1>
+                                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                                            </div>
+                                                                                            <div class="modal-body">
+                                                                                                <!-- Agregar cursos -->
+                                                                                                <div formArrayName="cursos">
+                                                                                                    <div *ngFor="let curso of cursos.controls; let imodal = index">
+                                                                                                        <div [formGroupName]="imodal" *ngIf="imodal==i">
+                                                                                                            <div class="input-group mb-3">
+                                                                                                                <label class="col-form-label">Curso {{i+1}}:</label>
+                                                                                                                <input type="text" class="form-control" formControlName="nombre" placeholder="Nombre del curso"
+                                                                                                                aria-label="Nombre del curso" aria-describedby="button-addon2">
+                                                                                                                <button type="button" class="btn btn-info" (click)="agregarParalelo(i)"><i class="bi bi-node-plus-fill"></i></button>
+                                                                                                            </div>
+
+                                                                                                        
+                                                                                                            <div formArrayName="paralelos" class="card-body">
+                                                                                                                <div *ngFor="let paralelo of paralelosArray(imodal).controls; let j = index">
+                                                                                                                    <div [formGroupName]="j" class="input-group">
+                                                                                                                        <label class="col-form-label">Paralelo {{ j + 1 }}:</label>
+                                                                                                                        <input class="form-control" formControlName="nombre" placeholder="Nombre del paralelo" />
+                                                                                                                        <button type="button" class="btn btn-danger" (click)="quitarParalelo(i,j)"><i class="bi bi-trash3-fill"></i></button>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                                
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="modal-footer">
+                                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>                                               
+
+                                                        <!-- Agregar módulos únicos -->
+                                                            <div class="card" [hidden]="!modalidadModulos">
+                                                                <div class="card-body">
+                                                                    <div class="card-header-title">
+                                                                        <div class="row">
+                                                                            <div class="col-lg-8">
+                                                                                <h3>Modalidad por Modulos</h3>
+                                                                            </div>
+                                                                            <div class="col-auto">
+                                                                                <button type="button" class="btn btn-primary" (click)="agregarModuloUnico()">Nuevo</button>
+                                                                            </div>
+                                                                        </div> 
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <div formArrayName="modulosUnicos">
+                                                                            <div *ngFor="let modulo of modulosUnicos.controls; let i = index">
+                                                                            <div [formGroupName]="i" class="input-group">
+                                                                                <label class="col-form-label">Módulo {{ i + 1 }}: </label>
+                                                                                <input class="form-control" formControlName="nombre" placeholder="Nombre del módulo único" />
+                                                                                <!-- Otros campos de ModuloUnicoSchema según sea necesario -->
+                                                                                <button type="button" class="btn btn-danger float-end" (click)="quitarModuloUnico(i)"><i class="bi bi-trash3-fill"></i></button>
+                                                                            </div>
+                                                                            </div>
+                                                                            
+                                                                        </div>
+                                                                    </div>
+                                                                </div>                                                   
                                                             </div>
                                                         </div>
-                                                    </div>                                                   
-                                                </div>
+                                                      </div>
+                                                    </div>
+                                                    <div class="accordion-item">
+                                                      <h2 class="accordion-header">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                                          Emsión de Pagos
+                                                        </button>
+                                                      </h2>
+                                                      <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                                        <div class="accordion-body">
+                                                            <div class="card">
+                                                                <div class="card-body">
+                                                                    <div class="card-header-title">
+                                                                        <h3>Servicio de Emisión / Email</h3>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <!-- Campos de ConexionSistemasSchema -->
+                                                                        <div formGroupName="conexionSistemas">
+                                                                            <label class="col-form-label">URL de conexión</label>
+                                                                            <input class="form-control" formControlName="url" placeholder="URL de conexión" />
+                                                                            <!-- Otros campos de ConexionSistemasSchema según sea necesario -->
+                                                                        </div>
+                                                                        
+                                                                        <!-- Campos de ConfigSMTPSchema -->
+                                                                        <div formGroupName="configSMTP">
+                                                                            <label class="col-form-label">Correo</label>
+                                                                            <input class="form-control" formControlName="correo" placeholder="Correo" />
+                                                                            <label class="col-form-label">Token</label>
+                                                                            <input class="form-control" formControlName="token" placeholder="Token" />
+                                                                            <!-- Otros campos de ConfigSMTPSchema según sea necesario -->
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                    <div class="accordion-item">
+                                                      <h2 class="accordion-header">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                                          Formato de Encabezado y Pie de Página
+                                                        </button>
+                                                      </h2>
+                                                      <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                                        <div class="accordion-body">
+                                                          <!-- Campos de ConfigEncabezadoPieSchema -->
+                                                            <div formGroupName="configEncabezadoPie">
+                                                                <label>Encabezado</label>
+                                                                <editor apiKey="1114vt4jrew4c1wlpnxy38e06x3h22hrrn3x7f8l3urhaxgk"
+                                                                formControlName="encabezado"
+                                                                [init]="{
+                                                                    height: 500,
+                                                                    menubar: true,
+                                                                    plugins: ['link', 'paste', 'table','code'],
+                                                                    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table',
+                                                                    content_css: [
+                                                                    '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+                                                                    ]
+                                                                }"
+                                                                ></editor>
+                                                            
+                                                                <label>Pie de Página</label>
+                                                                <editor apiKey="1114vt4jrew4c1wlpnxy38e06x3h22hrrn3x7f8l3urhaxgk"
+                                                                formControlName="piePagina"
+                                                                [init]="{
+                                                                    height: 500,
+                                                                    menubar: true,
+                                                                    plugins: ['link', 'paste', 'table','code'],
+                                                                    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table',
+                                                                    content_css: [
+                                                                    '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+                                                                    ]
+                                                                }"
+                                                                ></editor>
+                                                            
+                                                                <!-- Otros campos de ConfigEncabezadoPieSchema según sea necesario -->
+                                                            </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+
                                                 
-                                              <div class="card">
-                                                <div class="card-body">
-                                                    <div class="card-header-title">
-                                                        <h3>Servicio de Emisión / Email</h3>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <!-- Campos de ConexionSistemasSchema -->
-                                                        <div formGroupName="conexionSistemas">
-                                                            <label class="col-form-label">URL de conexión</label>
-                                                            <input class="form-control" formControlName="url" placeholder="URL de conexión" />
-                                                            <!-- Otros campos de ConexionSistemasSchema según sea necesario -->
-                                                        </div>
-                                                        
-                                                        <!-- Campos de ConfigSMTPSchema -->
-                                                        <div formGroupName="configSMTP">
-                                                            <label class="col-form-label">Correo</label>
-                                                            <input class="form-control" formControlName="correo" placeholder="Correo" />
-                                                            <label class="col-form-label">Token</label>
-                                                            <input class="form-control" formControlName="token" placeholder="Token" />
-                                                            <!-- Otros campos de ConfigSMTPSchema según sea necesario -->
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                              </div>
                                                 
                                               
-                                                   <!-- Campos de ConfigEncabezadoPieSchema -->
-                                                    <div formGroupName="configEncabezadoPie">
-                                                        <label>Encabezado</label>
-                                                        <editor apiKey="1114vt4jrew4c1wlpnxy38e06x3h22hrrn3x7f8l3urhaxgk"
-                                                        formControlName="encabezado"
-                                                        [init]="{
-                                                            height: 200,
-                                                            menubar: true,
-                                                            plugins: ['link', 'paste', 'table','code'],
-                                                            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table',
-                                                            content_css: [
-                                                            '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
-                                                            ]
-                                                        }"
-                                                        ></editor>
-                                                    
-                                                        <label>Pie de Página</label>
-                                                        <editor apiKey="1114vt4jrew4c1wlpnxy38e06x3h22hrrn3x7f8l3urhaxgk"
-                                                        formControlName="piePagina"
-                                                        [init]="{
-                                                            height: 200,
-                                                            menubar: true,
-                                                            plugins: ['link', 'paste', 'table','code'],
-                                                            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link table',
-                                                            content_css: [
-                                                            '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
-                                                            ]
-                                                        }"
-                                                        ></editor>
-                                                    
-                                                        <!-- Otros campos de ConfigEncabezadoPieSchema según sea necesario -->
-                                                    </div>
+                                                
+                                              
+                                                   
   
   
                                                 <!-- Botón para guardar configuración -->
-                                                <button type="button" (click)="guardarConfiguracion()">Guardar Configuración</button>
+                                                <div class="card-footer">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <button type="button" class="btn btn-primary" (click)="guardarConfiguracion()">Guardar Cambios</button>
+                                                        </div>
+                                                      </div>
+                                                </div>
                                               </form>
                                               
                                         </div>
-                                        <div class="card-footer">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <button type="button" class="btn btn-primary" (click)="guardarCambios()">Guardar Cambios</button>
-                                                </div>
-                                              </div>
-                                        </div>
+                                        
                                     </div>
                                 </div>                                  
                             </div>
