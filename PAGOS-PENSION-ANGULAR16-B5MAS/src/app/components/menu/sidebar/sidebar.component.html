@@ -29,6 +29,46 @@
 
 
 <!-- ALERTA DE PAGO-->
+<!--
+<div class="modal fade"
+  id="modalcontrato"
+  data-bs-keyboard="false"
+  tabindex="-1"
+  aria-labelledby="staticBackdropLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Fin de Contratación</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger">
+          <p>
+            <i class="fe fe-info mr-1"></i>
+            Se acerca el fin de su contrato, renueve antes del  
+            <b
+              ><i >1 de Febrero del 2024.</i>
+
+            </b>
+            Evite la suspensión de sus
+            <b> Servicios y Alojamiento. </b> 
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+-->
+
+
+<!-- ALERTA DE CONTRATO-->
 <div class="modal fade"
   id="staticBackdrop"
   data-bs-keyboard="false"
@@ -56,8 +96,8 @@
               ><i *ngIf="facu">{{ facu.date | date : "fullDate" : "UTC" }}</i>
 
             </b>
-            para evitar la suspensión de sus
-            <b> Servicios de Servidores y Alojamiento. </b>
+            Evite la suspensión de sus
+            <b> Servicios y Alojamiento. </b> 
           </p>
         </div>
       </div>

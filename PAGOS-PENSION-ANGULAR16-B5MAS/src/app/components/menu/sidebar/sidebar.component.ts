@@ -112,6 +112,7 @@ export class SidebarComponent implements OnInit {
 	}
 	public facu:any;
 	buscar(){
+		//$('#modalcontrato').modal('show');
 		this._adminService.getapitoken().subscribe((response)=>{
 			if(response[0].token){
 				const token=response[0].token;

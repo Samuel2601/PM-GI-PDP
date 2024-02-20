@@ -194,6 +194,13 @@
                 >
                   CASH
                 </button>
+                <button class="rainbow-button" [ngStyle]="{ 'background-image': 'linear-gradient(to right, ' + colors.join(', ') + ')' }" id="btncash"
+                type="button"
+                data-bs-toggle="modal"
+                [attr.data-bs-target]="'#modalDesGoogle'">
+                  <i class="bi bi-google"></i>
+                  <span class="material-icons">Deshabilitar</span> Google
+                </button>
               </div>
             </div>
             <div 
@@ -241,7 +248,87 @@
                 </div>
               </div>
             </div>
-
+            <div 
+            class="modal fade"
+            id="modalDesGoogle"
+            tabindex="-1"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+          >
+            <div
+              class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+              role="documentrubro"
+            >
+              <div class="modal-content">
+                <div class="modal-header">Selecciona a los Usuario que deseas Deshabilitar</div>
+                <div class="modal-body">
+                  <div class="row">
+                    <label for="">
+                      Selecciona los meses de corte
+                    </label>
+                    <select
+                      id="numcash"
+                      class="form-select form-select-sm"
+                      [(ngModel)]="dsgoogle"
+                    >
+                      <option selected>Selecciona un mes</option>
+                      <ng-container
+                        *ngFor="let mes of arr_meses; let i = index"
+                      >
+                        <option [value]="i+1">
+                          {{ mes.nombre }} ({{i+1}})
+                        </option>
+                      </ng-container>
+                    </select>
+                    
+                  </div>
+                  <div class="row">
+                    <label for="">Puedes ingresar un valor de Acotamiento</label>
+                    <input type="number" class="form-control" [(ngModel)]="contamiento" min="0">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    class="btn btn-primary"
+                    (click)="desGooglePlus()"
+                  >
+                    Generar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div 
+          class="modal fade"
+          id="modalDesGoogleConfir"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div
+            class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+            role="documentrubro"
+          >
+            <div class="modal-content">
+              <div class="modal-header">Confirmación de Deshabilicación de usuarios</div>
+              <div class="modal-body">
+                <div class="row">
+                  <label for="">
+                    Deseas Deshabilitar a {{emails.length}} usuarios?
+                  </label>                  
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  class="btn btn-primary"
+                  (click)="desGooglePlusConfir()"
+                >
+                  Si, Deshabilitar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
             <div class="table-responsive">
               <table
                 id="detalleeconomico"

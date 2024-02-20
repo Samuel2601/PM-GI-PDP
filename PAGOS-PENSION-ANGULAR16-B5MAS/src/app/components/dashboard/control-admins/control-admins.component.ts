@@ -89,13 +89,12 @@ export class ControlAdminsComponent implements OnInit {
 		return Array.isArray(value);
 	  }	  
   filtrar_documento() {
+	this.resgistro_arr = this.resgistro_const;
 		if (this.filtro) {
 			var term = new RegExp(this.filtro.toString().trim(), 'i');
 			this.resgistro_arr = this.resgistro_const.filter(
-				(item) => term.test(item.tipo) || term.test(item.createdAt) || term.test(item.admin.email)
+				(item) => term.test(item.tipo) || term.test(item.createdAt) || term.test(item.admin?.email) || item.descripcion.includes(this.filtro)
 			);
-		} else {
-			this.resgistro_arr = this.resgistro_const;
 		}
 	}
 }

@@ -8,6 +8,7 @@ import * as XLSX from 'xlsx';
 import * as pako from 'pako';
 import { saveAs } from 'file-saver';
 import * as jspdf from 'jspdf';
+import iziToast from 'izitoast';
 declare var $: any;
 
 @Component({
@@ -334,6 +335,7 @@ armado_matriz(val:any,costosextrapagos:any,costopension:any,costomatricula:any){
           this._configService.setProgress(this._configService.getProgress()+5);
           this._adminService.listar_pensiones_estudiantes_tienda(this.token,this.config[val].anio_lectivo).subscribe((response) => {
             if(response.data){
+              console.log(response.data[0]);
               this.penest = response.data.map((item:any)=>{
                 return{
                   curso:item.curso,
@@ -348,7 +350,8 @@ armado_matriz(val:any,costosextrapagos:any,costopension:any,costomatricula:any){
                     genero:item.idestudiante.genero,
                     dni:item.idestudiante.dni,
                     _id:item.idestudiante._id,
-                    anio_desac:item.idestudiante.anio_desac
+                    anio_desac:item.idestudiante.anio_desac,
+                    email:item.idestudiante.email
                   },
                   _id:item._id,
                   val_beca:item.val_beca,
@@ -446,7 +449,7 @@ armado_matriz(val:any,costosextrapagos:any,costopension:any,costomatricula:any){
                               auxpagos.data[0]+= valor;
                             }
                             */
-                            if(elementpent.condicion_beca != 'Si' || elementpent.paga_mat==1){
+                            if(elementpent.condicion_beca != 'Si' || elementpent.paga_mat!=1){
                               valor=0;
                               porpagar=this.config[this.active].matricula;
                               tipo=i;
@@ -542,7 +545,8 @@ armado_matriz(val:any,costosextrapagos:any,costopension:any,costomatricula:any){
                           detalle: this.pagopension.slice(0, 11),
                           rubro: this.pagopension.slice(11),
                           estado: elementpent.idestudiante.estado,
-                          dni:elementpent.idestudiante.dni
+                          dni:elementpent.idestudiante.dni,
+                          email:elementpent.idestudiante.email
                         }
                         if (this.pagos_estudiante[elementpent.curso]) {
                           if (this.pagos_estudiante[elementpent.curso][elementpent.paralelo]) {
@@ -959,6 +963,119 @@ retirados(){
     this._configService.setData([this.deteconomico[3],this.deteconomico[1],this.deteconomico[2]]);
   }, 1500);
 }
+colors = ['#ea4335', '#fbbc05', '#34a853', '#4285f4'];
+currentColorIndex = 0;
+dsgoogle=0;
+contamiento=0;
+emails:any=[];
+desGooglePlus(){
+  const json:any=[]
+  //console.log(j,this.pagos_estudiante,);
+  this.emails=[];
+  this.pagos_estudiante.forEach((element:any) => {
+    for (const key in element) {
+      if (Object.prototype.hasOwnProperty.call(element, key)) {
+        const element3 = element[key];
+        element3.forEach((element2:any) => {
+          var auxsuma=this.sumardsgoogle(element2.detalle);
+          if(auxsuma>this.contamiento &&element2.estado!='Desactivado'){            
+            let combinedData:any = {
+              nombres: element2.nombres,
+              curso: element2.curso,
+              paralelo: element2.paralelo,
+              estado: element2.estado,
+              dni: element2.dni,
+              email: element2.email
+            };
+            // Desglosar los elementos de detalle y rubro en nuevos objetos
+            element2.detalle.forEach((detalleItem: any, index: number) => {
+              let fecha='';
+              if(this.isDate(detalleItem.date)){
+                fecha=this.meses[new Date(detalleItem.date).getMonth()];
+              }else{
+                fecha=detalleItem.date;
+              }
+              //combinedData['date' + index] = fecha;
+              combinedData['valor - ' + fecha] = detalleItem.valor;
+              //combinedData['tipo' + index] = detalleItem.tipo;
+              combinedData['porpagar - ' + fecha] = detalleItem.porpagar;
+              // Puedes agregar más propiedades según sea necesario
+            });
+
+            element2.rubro.forEach((rubroItem: any, index: number) => {
+              const rubroIndex = index + element2.detalle.length;
+              //combinedData['date' + rubroIndex] = rubroItem.date;
+              combinedData['valor - ' + rubroItem.date] = rubroItem.valor;
+              //combinedData['tipo' + rubroIndex] = rubroItem.tipo;
+              combinedData['porpagar - ' + rubroItem.date] = rubroItem.porpagar;
+              // Puedes agregar más propiedades según sea necesario
+            });
+
+            // Agregar los objetos desglosados al array de exportación
+            this.emails.push(combinedData);
+          }
+          
+        });
+        
+      }
+    }
+  });
+  //console.log(this.emails);
+  const worksheet = XLSX.utils.json_to_sheet(this.emails);
+  const workbook = { Sheets: { 'Estudiantes': worksheet }, SheetNames: ['Estudiantes'] };
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const fileName = 'Estudiantes'+this.meses[new Date().getMonth()]+'_'+this.pdffecha+'('+this.mcash+').xlsx';
+  saveAs(blob, fileName);
+  $('#modalDesGoogle').modal('hide');
+  $('#modalDesGoogleConfir').modal('show');  
+  }
+  desGooglePlusConfir(){
+    let auxemail:any=[];
+    this.emails.forEach((element:any) => {
+      auxemail.push(element.email)
+    });
+    /*auxemail.forEach((element:any) => {      
+      this._adminService.consultarEstadoGoogle(this.token,element).subscribe(response=>{
+        if(response.users){
+          console.log(element,response.users.suspended);
+        }
+      });
+    });*/
+    this._adminService.cambiarEstadoGoogle(this.token,
+			{array:[auxemail],estado:false}).subscribe(response=>{
+      if(response.users){
+        iziToast.success({
+          title: 'Suspendido:',
+          position: 'topRight',
+          message: '('+response.users.length +') Email',
+        });
+      }
+		});
+
+  }
+  sumardsgoogle(valores:any){
+    var suma=0;
+    for(var i=0; i<=this.dsgoogle;i++){
+      suma=valores[i].porpagar+suma;
+    }
+    return suma
+  }
+  isDate(value: any): boolean {
+    if (value instanceof Date && !isNaN(value.getTime())) {
+      return true;
+    }
+  
+    // Si el valor es un número, intentar crear una instancia de Date
+    if (typeof value === 'number') {
+      const dateObject = new Date(value);
+      return !isNaN(dateObject.getTime());
+    }
+  
+    return false;
+  }
+  
+
 exportarcash(){
   const json:any=[]
   var j=1;
@@ -968,10 +1085,10 @@ exportarcash(){
       if (Object.prototype.hasOwnProperty.call(element, key)) {
         const element3 = element[key];
         element3.forEach((element2:any) => {
-          if(this.sumarcash(element2.detalle)>0 &&element2.estado!='Desactivado'){
-            var auxsuma=this.sumarcash(element2.detalle)
-            auxsuma= parseFloat((auxsuma).toFixed(2))*100
-            json.push({'Item':j,'Ref':'CO','Cedula':element2.dni,'Modena':'USD','Valor':auxsuma,'Ref1':'REC','Ref2':'','Ref3':'','Concepto':'PENSION DE '+ (this.meses[ new Date(new Date(this.fbeca).setMonth( new Date(this.fbeca).getMonth()+this.mcash)).getMonth()]).toUpperCase(),'Ref4':'C','Cedula2':element2.dni,'Alumno':element2.nombres});
+          let con=this.sumarcash(element2.detalle);
+          if(con>0 &&element2.estado!='Desactivado'){
+            con= parseFloat((con).toFixed(2))*100
+            json.push({'Item':j,'Ref':'CO','Cedula':element2.dni,'Modena':'USD','Valor':con,'Ref1':'REC','Ref2':'','Ref3':'','Concepto':'PENSION DE '+ (this.meses[ new Date(new Date(this.fbeca).setMonth( new Date(this.fbeca).getMonth()+this.mcash)).getMonth()]).toUpperCase(),'Ref4':'C','Cedula2':element2.dni,'Alumno':element2.nombres});
             j++;
           }
         });
@@ -979,6 +1096,7 @@ exportarcash(){
       }
     }
   });
+  
  
   
   const worksheet = XLSX.utils.json_to_sheet(json);
@@ -989,6 +1107,8 @@ exportarcash(){
   saveAs(blob, fileName);
   $('#modalGenerarCash').modal('hide');
   }
+
+
   public auxdasboarestudiante: any = {};
 guardardashboard_estudiante(){
   var j=0;
@@ -1417,11 +1537,11 @@ getCount(name:any,name2?:any) {
     }
   public mcash=0;
   sumarcash(valores:any){
-  var suma=0;
-  for(var i=0; i<=this.mcash;i++){
-    suma=valores[i].porpagar+suma;
-  }
-  return suma
+    var suma=0;
+    for(var i=0; i<=this.mcash;i++){
+      suma=valores[i].porpagar+suma;
+    }
+    return suma
   }
   onCash(): void {
     this.mcash=Number(this.mcash);

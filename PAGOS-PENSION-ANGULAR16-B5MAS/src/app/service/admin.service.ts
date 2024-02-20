@@ -19,7 +19,21 @@ export class AdminService {
 		});
 		return this._http.post(this.url + 'agregar_ctacontable', data, { headers: headers });
 	}
-
+	cambiarEstadoGoogle( token: any,data: any):Observable<any>{
+		let headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			Authorization: token,
+		});
+		return this._http.post(this.url + 'cambiarEstadoGoogle', data,{ headers: headers });
+	}
+	
+	consultarEstadoGoogle( token: any,id: any):Observable<any>{
+		let headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			Authorization: token,
+		});
+		return this._http.get(this.url + 'consultarEstadoGoogle/' + id,{ headers: headers });
+	}
 	agregar_proveedor( token: any,data: any):Observable<any>{
 		let headers = new HttpHeaders({
 			'Content-Type': 'application/json',

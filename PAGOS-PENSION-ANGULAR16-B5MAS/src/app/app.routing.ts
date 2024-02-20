@@ -78,8 +78,8 @@ const appRoute: Routes = [
 		canActivate: [AuthGuard],
 	},
 	
-	{ path: 'egresos', component: DischargeComponent, canActivate: [AuthGuard] },
-	{ path: 'proveedores', component: SupplierComponent, canActivate: [AuthGuard] },
+	//{ path: 'egresos', component: DischargeComponent, canActivate: [AuthGuard] },
+	//{ path: 'proveedores', component: SupplierComponent, canActivate: [AuthGuard] },
 
 	{ path: 'documentos', component: IndexDocumentComponent, canActivate: [AuthGuard] },
 	//{path: 'documentos/create', component: CreateDocumentoComponent, canActivate:[AuthGuard]},

@@ -93,7 +93,7 @@ export class IndexStudentsComponent implements OnInit {
 				this.router.navigate(['/configuracion']);
 			} else {				
 				this.config_const = response.data[0];
-				console.log(this.config_const);
+				//console.log(this.config_const);
 				this._adminService.obtener_admin(aux, this.token).subscribe((response) => {
 
 					if(response.data){
@@ -120,7 +120,7 @@ export class IndexStudentsComponent implements OnInit {
 		this.estudiantes = [];
 		this.progressBarService.setProgress(this.progressBarService.getProgress()+25);
 		this._adminService.listar_estudiantes_tienda(this.token).subscribe((response) => {
-			console.log(response);
+			//console.log(response);
 			this.estudiantes_const = response.data;
 			this.estudiantes = [];
 			this.progressBarService.setProgress(this.progressBarService.getProgress()+25);
@@ -366,7 +366,7 @@ onFileChange(event:any) {
       const csvData = reader.result;
       if(csvData){
         const parsedData = Papa.parse(csvData.toString(), { header: true });        
-        console.log(parsedData);
+        //console.log(parsedData);
         this.encabezados=parsedData.meta.fields;
         //console.log(this.encabezados)
         this.abrirVentana(parsedData);
@@ -474,7 +474,7 @@ onFileChange(event:any) {
       $('#modalGuardar').modal('show');
     }
 
-		console.log("Validos",this.proveedores);
+		//console.log("Validos",this.proveedores);
 		console.log("Erroneos",this.proveedores_erro);
 	}
 	cerrar_ventana(){
@@ -495,7 +495,7 @@ onFileChange(event:any) {
 			const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
 			fileEntry.file((file: File) => {
 			  this.validacion(file);
-			  console.log(file);
+			  //console.log(file);
 			});
 		  }
 		}
@@ -608,6 +608,38 @@ onFileChange(event:any) {
 		});
 		this.load_data_est = false;
 		this.recarga();
+	}
+	GoogleSuspend(email:string,id:string){
+		this._adminService.cambiarEstadoGoogle(this.token,
+			{array:[email],estado:!this.infouser.suspended}).subscribe(response=>{
+			if(response.users){
+				$('#suspend-' + id).modal('hide');
+				let titulo='Reactivado:';
+				if(!this.infouser.suspended){
+					titulo='Suspendido:';
+				}
+				iziToast.success({
+					title: titulo,
+					position: 'topRight',
+					message: response.users[0].userEmail,
+				});
+			}			
+		});
+	}
+	infouser:any={};
+	loadinfouser=true;
+	Googlefind(email:string,id:string){
+		this.infouser={};
+		this.loadinfouser=true;
+		this._adminService.consultarEstadoGoogle(this.token,email).subscribe(response=>{
+			//console.log(response);
+			$('#suspend-' + id).modal('show');
+			if(response.users){
+				this.infouser=response.users;
+				this.loadinfouser=false;
+				
+			}			
+		});
 	}
 	filtrar_estudiante() {
 		this.load_data_est = true;

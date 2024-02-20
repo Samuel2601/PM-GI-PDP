@@ -224,7 +224,7 @@ export class ShowPaymentsComponent implements OnInit {
 			this._adminService
 				.marcar_finalizado_orden(this.pago._id, this.registro, this.token)
 				.subscribe((response) => {
-					console.log(response);
+					//console.log(response);
 					if (response.message) {
 						iziToast.info({
 							title: 'RESP API:',
@@ -416,7 +416,7 @@ export class ShowPaymentsComponent implements OnInit {
 			console.log("sin link");
 		}*/
 		//console.log('registro', this.registro);
-		console.log(this.registro);
+		//console.log(this.registro);
 	}
 	facturar_electronica() {
 		try {

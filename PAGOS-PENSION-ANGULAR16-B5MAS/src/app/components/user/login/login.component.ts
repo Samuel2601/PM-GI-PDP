@@ -102,7 +102,7 @@ export class LoginComponent implements OnInit {
 							iziToast.error({
 								title: 'ERROR USER',
 								position: 'topRight',
-								message: response.message,
+								message: response.message||response.messages,
 							});
 						}
 					},

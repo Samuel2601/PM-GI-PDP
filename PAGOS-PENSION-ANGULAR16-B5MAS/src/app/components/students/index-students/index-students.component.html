@@ -1,11 +1,11 @@
-<div class="container">
+<div class="container-xl">
 	<div class="sidebar">
 		<app-sidebar></app-sidebar>
 	</div>
 	
-	<div class="content">
+	<div class="content" >
 		<div class="container-fluid" >
-			<div class="row justify-content-center" >
+			<div class="row" >
 				<div class="col-lg-12">
 					<!-- Header -->
 					<div class="header mt-md-5">
@@ -17,6 +17,7 @@
 	
 									<!-- Title -->
 									<h1 class="header-title">Estudiantes</h1>
+									
 								</div>
 							</div>
 							<!-- / .row -->
@@ -256,7 +257,7 @@
 										></button>
 										</div>
 										<div class="modal-body">
-										Deseas Guardar estos Proveedores? ({{ proveedores.length }})
+										Deseas Guardar estos Estudiantes? ({{ proveedores.length }})
 										</div>
 										<div class="modal-footer">
 											<button type="button" class="btn btn-primary" (click)="subir_estudiante()">Guardar</button>
@@ -426,6 +427,13 @@
 																		data-bs-toggle="modal"
 																		[attr.data-bs-target]="'#delete-' + item.element._id">Eliminar</a>
 																</li>
+																<li><!--data-bs-toggle="modal"
+																	[attr.data-bs-target]="'#suspend-' + item.element._id" -->
+																	<a class="dropdown-item"
+																		style="cursor: pointer"
+																		
+																		(click)="Googlefind(item.element.email,item.element._id)">Google Account</a>
+																</li>
 															</ul>
 														</div>
 														<div
@@ -458,6 +466,42 @@
 																			type="button"
 																		>
 																			Si, eliminar
+																		</button>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<div
+															class="modal fade"
+															id="suspend-{{ item.element._id }}"
+															tabindex="-1"
+															style="display: none"
+															aria-hidden="true"
+														>
+															<div class="modal-dialog modal-dialog-centered" role="document">
+																<div class="modal-content">
+																	<div class="modal-header">
+																		<h4 class="modal-title">
+																			INFO GOOGLE ACCOUNT:{{ item.element.nombres }} {{ item.element.apellidos }}
+																		</h4>
+																		<button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
+																			<span aria-hidden="true">×</span>
+																		</button>
+																	</div>
+																	<div class="modal-body">
+																		<ng-container *ngIf="!loadinfouser"><p>Desea <ng-container *ngIf="infouser.suspended"><b>Reactivar</b> </ng-container><ng-container *ngIf="!infouser.suspended"><b>Suspender</b></ng-container> a este estudiante? {{ item.element.nombres }} {{ item.element.apellidos }}</p></ng-container>
+																		<ng-container *ngIf="loadinfouser">Este estudiante no cuenta con un correo de tu organización</ng-container>
+																	</div>
+																	<div class="modal-footer">
+																		<button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
+																			Cancelar
+																		</button>
+																		<button *ngIf="!loadinfouser"
+																			class="btn btn-primary btn-shadow btn-sm"
+																			(click)="GoogleSuspend(item.element.email,item.element._id)"
+																			type="button"
+																		>
+																			Si, Suspender
 																		</button>
 																	</div>
 																</div>

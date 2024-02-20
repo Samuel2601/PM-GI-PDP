@@ -84,7 +84,7 @@ export class SchoolYearConfigComponent implements OnInit {
 	}
 	init_data() {
 		this.load_data = true;
-		this.select_nav(3);
+		this.select_nav(2);
 	}
 	select_nav(val:any){
 		if(val!=this.tip_conf){

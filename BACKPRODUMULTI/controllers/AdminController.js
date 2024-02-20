@@ -1347,14 +1347,7 @@ const actualizar_config_admin = async (req, res) => {
 	} else {
 		res.status(500).send({ message: 'NoAccess' });
 	}
-}; /*
-{
-    "_id" : ObjectId("61abe55d2dce63583086f108"),
-    "anio_lectivo" : ISODate("2022-05-01T15:29:00.000Z"),
-    "pension" : 42.76,
-    "numpension" : 8,
-    "matricula" : 26.73
-}*/
+};
 const obtener_pagos_admin = async function (req, res) {
 	if (req.user) {
 		try {
