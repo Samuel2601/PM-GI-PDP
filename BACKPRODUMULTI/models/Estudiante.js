@@ -10,7 +10,7 @@ var EstudianteSchema = Schema({
     email: {type: String, required: true},
     password:{type: String, required: false},
 
-    genero: {type: String, required: true},
+    genero: {type: String},
     f_nacimiento: {type: String, required: false},
     telefono: {type: String, required: false},
     dni: {type: String, required: true},

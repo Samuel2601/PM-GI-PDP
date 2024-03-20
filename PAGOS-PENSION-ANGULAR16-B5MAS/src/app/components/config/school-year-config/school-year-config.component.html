@@ -44,7 +44,7 @@
                        
 
                         <div class="container" *ngIf="tip_conf==1">
-                            <div class="row" *ngIf="config_const">
+                            <div class="row" *ngIf="config_const.length>0">
                                 <div class="col-2">
                                     <nav class="nav flex-column nav-tabs">
                                         <ng-container *ngFor="let item of config_const; let index = index">
@@ -56,7 +56,7 @@
                                 </div>
                                 <div class="col-8 col-lg-8 col-xl-8">
                                     <!-- Alert -->
-                                    <div class="alert alert-danger" *ngIf="bol !== ''">
+                                    <div class="alert alert-danger" *ngIf="bol">
                                         <i class="bi bi-info-circle"></i> {{ bol }}
                                     </div>
                 
@@ -127,7 +127,8 @@
                                                         />
                                                     </div>
                                                 </div>
-                                                <div class="row mb-3" style="display: none;">
+                                                <!--
+ <div class="row mb-3" style="display: none;">
                                                     <label for="inputEmail3" class="form-label">Descuento por Pago Anticipado</label>
                 
                                                     <div class="input-group mb-3">
@@ -149,6 +150,9 @@
                                                         />
                                                     </div>
                                                 </div>
+                                                -->
+                                               
+
                                                 <div class="row mb-3">
                                                     <label for="inputEmail3" class="form-label">Fecha de Año Lectivo</label>
                                                     <div class="input-group mb-3">
@@ -196,7 +200,8 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="row mb-3" style="display: none;">
+                                                <!--
+<div class="row mb-3" style="display: none;">
                                                     <label for="basic-url" class="form-label">Tu URL de API Facturación</label>
                                                     <div class="input-group mb-3">
                                                         <span class="input-group-text" id="basic-auxmescompleto" *ngIf="!config.facturacion"
@@ -215,6 +220,9 @@
                                                         />
                                                     </div>
                                                 </div>
+                                                -->
+                                                
+
                                             </div>
                 
                                             <ng-container *ngIf="load_data">
@@ -254,10 +262,10 @@
                                                                 </button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <p>¿Desea Iniciar?</p>
-                                                                <b><i> este proceso no se podrá iniciar hasta que transcurra 10 meses</i></b>
+                                                                <p *ngIf="load_enviar">¿Desea Iniciar?</p>
+                                                                <b><i> Este proceso no se podrá iniciar hasta que transcurra 10 meses</i></b>
                                                             </div>
-                                                            <div class="modal-footer">
+                                                            <div class="modal-footer" *ngIf="load_enviar">
                                                                 <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
                                                                     Cancelar
                                                                 </button>

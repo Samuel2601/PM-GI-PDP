@@ -17,7 +17,7 @@ export class ReporPensionComponent implements OnInit{
   public horaact:any;
   public pdffecha: any;
   public tipreport: any;
-  public cursos: any = [];
+  public cursos: any[] = [];
   public pagospension: any = [];
   public pagos_estudiante: Array<any> = [];
   public director=this._configService.getDirector();

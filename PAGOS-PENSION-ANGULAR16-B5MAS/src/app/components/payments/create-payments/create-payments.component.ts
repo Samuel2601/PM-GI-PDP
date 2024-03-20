@@ -288,7 +288,7 @@ public arr_rubro_const=[];
 	}
 	isPensionValid(i: number): boolean {
 	const isValid = (
-		this.pension[i].meses < 10 ||
+		this.pension[i].meses <= 10 ||
 		(this.pension[i].matricula !== 1 && this.pension[i].paga_mat === 0) ||
 		((this.pension[i].extrapagos === undefined && this.pension[i].idanio_lectivo.extrapagos !== undefined) ||
 			(JSON.parse(this.pension[i].idanio_lectivo.extrapagos || '[]').length !==

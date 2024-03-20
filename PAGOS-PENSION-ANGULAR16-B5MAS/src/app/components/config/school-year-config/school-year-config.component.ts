@@ -14,7 +14,7 @@ declare var $: any;
 
 export class SchoolYearConfigComponent implements OnInit {
 	public config: any = {};
-	public config_const: any = {};
+	public config_const: any = [];
 	public load_btn = true;
 	public token = localStorage.getItem('token');
 	public load_data = true;
@@ -22,7 +22,7 @@ export class SchoolYearConfigComponent implements OnInit {
 	public auxdate = '';
 	public auxmescompleto:string = 'ninguno';
 	
-	public bol:string='';
+	public bol:any=undefined;
 	public arr_meses: Array<any> = [];
 	public tip_conf=1;
 	public institucion:any=[];
@@ -84,7 +84,7 @@ export class SchoolYearConfigComponent implements OnInit {
 	}
 	init_data() {
 		this.load_data = true;
-		this.select_nav(2);
+		this.select_nav(1);
 	}
 	select_nav(val:any){
 		if(val!=this.tip_conf){
@@ -96,6 +96,8 @@ export class SchoolYearConfigComponent implements OnInit {
 			}else{
 				this.call_config();
 			}
+		}else{
+			this.call_lectivo();
 		}
 	}
 	guardarCambios() {
@@ -104,7 +106,9 @@ export class SchoolYearConfigComponent implements OnInit {
 		// Puedes implementar aquí la lógica de llamada a tu servicio o API para guardar los cambios
 	  }
 	call_lectivo(){
-		
+		console.log('Llamado config');
+		this.load_btn = true;
+		this.load_data = true;
 		this._adminService.obtener_config_admin(this.token).subscribe((response) => {
 			if (response.message) {
 				this.bol = response.message;
@@ -145,8 +149,10 @@ export class SchoolYearConfigComponent implements OnInit {
 			this.institucion=response.data;
 		});
 	}
+	index_selecte=-1;
 	select_config(val:any){
-		this.config=this.config_const[val];
+		this.index_selecte=val;
+		this.config=this.config_const[this.index_selecte];
 		if(this.config.extrapagos){
 			this.arr_rubro_const=Object.assign(JSON.parse(this.config.extrapagos));
 			this.arr_rubro= Object.assign(JSON.parse(this.config.extrapagos));
@@ -215,7 +221,7 @@ export class SchoolYearConfigComponent implements OnInit {
 
 	addrubro(){
 		if(this.arr_rubro.length>=0){
-			this.config=this.config_const;
+			this.config=this.config_const[this.index_selecte];
 			this.config.extrapagos=JSON.stringify(this.arr_rubro);
 			this._adminService.actualizar_config_admin(this.config, this.token).subscribe(
 				(response) => {
@@ -233,55 +239,52 @@ export class SchoolYearConfigComponent implements OnInit {
 			);
 		}
 	}
+	load_enviar=true;
 	actualizar(actualizarForm: any) {
-
-
+		this.load_enviar = false;
 		if (actualizarForm.valid) {
 			this.load_btn = true;
-			this.config.nuevo=1;
-			if (
-				(this.bol == '' &&
-					this.config.numpension >= 10 &&
-					new Date(new Date(this.auxdate).setMonth(new Date(this.auxdate).getMonth() + 10)).getTime() <
-						new Date(this.config[0].anio_lectivo).getTime()) ||
-				this.bol != ''
-			) {
-				this._adminService.actualizar_config_admin(this.config, this.token).subscribe(
-					(response) => {
-						if (response.message == undefined) {
-							iziToast.success({
-								title: 'ÉXITOSO',
-								position: 'topRight',
-								message: 'Se actualizó correctamente las configuraciones.',
-							});
-						} else {
-							iziToast.error({
-								title: 'PELIGRO',
-								position: 'topRight',
-								message: response.message,
-							});
-						}
-
-						this.load_btn = false;
-
-						//this.ngOnInit();
-						$('#modalConfirmar').modal('hide');
-						location.reload();
-					},
-					(error) => {
-						this.load_btn = false;
-					}
-				);
-				
+	
+			let lastConfigAnioLectivo = new Date(this.config_const[0].anio_lectivo).getFullYear();
+			if (this.config.anio_lectivo > lastConfigAnioLectivo) {
+				this.config.nuevo = 1;
 			} else {
-				$('#modalConfirmar').modal('hide');
-				this.load_btn = false;
-				iziToast.error({
-					title: 'PELIGRO',
-					position: 'topRight',
-					message:'No se puede añadir un nuevo perido si es menor o igual al actual y ya hayan pasado los 10 meses ',
-				});
+				delete this.config.createdAt;
+				delete this.config.extrapagos;
+				delete this.config.facturacion;
+				delete this.config._id;
+				delete this.config.numpension;
 			}
+	
+			this._adminService.actualizar_config_admin(this.config, this.token).subscribe(
+				(response) => {
+					if (response.message == undefined) {
+						iziToast.success({
+							title: 'ÉXITOSO',
+							position: 'topRight',
+							message: 'Se ingresado correctamente las configuraciones.',
+						});
+					} else {
+						iziToast.error({
+							title: 'PELIGRO',
+							position: 'topRight',
+							message: response.message,
+						});
+					}
+	
+					this.load_btn = false;
+	
+					//this.ngOnInit();
+					$('#modalConfirmar').modal('hide');
+					location.reload();
+					this.load_enviar = true;
+	
+				},
+				(error) => {
+					this.load_btn = false;
+				}
+			);
+	
 		} else {
 			iziToast.error({
 				title: 'ERROR',
@@ -290,6 +293,7 @@ export class SchoolYearConfigComponent implements OnInit {
 			});
 		}
 	}
+	
 
 	get cursos(): FormArray {
 		return this.configForm.get('cursos') as FormArray;

@@ -1164,6 +1164,7 @@ const obtener_config_admin = async (req, res) => {
 		res.status(403).send({ message: 'NoAccess' });
 	}
 };
+/*
 const actualizar_config_admin = async (req, res) => {
 	let fecha_actual = new Date();
 	if (req.user) {
@@ -1237,11 +1238,6 @@ const actualizar_config_admin = async (req, res) => {
 				}
 			} else {
 				let configfecha = new Date(data.anio_lectivo);
-				/*
-                const formatDate = (current_datetime)=>{
-                    let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds();
-                    return formatted_date;
-                }*/
 
 		//	if (fecha_actual.getTime() >= configfecha.getTime()) {
 					var aux = cfg[0]; //await Config.findById('61abe55d2dce63583086f108');
@@ -1265,14 +1261,7 @@ const actualizar_config_admin = async (req, res) => {
 							delete data._id;
 							delete data.createdAt;
 							await Config.create(data);
-							/*
-                            await Config.updateOne({_id:'61abe55d2dce63583086f108'},{
-                                //envio_activacion : data.envio_activacion,
-                                pension: data.pension,
-                                matricula:data.matricula,
-                                anio_lectivo:data.anio_lectivo,
-                                numpension:data.numpension
-                            });*/
+
 
 							let vconfg = await Config.find().sort({ createdAt: -1 });
 							if (vconfg.length > 0) {
@@ -1335,10 +1324,6 @@ const actualizar_config_admin = async (req, res) => {
 					} else {
 						res.status(200).send({ message: 'No puedes ingresar una fecha menor a la anterior' });
 					}
-			/*		
-				} else {
-					res.status(200).send({ message: 'No puedes ingresar una fecha mayor a la actual' });
-				}*/
 			}
 		} catch (error) {
 			console.log(error);
@@ -1347,7 +1332,100 @@ const actualizar_config_admin = async (req, res) => {
 	} else {
 		res.status(500).send({ message: 'NoAccess' });
 	}
+};*/
+const actualizar_config_admin = async (req, res) => {
+    if (!req.user) {
+        return res.status(500).send({ message: 'NoAccess' });
+    }
+
+    try {
+        let conn = mongoose.connection.useDb(req.user.base);
+        const Config = conn.model('config', ConfigSchema);
+        const Registro = conn.model('registro', RegistroSchema);
+        const Pension = conn.model('pension', PensionSchema);
+        const Estudiante = conn.model('estudiante', EstudianteSchema);
+
+        let fecha_actual = new Date();
+        let data = req.body;
+
+        if (data.nuevo === 1) {
+            let configfecha = new Date(data.anio_lectivo);
+            let mes = (fecha_actual.getFullYear() - configfecha.getFullYear()) * 12;
+            mes -= configfecha.getMonth();
+            mes += fecha_actual.getMonth() + 1;
+            let numpension = Math.min(mes, 10);
+
+            let config = new Config(data);
+            config.numpension = numpension;
+            await config.save();
+
+            let estudiantes = await Estudiante.find({ estado: 'Activo', curso: { $lte: 9 } });
+
+            for (let estudiante of estudiantes) {
+                estudiante.curso++;
+                await estudiante.save();
+
+                let pension = new Pension({
+                    idanio_lectivo: config._id,
+                    idestudiante: estudiante._id,
+                    anio_lectivo: config.anio_lectivo,
+                    condicion_beca: 'No',
+                    curso: estudiante.curso.toString(),
+                    paralelo: estudiante.paralelo
+                });
+                await pension.save();
+            }
+			
+			// Deshabilitar estudiantes de curso 10
+            let estudiantesDesactivar = await Estudiante.find({ estado: 'Activo', curso: 10 });
+            for (let estudianteDesactivar of estudiantesDesactivar) {
+                estudianteDesactivar.estado = 'Desactivado';
+                await estudianteDesactivar.save();
+            }
+
+            let registro = new Registro({
+                admin: req.user.sub,
+                tipo: 'actualizo',
+                descripcion: JSON.stringify(config)
+            });
+            await registro.save();
+
+            return res.status(200).send({ data: config });
+        } else {
+            let config = await Config.findOne().sort({ createdAt: -1 });
+			if(config._id==data._id){
+				config.extrapagos=data.extrapagos;
+			}
+            if (!config) {
+                return res.status(400).send({ message: 'No existe una configuración previa' });
+            }
+
+            let configfecha = new Date(data.anio_lectivo);
+            if (configfecha.getTime() < config.anio_lectivo.getTime()) {
+                return res.status(400).send({ message: 'No puedes ingresar una fecha menor a la anterior' });
+            }
+
+            if (configfecha.getTime() !== config.anio_lectivo.getTime()) {
+                config.set(data);
+                let mes = (fecha_actual.getFullYear() - configfecha.getFullYear()) * 12;
+                mes -= configfecha.getMonth();
+                mes += fecha_actual.getMonth() + 1;
+                config.numpension = Math.min(mes, 10);
+                await config.save();
+            } else {
+                config.numpension = data.numpension;
+                await config.save();
+            }
+
+            return res.status(200).send({ data: config });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ message: 'Algo salió mal' });
+    }
 };
+
+
 const obtener_pagos_admin = async function (req, res) {
 	if (req.user) {
 		try {
