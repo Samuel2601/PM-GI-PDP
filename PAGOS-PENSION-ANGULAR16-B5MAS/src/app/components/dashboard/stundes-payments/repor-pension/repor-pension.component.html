@@ -142,7 +142,7 @@
                 <th>
                   Nombres
                 </th>
-                  <ng-container *ngIf="tipreport=='Pension'||tipreport=='PensionRubro'">
+                  <ng-container *ngIf="(tipreport=='Pension'||tipreport=='PensionRubro')&&pagos_estudiante[ctpagos.curso][ctpagos.paralelo]">
                     <ng-container *ngFor="let item of pagos_estudiante[ctpagos.curso][ctpagos.paralelo][0].detalle;let idenx = index">
                       <th>
                         <ng-container *ngIf="item.tipo==0||item.tipo>10">
@@ -155,7 +155,7 @@
                   </ng-container>
                 </ng-container>
       
-                  <ng-container *ngIf="tipreport=='Rubro'||tipreport=='PensionRubro'">
+                  <ng-container *ngIf="(tipreport=='Rubro'||tipreport=='PensionRubro')&&pagos_estudiante[ctpagos.curso][ctpagos.paralelo]">
                   <ng-container *ngFor="let item of pagos_estudiante[ctpagos.curso][ctpagos.paralelo][0].rubro;let idenx = index">
                     <th >
                       <ng-container>
@@ -237,7 +237,7 @@
                   </tr>
                   <tr class="table-info" style="font-weight: bold;">
                     <td colspan="2">Total</td>
-                    <ng-container *ngIf="tipreport=='Pension'||tipreport=='PensionRubro'">
+                    <ng-container *ngIf="(tipreport=='Pension'||tipreport=='PensionRubro')&&pagos_estudiante[ctpagos.curso][ctpagos.paralelo]">
                       <ng-container *ngFor="let item of pagos_estudiante[ctpagos.curso][ctpagos.paralelo][0].detalle;let idenx = index">
                         <td >
                           {{
@@ -252,7 +252,7 @@
                       </ng-container>
                     </ng-container>
       
-                    <ng-container *ngIf="tipreport=='Rubro'||tipreport=='PensionRubro'">
+                    <ng-container *ngIf="(tipreport=='Rubro'||tipreport=='PensionRubro')&&pagos_estudiante[ctpagos.curso][ctpagos.paralelo]">
                       <ng-container *ngFor="let item of pagos_estudiante[ctpagos.curso][ctpagos.paralelo][0].rubro;let idenx = index">
                         <td >
                           {{
@@ -267,7 +267,7 @@
                       </ng-container>
                     </ng-container>
       
-                    <ng-container *ngIf="tipreport=='Pension'">
+                    <ng-container *ngIf="(tipreport=='Pension')&&pagos_estudiante[ctpagos.curso][ctpagos.paralelo]">
                       <td >
                         {{
                           sumarrecuadado(
@@ -289,7 +289,7 @@
                         }}  
                       </td>
                     </ng-container>
-                    <ng-container *ngIf="tipreport=='Rubro'">
+                    <ng-container *ngIf="(tipreport=='Rubro')&&pagos_estudiante[ctpagos.curso][ctpagos.paralelo]">
                       <td >
                         {{
                           sumarrecuadado(
@@ -311,7 +311,7 @@
                         }}  
                       </td>
                     </ng-container>
-                    <ng-container *ngIf="tipreport=='PensionRubro'">
+                    <ng-container *ngIf="(tipreport=='PensionRubro')&&pagos_estudiante[ctpagos.curso][ctpagos.paralelo]">
                       <td >
                         {{ sumarrecuadado(
                           'detalle',

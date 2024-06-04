@@ -118,6 +118,7 @@ export class EditStudentsComponent implements OnInit {
 										//console.log(response.data);
 										if (response.data) {
 											var pen = response.data;
+											console.log(response.data);
 											/*
 											for (const iterator of pen) {
 												console.log(iterator.idanio_lectivo._id==this.config._id);
@@ -133,7 +134,7 @@ export class EditStudentsComponent implements OnInit {
 											//console.log(this.estudiante);
 											
 											//console.log(this.estudiante);
-											//console.log(this.pension);
+											console.log(this.pension);
 											for (var i = 0; i < 10; i++) {
 												////console.log(new Date (new Date (this.pension.anio_lectivo).setMonth(new Date (this.pension.anio_lectivo).getMonth()+i)).getMonth() );
 												////console.log( new Date (this.pension.anio_lectivo).setMonth(new Date (this.pension.anio_lectivo).getMonth()+i) );

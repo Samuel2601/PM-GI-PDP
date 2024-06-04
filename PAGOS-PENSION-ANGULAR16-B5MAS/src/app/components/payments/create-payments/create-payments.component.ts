@@ -506,15 +506,15 @@ public arr_rubro_const=[];
 				this.fecha[y.tipo - 1] = '';
 			  }
 			}
-	  
-			if (this.selec_est.estado === 'Desactivado') {
+			console.log(this.selec_est.estado);
+			/*if (this.selec_est.estado === 'Desactivado') {
 			  const con = this.fecha.filter((element) => element !== '').length;
 	  
 			  if (con === 1 && this.dpago.length === 0) {
 				console.log(this.pago.estudiante);
 				this.pago.estudiante = '';
 			  }
-			}
+			}*/
 		  });
 	  }
 	  
@@ -923,7 +923,9 @@ public arr_rubro_const=[];
 				this.pago.tipo_producto = 'S';
 				this.pago.tipo_tarifa = 0;
 				this.pago.config = this.config;
+				console.log(this.pago);
 	  
+				
 				this._adminService.registro_compra_manual_estudiante(this.pago, this.token).subscribe(
 				  (response) => {
 					console.log(response);
@@ -946,6 +948,7 @@ public arr_rubro_const=[];
 					});
 				  }
 				);
+
 			  }
 			}
 		  },

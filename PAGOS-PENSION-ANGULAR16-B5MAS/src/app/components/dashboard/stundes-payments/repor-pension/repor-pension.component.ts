@@ -235,7 +235,7 @@ export class ReporPensionComponent implements OnInit{
               j++;
             }              
           } while (j>0);  
-            
+            console.log(this.pagos_estudiante);
       // this.cargar_canvas3(costosextrapagos);
       }else{ 
         this._router.navigate(['/dashboard']);
@@ -435,6 +435,7 @@ cambiarSeleccionTodo(val: any) {
     this.pagospension = pagospension;
     this.imagen = imagen;
     this.pagos_estudiante = pagos_estudiante;
+    
     this.director = director;
     this.delegado = delegado;
     this.admin = admin;
