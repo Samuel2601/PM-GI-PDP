@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<factura xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:/C:/borrar/xsd/111-xsd-1_V2.1.0.xsd" id="comprobante" version="version0">
+  <infoTributaria>
+    <ambiente>1</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>PRUEBAS SERVICIO DE RENTAS INTERNAS</razonSocial>
+    <nombreComercial>nombreComercial0</nombreComercial>
+    <ruc>17600038400</ruc>
+    <claveAcceso>2104202101176000384000110010010000836331234567819</claveAcceso>
+    <codDoc>01</codDoc>
+    <estab>000</estab>
+    <ptoEmi>000</ptoEmi>
+    <secuencial>000000000</secuencial>
+    <dirMatriz>dirMatriz0</dirMatriz>
+    <agenteRetencion>0</agenteRetencion>
+    <contribuyenteRimpe>CONTRIBUYENTE RÉGIMEN RIMPE</contribuyenteRimpe>
+  </infoTributaria>
+<infoFactura>
+        <fechaEmision>21/04/2021</fechaEmision>
+        <dirEstablecimiento>Calle: AV SUCRE Número: 16 Intersección: 24 DE MAYO Manzana: 40 </dirEstablecimiento>
+        <obligadoContabilidad>NO</obligadoContabilidad>
+        <tipoIdentificacionComprador>05</tipoIdentificacionComprador>
+        <razonSocialComprador>ZAMBRANO MORANTE ODALIA MARIA</razonSocialComprador>
+        <identificacionComprador>1206104182</identificacionComprador>
+        <direccionComprador>TOLITA 1</direccionComprador>
+        <totalSinImpuestos>814.25</totalSinImpuestos>
+        <totalDescuento>0.00</totalDescuento>
+        <totalConImpuestos>
+            <totalImpuesto>
+                <codigo>2</codigo>
+                <codigoPorcentaje>2</codigoPorcentaje>
+                <baseImponible>814.25</baseImponible>
+                <valor>97.71</valor>
+            </totalImpuesto>
+        </totalConImpuestos>
+        <propina>0</propina>
+        <importeTotal>911.96</importeTotal>
+        <moneda>DOLAR</moneda>
+        <pagos>
+            <pago>
+                <formaPago>19</formaPago>
+                <total>911.96</total>
+                <plazo>12</plazo>
+                <unidadTiempo>Meses</unidadTiempo>
+            </pago>
+        </pagos>
+    </infoFactura>
+    <detalles>
+        <detalle>
+            <codigoPrincipal>018</codigoPrincipal>
+            <descripcion>COMBO COMPUTADORA ASUS I5 13GENERACIÓN 8GB RAM 480GB SSD + TECLADO + MOUSE + PARLANTE + MONITOR QUASAD 19.5INC FULL-HD LED</descripcion>
+            <cantidad>1.0</cantidad>
+            <precioUnitario>814.25</precioUnitario>
+            <descuento>0.00</descuento>
+            <precioTotalSinImpuesto>814.25</precioTotalSinImpuesto>
+            <impuestos>
+                <impuesto>
+                    <codigo>2</codigo>
+                    <codigoPorcentaje>2</codigoPorcentaje>
+                    <tarifa>12.0</tarifa>
+                    <baseImponible>814.25</baseImponible>
+                    <valor>97.71</valor>
+                </impuesto>
+            </impuestos>
+        </detalle>
+    </detalles>
+    <infoAdicional>
+        <campoAdicional nombre="Telefono">0959959713</campoAdicional>
+        <campoAdicional nombre="Email">odalia21mz@hotmail.com</campoAdicional>
+    </infoAdicional>
+</factura>

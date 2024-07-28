@@ -1,0 +1,101 @@
+<factura xmlns="http://example.com" id="comprobante" version="1.0.0">
+  <infoTributaria>
+    <ambiente>1</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>JYBARO SOFTWARE HOUSE CIA LTDA</razonSocial>
+    <nombreComercial>JYBARO SOFTWARE HOUSE CIA LTDA</nombreComercial>
+    <ruc>1792521254001</ruc>
+    <claveAcceso>213202301179252125400110020030000000030000000018</claveAcceso>
+    <codDoc>1</codDoc>
+    <estab>2</estab>
+    <ptoEmi>3</ptoEmi>
+    <secuencial>3</secuencial>
+    <dirMatriz>Carapungo Av. Luis Vacarri B9 S29 y Carihuairazo</dirMatriz>
+  </infoTributaria>
+  <infoFactura>
+    <fechaEmision>1/2/2023</fechaEmision>
+    <dirEstablecimiento>Carapungo B9-S29</dirEstablecimiento>
+    <contribuyenteEspecial>5368</contribuyenteEspecial>
+    <obligadoContabilidad>SI</obligadoContabilidad>
+    <tipoIdentificacionComprador>3</tipoIdentificacionComprador>
+    <guiaRemision>001-001-000000001</guiaRemision>
+    <razonSocialComprador>PRUEBAS SERVICIO DE RENTAS INTERNAS</razonSocialComprador>
+    <identificacionComprador>1713328506001</identificacionComprador>
+    <direccionComprador>salinas y santiago</direccionComprador>
+    <totalSinImpuestos>2995000.00</totalSinImpuestos>
+    <totalDescuento>5000.00</totalDescuento>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>2</codigoPorcentaje>
+        <baseImponible>309750.00</baseImponible>
+        <valor>37170.00</valor>
+      </totalImpuesto>
+      <totalImpuesto>
+        <codigo>3</codigo>
+        <codigoPorcentaje>3072</codigoPorcentaje>
+        <baseImponible>295000.00</baseImponible>
+        <valor>14750.00</valor>
+      </totalImpuesto>
+      <totalImpuesto>
+        <codigo>5</codigo>
+        <codigoPorcentaje>5001</codigoPorcentaje>
+        <baseImponible>12000.00</baseImponible>
+        <valor>240.00</valor>
+      </totalImpuesto>
+    </totalConImpuestos>
+    <propina>0.00</propina>
+    <importeTotal>3371160.00</importeTotal>
+    <moneda>DOLAR</moneda>
+  </infoFactura>
+  <detalles>
+    <detalle>
+      <codigoPrincipal>125BJC-01</codigoPrincipal>
+      <codigoAuxiliar>1234D56789-A</codigoAuxiliar>
+      <descripcion>CAMIONETA 4X4 DIESEL 3.7</descripcion>
+      <cantidad>10.00</cantidad>
+      <precioUnitario>300000.00</precioUnitario>
+      <descuento>5000.00</descuento>
+      <precioTotalSinImpuesto>295000.00</precioTotalSinImpuesto>
+      <detallesAdicionales>
+        <detAdicional>
+          <_nombre>Marca Chevrolet</_nombre>
+          <_valor>Chevrolet</_valor>
+        </detAdicional>
+      </detallesAdicionales>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>2</codigoPorcentaje>
+          <tarifa>12</tarifa>
+          <baseImponible>309750.00</baseImponible>
+          <valor>361170.00</valor>
+        </impuesto>
+        <impuesto>
+          <codigo>3</codigo>
+          <codigoPorcentaje>3072</codigoPorcentaje>
+          <tarifa>5</tarifa>
+          <baseImponible>295000.00</baseImponible>
+          <valor>14750.00</valor>
+        </impuesto>
+        <impuesto>
+          <codigo>5</codigo>
+          <codigoPorcentaje>5001</codigoPorcentaje>
+          <tarifa>0.02</tarifa>
+          <baseImponible>12000.00</baseImponible>
+          <valor>240.00</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+  <infoAdicional>
+    <campoAdicional>
+      <_nombre>Codigo Impuesto ISD</_nombre>
+      <__text>4580</__text>
+    </campoAdicional>
+    <campoAdicional>
+      <_nombre>Impuesto ISD</_nombre>
+      <__text>15.42x</__text>
+    </campoAdicional>
+  </infoAdicional>
+</factura>

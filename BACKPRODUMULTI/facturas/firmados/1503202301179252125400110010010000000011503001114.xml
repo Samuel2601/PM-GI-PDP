@@ -1,0 +1,100 @@
+<head></head><body><factura id="comprobante" version="1.0.0"><infotributaria><ambiente>1</ambiente><tipoemision>1</tipoemision><razonsocial>JYBARO SOFTWARE HOUSE CIA LTDA</razonsocial><nombrecomercial>JYBARO SOFTWARE HOUSE CIA LTDA</nombrecomercial><ruc>1792521254001</ruc><claveacceso>1503202301179252125400110010010000000011503001114</claveacceso><coddoc>01</coddoc><estab>001</estab><ptoemi>001</ptoemi><secuencial>000000001</secuencial><dirmatriz>Carapungo Av. Luis Vacarri B9 S29 y Carihuairazo</dirmatriz></infotributaria><infofactura><fechaemision>15/03/2023</fechaemision><direstablecimiento>Carapungo B9-S29</direstablecimiento><contribuyenteespecial>5368</contribuyenteespecial><obligadocontabilidad>SI</obligadocontabilidad><tipoidentificacioncomprador>04</tipoidentificacioncomprador><guiaremision>001-001-000000001</guiaremision><razonsocialcomprador>PRUEBAS SERVICIO DE RENTAS INTERNAS</razonsocialcomprador><identificacioncomprador>1713328506001</identificacioncomprador><direccioncomprador>salinas y santiago</direccioncomprador><totalsinimpuestos>2995000.00</totalsinimpuestos><totaldescuento>5000.00</totaldescuento><totalconimpuestos><totalimpuesto><codigo>2</codigo><codigoporcentaje>2</codigoporcentaje><baseimponible>309750.00</baseimponible><valor>37170.00</valor></totalimpuesto><totalimpuesto><codigo>3</codigo><codigoporcentaje>3072</codigoporcentaje><baseimponible>295000.00</baseimponible><valor>14750.00</valor></totalimpuesto><totalimpuesto><codigo>5</codigo><codigoporcentaje>5001</codigoporcentaje><baseimponible>12000.00</baseimponible><valor>240.00</valor></totalimpuesto></totalconimpuestos><propina>0.00</propina><importetotal>3371160.00</importetotal><moneda>DOLAR</moneda></infofactura><detalles><detalle><codigoprincipal>125BJC-01</codigoprincipal><codigoauxiliar>1234D56789-A</codigoauxiliar><descripcion>CAMIONETA 4X4 DIESEL 3.7</descripcion><cantidad>10.00</cantidad><preciounitario>300000.00</preciounitario><descuento>5000.00</descuento><preciototalsinimpuesto>295000.00</preciototalsinimpuesto><detallesadicionales><detadicional nombre="Marca Chevrolet" valor="Chevrolet"></detadicional></detallesadicionales><impuestos><impuesto><codigo>2</codigo><codigoporcentaje>2</codigoporcentaje><tarifa>12</tarifa><baseimponible>309750.00</baseimponible><valor>361170.00</valor></impuesto><impuesto><codigo>3</codigo><codigoporcentaje>3072</codigoporcentaje><tarifa>5</tarifa><baseimponible>295000.00</baseimponible><valor>14750.00</valor></impuesto><impuesto><codigo>5</codigo><codigoporcentaje>5001</codigoporcentaje><tarifa>0.02</tarifa><baseimponible>12000.00</baseimponible><valor>240.00</valor></impuesto></impuestos></detalle></detalles><infoadicional><campoadicional nombre="Codigo Impuesto ISD">4580</campoadicional><campoadicional nombre="Impuesto ISD">15.42x</campoadicional></infoadicional><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" Id="Signature147947">
+<ds:SignedInfo Id="Signature-SignedInfo194518">
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></ds:CanonicalizationMethod>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"></ds:SignatureMethod>
+<ds:Reference Id="SignedPropertiesID686985" Type="http://uri.etsi.org/01903#SignedProperties" URI="#Signature147947-SignedProperties44474">
+<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></ds:DigestMethod>
+<ds:DigestValue>y7QyrxPZbIoHpyUJ6ZP8ehFeoIc=</ds:DigestValue>
+</ds:Reference>
+<ds:Reference URI="#Certificate53224">
+<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></ds:DigestMethod>
+<ds:DigestValue>WfrQFRTnwzdSi2wEbGBeVwd5mXU=</ds:DigestValue>
+</ds:Reference>
+<ds:Reference Id="Reference-ID-888591" URI="#comprobante">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"></ds:Transform>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></ds:DigestMethod>
+<ds:DigestValue>Y/J8TS+iM/ekGXYO+hqkjH7MaO8=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue Id="SignatureValue394083">
+nNJy79EwtVKqRGM7WtK1PuqFlcZMqaCpfQPVJ7r8MkE3p+2nr0eiOJpOSwTPQfSkRFCNqA2ktDeu
+lXqOYOaProuxrBkOVW1tcqPn+9tG0l/kH+vUvF7n7WU3YDgf+pFUq/HMjh/FcaMjWe54bogfMwFl
+njPCjoUTp3jXYZgJP8s9jtHLt1xtvkhmt/z/0EiWud2lN9FPrjKj5sBCNHJraHfcZeOrqYW6wYEE
+GRHRmN7HL6TkMnWj0j85mA9zW1MwgMtqHX47Vmb/aO2/A/R065mYqiLKJik+N4hU6yg5SGAHHdfw
+iU59fZUZaDxCW4rI9bFh/ETtjAB3qkc+ySqMQQ==
+</ds:SignatureValue>
+<ds:KeyInfo Id="Certificate53224">
+<ds:X509Data>
+<ds:X509Certificate>
+MIILyjCCCbKgAwIBAgIEAwsD/zANBgkqhkiG9w0BAQsFADCBmTELMAkGA1UEBhMCRUMxHTAbBgNV
+BAoMFFNFQ1VSSVRZIERBVEEgUy5BLiAyMTAwLgYDVQQLDCdFTlRJREFEIERFIENFUlRJRklDQUNJ
+T04gREUgSU5GT1JNQUNJT04xOTA3BgNVBAMMMEFVVE9SSURBRCBERSBDRVJUSUZJQ0FDSU9OIFNV
+QkNBLTIgU0VDVVJJVFkgREFUQTAeFw0yMzAyMDIyMTMyMzFaFw0yNTAyMDEyMTMyMzFaMIGcMSUw
+IwYDVQQDDBxEQVZJRCBEQU5JRUwgUEFOQ0hJIENBTkRPTkdBMRUwEwYDVQQFEwwwMjAyMjMxNjQy
+MDgxMDAuBgNVBAsMJ0VOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBERSBJTkZPUk1BQ0lPTjEdMBsG
+A1UECgwUU0VDVVJJVFkgREFUQSBTLkEuIDIxCzAJBgNVBAYTAkVDMIIBIjANBgkqhkiG9w0BAQEF
+AAOCAQ8AMIIBCgKCAQEAt9lnrANpr/qSNvJRL4XzYLbvTkTlDe1acmzlpLPzTxMWbUbwoCh9boui
+vEKVlJ2Fpi8dtceM0y/pRV5W56HMvwk7fK62aLcupM0fda1QHn2vyFCIIptxfQibkTM2Zq1cKulI
+fV1lXxzxGJuooHPDqcLej3cOFZYfmQwLMDAg5vhPj6SE2D3B0MzWQiux7SH3M9yveMR+8UU0eEWY
+zZSqg7uVwrxIg1tJUBk6/xzZsZAVWJCJgkC1dX7RYU5zTcpd4IrlypocR/a7Oc+ZZogZwQPiAAjt
+zyllKDtA7khW04SsAHxr1YKXfnEzlHBSsOvCkWYIdrrmH6QhOnU6uGSRAwIDAQABo4IHEzCCBw8w
+DAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBSMusoRV3glgB1rCktVv42uYt29jzBZBggrBgEFBQcB
+AQRNMEswSQYIKwYBBQUHMAGGPWh0dHA6Ly9vY3NwZ3cuc2VjdXJpdHlkYXRhLm5ldC5lYy9lamJj
+YS9wdWJsaWN3ZWIvc3RhdHVzL29jc3Awgc8GA1UdLgSBxzCBxDCBwaCBvqCBu4aBuGxkYXA6Ly9s
+ZGFwc2RjYTIuc2VjdXJpdHlkYXRhLm5ldC5lYy9DTj1BVVRPUklEQUQgREUgQ0VSVElGSUNBQ0lP
+TiBTVUJDQS0yIFNFQ1VSSVRZIERBVEEsT1U9RU5USURBRCBERSBDRVJUSUZJQ0FDSU9OIERFIElO
+Rk9STUFDSU9OLE89U0VDVVJJVFkgREFUQSBTLkEuIDIsQz1FQz9kZWx0YVJldm9jYXRpb25MaXN0
+P2Jhc2UwIAYDVR0RBBkwF4EVZGF2aWQucGMzQG91dGxvb2suY29tMIIBBgYDVR0gBIH+MIH7MFoG
+CisGAQQBgqZyAgcwTDBKBggrBgEFBQcCAjA+HjwAQwBlAHIAdABpAGYAaQBjAGEAZABvACAAZABl
+ACAAUABlAHIAcwBvAG4AYQAgAE4AYQB0AHUAcgBhAGwwgZwGCisGAQQBgqZyAgEwgY0wgYoGCCsG
+AQUFBwIBFn5odHRwczovL3d3dy5zZWN1cml0eWRhdGEubmV0LmVjL3dwLWNvbnRlbnQvZG93bmxv
+YWRzL05vcm1hdGl2YXMvUF9kZV9DZXJ0aWZpY2Fkb3MvUG9saXRpY2FzIGRlIENlcnRpZmljYWRv
+IFBlcnNvbmEgTmF0dXJhbC5wZGYwggKiBgNVHR8EggKZMIIClTCB5aBBoD+GPWh0dHA6Ly9vY3Nw
+Z3cuc2VjdXJpdHlkYXRhLm5ldC5lYy9lamJjYS9wdWJsaWN3ZWIvc3RhdHVzL29jc3CigZ+kgZww
+gZkxOTA3BgNVBAMMMEFVVE9SSURBRCBERSBDRVJUSUZJQ0FDSU9OIFNVQkNBLTIgU0VDVVJJVFkg
+REFUQTEwMC4GA1UECwwnRU5USURBRCBERSBDRVJUSUZJQ0FDSU9OIERFIElORk9STUFDSU9OMR0w
+GwYDVQQKDBRTRUNVUklUWSBEQVRBIFMuQS4gMjELMAkGA1UEBhMCRUMwgceggcSggcGGgb5sZGFw
+Oi8vbGRhcHNkY2EyLnNlY3VyaXR5ZGF0YS5uZXQuZWMvQ049QVVUT1JJREFEIERFIENFUlRJRklD
+QUNJT04gU1VCQ0EtMiBTRUNVUklUWSBEQVRBLE9VPUVOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBE
+RSBJTkZPUk1BQ0lPTixPPVNFQ1VSSVRZIERBVEEgUy5BLiAyLEM9RUM/Y2VydGlmaWNhdGVSZXZv
+Y2F0aW9uTGlzdD9iYXNlMIHgoIHdoIHahoHXaHR0cHM6Ly9wb3J0YWwtb3BlcmFkb3IyLnNlY3Vy
+aXR5ZGF0YS5uZXQuZWMvZWpiY2EvcHVibGljd2ViL3dlYmRpc3QvY2VydGRpc3Q/Y21kPWNybCZp
+c3N1ZXI9Q049QVVUT1JJREFEIERFIENFUlRJRklDQUNJT04gU1VCQ0EtMiBTRUNVUklUWSBEQVRB
+LE9VPUVOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBERSBJTkZPUk1BQ0lPTixPPVNFQ1VSSVRZIERB
+VEEgUy5BLiAyLEM9RUMwHQYDVR0OBBYEFAH0nHoIxXZ8AOwz/Ed9i0eLB92CMCsGA1UdEAQkMCKA
+DzIwMjMwMjAyMjEzMjMxWoEPMjAyNTAyMDEyMTMyMzFaMAsGA1UdDwQEAwIF4DAaBgorBgEEAYKm
+cgMBBAwMCjA4MDIwMDk4NjAwGgYKKwYBBAGCpnIDCQQMDApFU01FUkFMREFTMBEGCisGAQQBgqZy
+AyIEAwwBLjAoBgorBgEEAYKmcgMHBBoMGEFWIFNVQ1JFIDE2IFkgMjQgREUgTUFZTzAcBgorBgEE
+AYKmcgMCBA4MDERBVklEIERBTklFTDAfBgorBgEEAYKmcgMgBBEMDzAwMTAwMjAwMDM0ODA5MjAR
+BgorBgEEAYKmcgMjBAMMAS4wEwYKKwYBBAGCpnIDIQQFDANQRlgwFwYKKwYBBAGCpnIDDAQJDAdF
+Q1VBRE9SMBYGCisGAQQBgqZyAwMECAwGUEFOQ0hJMBEGCisGAQQBgqZyAx4EAwwBLjAdBgorBgEE
+AYKmcgMLBA8MDTA4MDIwMDk4NjAwMDEwEQYKKwYBBAGCpnIDHQQDDAEuMBgGCisGAQQBgqZyAwQE
+CgwIQ0FORE9OR0EwGgYKKwYBBAGCpnIDCAQMDAowOTkxMjU4OTgxMA0GCSqGSIb3DQEBCwUAA4IC
+AQC8XlevsaBGilZekviW2Iw133uH45qnYwr1I/vyOfQjqTn6jiJuthOLWNTFGPy1B8NgREpKowM2
+zolqDwyKOROsf7A2kwnoKE7YN6/dXsm4j5x2XjiH63bNLv8l/vl19VQIRONXlzx2ipM6JcAnPWJM
+6RKB+Qm+qdPZiK8PvTEbK64dLiBmfj9L4Id0FcD7oCmiGPTKjUkibs6aHS90WoZnMg3WSv8mR/0M
+sRa0hcZstbWfr8xYJ8zbEshrcBHlvW9P9WuL3CDwTBh2sE/YogkFb0epmTseWQV5fDO1H3A5GjOt
+tdS56OW4yQsg3v/+JlWn2RudtS5n787Dmp/F3SHv8fNm6HY2sHPEPOTM0pcf5ikbka/E5Aq3RC0M
+lZB0/FfpPFVp4K7vVslxCE7x7H6D6jKUkkNYPTCML+iQSdIXnVuJs3Z8tCxtPwZ8k1eX6SRWFWYX
+D3VVqQt9Ocn0Piq66FaniviUjyNMPoFvUclYfPARujyPZ4+V+V3O+WDXfTAfkGJpC1HLJyy/Pf2F
+SGDUvwLkelbeECDZWPLHTb3CAn3FvRGYYKE8bdClFl2axyJMeDwR7r2p9aufmEgxkbYuM10Q963d
+uOdFnBUfJsP7bEtQ4W4E/6z3IkkEV1D751d9VjcQuIjRlufBzvUAAY50N/dT1E21/qkxMWMsewKR
+ow==
+</ds:X509Certificate>
+</ds:X509Data>
+<ds:KeyValue>
+<ds:RSAKeyValue>
+<ds:Modulus>
+t9lnrANpr/qSNvJRL4XzYLbvTkTlDe1acmzlpLPzTxMWbUbwoCh9bouivEKVlJ2Fpi8dtceM0y/p
+RV5W56HMvwk7fK62aLcupM0fda1QHn2vyFCIIptxfQibkTM2Zq1cKulIfV1lXxzxGJuooHPDqcLe
+j3cOFZYfmQwLMDAg5vhPj6SE2D3B0MzWQiux7SH3M9yveMR+8UU0eEWYzZSqg7uVwrxIg1tJUBk6
+/xzZsZAVWJCJgkC1dX7RYU5zTcpd4IrlypocR/a7Oc+ZZogZwQPiAAjtzyllKDtA7khW04SsAHxr
+1YKXfnEzlHBSsOvCkWYIdrrmH6QhOnU6uGSRAw==
+</ds:Modulus>
+<ds:Exponent>AQAB</ds:Exponent>
+</ds:RSAKeyValue>
+</ds:KeyValue>
+</ds:KeyInfo>
+<ds:Object Id="Signature147947-Object111305"><etsi:QualifyingProperties Target="#Signature147947"><etsi:SignedProperties Id="Signature147947-SignedProperties44474"><etsi:SignedSignatureProperties><etsi:SigningTime>2023-03-15T18:51:36-05:00</etsi:SigningTime><etsi:SigningCertificate><etsi:Cert><etsi:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></ds:DigestMethod><ds:DigestValue>xnsHNm+he2VscGkViZjyxohS1gw=</ds:DigestValue></etsi:CertDigest><etsi:IssuerSerial><ds:X509IssuerName>CN=AUTORIDAD DE CERTIFICACION SUBCA-2 SECURITY DATA, OU=ENTIDAD DE CERTIFICACION DE INFORMACION, O=SECURITY DATA S.A. 2, C=EC, </ds:X509IssuerName><ds:X509SerialNumber>51053567</ds:X509SerialNumber></etsi:IssuerSerial></etsi:Cert></etsi:SigningCertificate></etsi:SignedSignatureProperties><etsi:SignedDataObjectProperties><etsi:DataObjectFormat ObjectReference="#Reference-ID-888591"><etsi:Description>contenido comprobante</etsi:Description><etsi:MimeType>text/xml</etsi:MimeType></etsi:DataObjectFormat></etsi:SignedDataObjectProperties></etsi:SignedProperties></etsi:QualifyingProperties></ds:Object></ds:Signature></factura></body>
