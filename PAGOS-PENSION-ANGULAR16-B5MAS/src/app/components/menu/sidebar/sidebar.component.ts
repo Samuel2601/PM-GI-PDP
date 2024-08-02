@@ -104,7 +104,7 @@ export class SidebarComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.buscar();
+		//this.buscar();
 		//console.log(this.rol);
 		if (this.estado == 'Fuera' || this.estado == 'deshabilitado') {
 			this.logout();

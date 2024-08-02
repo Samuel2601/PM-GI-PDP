@@ -194,6 +194,15 @@
                 >
                   CASH
                 </button>
+                <button
+                  id="btncash"
+                  type="button"
+                  class="btn btn-primary"
+                  data-bs-toggle="modal"
+                  [attr.data-bs-target]="'#modalGenerarCashPARALELO'"
+                >
+                  CASH PARALELO
+                </button>
                 <button class="rainbow-button" [ngStyle]="{ 'background-image': 'linear-gradient(to right, ' + colors.join(', ') + ')' }" id="btncash"
                 type="button"
                 data-bs-toggle="modal"
@@ -240,7 +249,52 @@
                   <div class="modal-footer">
                     <button
                       class="btn btn-primary"
-                      (click)="onCash()"
+                      (click)="onCash(false)"
+                    >
+                      Generar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div 
+              class="modal fade"
+              id="modalGenerarCashPARALELO"
+              tabindex="-1"
+              aria-labelledby="exampleModalLabel"
+              aria-hidden="true"
+            >
+              <div
+                class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                role="documentrubro"
+              >
+                <div class="modal-content">
+                  <div class="modal-header">Generar CASH</div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <label for="">
+                        Selecciona los meses para generar el CASH
+                      </label>
+                      <select
+                        id="numcash"
+                        class="form-select form-select-sm"
+                        [(ngModel)]="mcash"
+                      >
+                        <option selected>Selecciona un mes</option>
+                        <ng-container
+                          *ngFor="let mes of arr_meses; let i = index"
+                        >
+                          <option [value]="i+1">
+                            {{ mes.nombre }}
+                          </option>
+                        </ng-container>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      class="btn btn-primary"
+                      (click)="onCash(true)"
                     >
                       Generar
                     </button>

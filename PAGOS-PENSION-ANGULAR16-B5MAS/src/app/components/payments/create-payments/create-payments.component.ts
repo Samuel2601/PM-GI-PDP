@@ -700,6 +700,10 @@ public arr_rubro_const=[];
 		  if (parseFloat((parseFloat(this.documento_select.valor) - this.valorigualdocumento).toFixed(2)) > 0) {
 			this._adminService.obtener_detalles_ordenes_estudiante_abono(this.idpension, this.token)
 			  .subscribe((response) => {
+				console.log("Fecha",this.checkfecha);
+				console.log("tipo",this.tipo);
+				console.log("num_pagos",this.num_pagos);
+				console.log("arr_rubro",this.arr_rubro);
 				if (this.checkfecha) {
 				  if (this.tipo < this.num_pagos && this.tipo != 0) {
 					est = 'Pago atrasado';
@@ -741,7 +745,10 @@ public arr_rubro_const=[];
 	  
 				if (parseFloat((parseFloat(this.documento_select.valor) - this.valorigualdocumento).toFixed(2)) > 0 &&
 				  debe - (auxb + auxc) > 0) {
-	  
+					console.log(
+						debe - (auxb + auxc), 
+						parseFloat((parseFloat(this.documento_select.valor) - this.valorigualdocumento).toFixed(2)),
+						debe - (auxb + auxc) <= parseFloat((parseFloat(this.documento_select.valor) - this.valorigualdocumento).toFixed(2)));
 				  if (debe - (auxb + auxc) <= parseFloat((parseFloat(this.documento_select.valor) - this.valorigualdocumento).toFixed(2))) {
 					this.valor = parseFloat((debe - (auxb + auxc)).toFixed(2));
 	  
