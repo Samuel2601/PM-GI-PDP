@@ -1420,7 +1420,7 @@ const actualizar_config_admin = async (req, res) => {
             return res.status(200).send({ data: config });
         }
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).send({ message: 'Algo salió mal' });
     }
 };
@@ -1651,7 +1651,7 @@ const obtener_detalles_ordenes_rubro = async function (req, res) {
 
 			res.status(200).send({ pagos });
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 			res.status(200).send({ message: 'Algo salio mal' });
 		}
 	} else {

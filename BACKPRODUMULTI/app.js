@@ -32,6 +32,7 @@ var admin_routes = require('./routes/admin');
 //var finan_routes = require('./routes/financiero');
 var google_routes = require('./routes/google');
 const { actualizarNumpension } = require('./controllers/scheduler');
+const apiexport = require('./controllers/consulta_externa');
 mongoose.connect('mongodb://127.0.0.1:27017/Instituciones',{useUnifiedTopology: true, useNewUrlParser: true}, (err,res)=>{
     if(err){  
         throw err;
@@ -60,6 +61,8 @@ app.use('/api',estudiante_routes);
 app.use('/api',admin_routes);
 //app.use('/api',finan_routes);
 app.use('/api',google_routes);
+app.use('/api',apiexport);
+
 actualizarNumpension();
 
 module.exports = app;
