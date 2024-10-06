@@ -1383,7 +1383,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                   this.meses[
                     new Date(
                       new Date(this.fbeca).setMonth(
-                        new Date(this.fbeca).getMonth() + this.mcash
+                        new Date(this.fbeca).getMonth() + this.mcash - 1
                       )
                     ).getMonth()
                   ].toUpperCase(),
