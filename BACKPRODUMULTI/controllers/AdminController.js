@@ -252,7 +252,7 @@ const registrar_admin = async function (req, res) {
           data.estado = "habilitado";
           data.rol = "admin";
           var img_path = req.files.portada.path;
-          var name = img_path.split("\\"); // usar / en produccion
+          var name = img_path.split("/"); // usar / en produccion  \\ local
           var portada_name = name[2];
           data.portada = portada_name;
 
@@ -1822,6 +1822,21 @@ function toXML(json) {
   //console.log(builder.buildObject(json));
   return builder.buildObject(json);
 }
+
+ruc_arr = [
+  {
+    base: "CRISTOREY",
+    ruc: "",
+  },
+  {
+    base: "CRISTOREY",
+    ruc: "",
+  },
+  {
+    base: "CRISTOREY",
+    ruc: "",
+  },
+];
 const marcar_finalizado_orden = async function (req, res) {
   if (req.user) {
     try {
@@ -1831,6 +1846,9 @@ const marcar_finalizado_orden = async function (req, res) {
       var id = req.params["id"];
       let data = req.body;
       data.numeroIdPago = id;
+      data.ruc = ruc_arr.findOne(
+        (element) => element.base === req.user.base
+      ).ruc;
       let msg = "";
 
       var url_validar =
