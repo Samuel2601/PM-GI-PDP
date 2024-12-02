@@ -1,7 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { AdminService } from 'src/app/service/admin.service';
 import { ConfigService } from 'src/app/service/config.service';
-import { FormGroup, FormBuilder, Validators, FormArray, AbstractControl } from '@angular/forms';
+import {
+  FormGroup,
+  FormBuilder,
+  Validators,
+  FormArray,
+  AbstractControl,
+} from '@angular/forms';
 import iziToast from 'izitoast';
 
 declare var $: any;
@@ -9,395 +15,430 @@ declare var $: any;
 @Component({
   selector: 'app-school-year-config',
   templateUrl: './school-year-config.component.html',
-  styleUrls: ['./school-year-config.component.scss']
+  styleUrls: ['./school-year-config.component.scss'],
 })
-
 export class SchoolYearConfigComponent implements OnInit {
-	public config: any = {};
-	public config_const: any = [];
-	public load_btn = true;
-	public token = localStorage.getItem('token');
-	public load_data = true;
-	public rol = '';
-	public auxdate = '';
-	public auxmescompleto:string = 'ninguno';
-	
-	public bol:any=undefined;
-	public arr_meses: Array<any> = [];
-	public tip_conf=1;
-	public institucion:any=[];
-	public rubro = {
-		idrubro:'',
-		descripcion:'',
-		valor:''
-	};
-	public arr_rubro: Array<any> = [];
-	public arr_rubro_const: Array<any> = [];
+  public config: any = {};
+  public config_const: any = [];
+  public load_btn = true;
+  public token = localStorage.getItem('token');
+  public load_data = true;
+  public rol = '';
+  public auxdate = '';
+  public auxmescompleto: string = 'ninguno';
 
-	public uniqueArray=true;
+  public bol: any = undefined;
+  public arr_meses: Array<any> = [];
+  public tip_conf = 1;
+  public institucion: any = [];
+  public rubro = {
+    idrubro: '',
+    descripcion: '',
+    valor: '',
+  };
+  public arr_rubro: Array<any> = [];
+  public arr_rubro_const: Array<any> = [];
 
+  public uniqueArray = true;
 
+  configForm: FormGroup;
 
-	configForm: FormGroup;
+  constructor(
+    private _adminService: AdminService,
+    private _configService: ConfigService,
+    private fb: FormBuilder
+  ) {
+    // Inicializar el formulario con validaciones si es necesario
+    this.configForm = this.fb.group({
+      tipo: true,
+      cursos: this.fb.array([]),
+      modulosUnicos: this.fb.array([]),
+      conexionSistemas: this.fb.group({
+        url: ['', Validators.required],
+        // Otros campos de conexionSistemasSchema según sea necesario
+      }),
+      configSMTP: this.fb.group({
+        correo: ['', [Validators.required, Validators.email]],
+        token: ['', Validators.required],
+        // Otros campos de configSMTPSchema según sea necesario
+      }),
+      configEncabezadoPie: this.fb.group({
+        encabezado: ['', Validators.required],
+        piePagina: [''],
+        // Otros campos de configEncabezadoPieSchema según sea necesario
+      }),
+    });
+  }
+  modalidadCursosParalelos: boolean = false;
+  modalidadModulos: boolean = true; // Puedes establecer el valor inicial según tus necesidades
+  activarModalidadCursosParalelos() {
+    this.modalidadCursosParalelos = true;
+    this.modalidadModulos = false;
+    this.configForm.get('tipo')?.setValue(true);
+  }
 
-  	constructor(private _adminService: AdminService, private _configService: ConfigService,private fb: FormBuilder) {
-		// Inicializar el formulario con validaciones si es necesario
-		this.configForm = this.fb.group({
-			tipo:true,
-			cursos: this.fb.array([]),
-			modulosUnicos: this.fb.array([]),
-			conexionSistemas: this.fb.group({
-				url: ['', Validators.required]
-				// Otros campos de conexionSistemasSchema según sea necesario
-			}),
-			configSMTP: this.fb.group({
-				correo: ['', [Validators.required, Validators.email]],
-				token: ['', Validators.required]
-				// Otros campos de configSMTPSchema según sea necesario
-			}),
-			configEncabezadoPie: this.fb.group({
-				encabezado: ['', Validators.required],
-				piePagina: ['']
-				// Otros campos de configEncabezadoPieSchema según sea necesario
-			})
-		});
-	}
-	modalidadCursosParalelos: boolean = false;
-	modalidadModulos: boolean = true;  // Puedes establecer el valor inicial según tus necesidades
-	activarModalidadCursosParalelos() {
-		this.modalidadCursosParalelos = true;
-		this.modalidadModulos = false;
-		this.configForm.get('tipo')?.setValue(true);
-	}
-	
-	activarModalidadModulos() {
-		this.modalidadCursosParalelos = false;
-		this.modalidadModulos = true;
-		this.configForm.get('tipo')?.setValue(false);
-	}
-	  
+  activarModalidadModulos() {
+    this.modalidadCursosParalelos = false;
+    this.modalidadModulos = true;
+    this.configForm.get('tipo')?.setValue(false);
+  }
 
-	ngOnInit(): void {
-		let aux = this._configService.getConfig()as { imagen: string, identity: string, token: string , rol:string};
-    	this.rol = aux.rol||'';
-		this.init_data();
-	}
-	init_data() {
-		this.load_data = true;
-		this.select_nav(1);
-	}
-	select_nav(val:any){
-		if(val!=this.tip_conf){
-			this.tip_conf=val;
-			if(this.tip_conf==1){
-				this.call_lectivo();
-			}else if(this.tip_conf==2){
-				this.call_insti();
-			}else{
-				this.call_config();
-			}
-		}else{
-			this.call_lectivo();
-		}
-	}
-	guardarCambios() {
-		// Lógica para guardar los cambios, por ejemplo, enviar a un servicio o API
-		console.log('Cambios guardados:', this.institucion);
-		// Puedes implementar aquí la lógica de llamada a tu servicio o API para guardar los cambios
-	  }
-	call_lectivo(){
-		console.log('Llamado config');
-		this.load_btn = true;
-		this.load_data = true;
-		this._adminService.obtener_config_admin(this.token).subscribe((response) => {
-			if (response.message) {
-				this.bol = response.message;
-				
-				this.load_btn = false;
-				this.load_data = false;
-			} else {
-				
-				this.config_const = response.data;
-				this.select_config(0);
-				if(this.config){
-					this._adminService.actualizar_config_admin(this.config, this.token).subscribe(
-						(response) => {
-							iziToast.success({
-								title: 'ÉXITOSO',
-								position: 'topRight',
-								message: 'Se encuentra actualiza correctamente las configuraciones.',
-							});
-						},
-						(error) => {
-							this.load_btn = false;
-						}
-					);
-				}				
-			}
+  ngOnInit(): void {
+    let aux = this._configService.getConfig() as {
+      imagen: string;
+      identity: string;
+      token: string;
+      rol: string;
+    };
+    this.rol = aux.rol || '';
+    this.init_data();
+  }
+  init_data() {
+    this.load_data = true;
+    this.select_nav(1);
+  }
+  select_nav(val: any) {
+    if (val != this.tip_conf) {
+      this.tip_conf = val;
+      if (this.tip_conf == 1) {
+        this.call_lectivo();
+      } else if (this.tip_conf == 2) {
+        this.call_insti();
+      } else {
+        this.call_config();
+      }
+    } else {
+      this.call_lectivo();
+    }
+  }
+  guardarCambios() {
+    // Lógica para guardar los cambios, por ejemplo, enviar a un servicio o API
+    console.log('Cambios guardados:', this.institucion);
+    // Puedes implementar aquí la lógica de llamada a tu servicio o API para guardar los cambios
+  }
+  call_lectivo() {
+    console.log('Llamado config');
+    this.load_btn = true;
+    this.load_data = true;
+    this._adminService
+      .obtener_config_admin(this.token)
+      .subscribe((response) => {
+        console.log(response);
+        if (response.message) {
+          this.bol = response.message;
 
-			if (this.config.numpension >= 10) {
-				this.load_btn = false;
-			}
-		});
-	}
-	call_config(){
+          this.load_btn = false;
+          this.load_data = false;
+        } else {
+          this.config_const = response.data;
+          this.select_config(0);
+          if (this.config) {
+            this._adminService
+              .actualizar_config_admin(this.config, this.token)
+              .subscribe(
+                (response) => {
+                  iziToast.success({
+                    title: 'ÉXITOSO',
+                    position: 'topRight',
+                    message:
+                      'Se encuentra actualiza correctamente las configuraciones.',
+                  });
+                },
+                (error) => {
+                  this.load_btn = false;
+                }
+              );
+          }
+        }
 
-	}
-	call_insti(){
-		this._adminService.obtener_info_admin(this.token).subscribe((response)=>{
-			console.log(response);
-			this.institucion=response.data;
-		});
-	}
-	index_selecte=-1;
-	select_config(val:any){
-		this.index_selecte=val;
-		this.config=this.config_const[this.index_selecte];
-		if(this.config.extrapagos){
-			this.arr_rubro_const=Object.assign(JSON.parse(this.config.extrapagos));
-			this.arr_rubro= Object.assign(JSON.parse(this.config.extrapagos));
-			
-		}else{
-			this.arr_rubro_const=[];
-			this.arr_rubro=[];
-		}
-		this.auxdate = this.config.anio_lectivo;
-		this.auxmescompleto = this.config.mescompleto;
-		this.config.mescompleto='';
-		this.load_data = false;
-		this.fechas(1);
-	}
+        if (this.config.numpension >= 10) {
+          this.load_btn = false;
+        }
+      });
+  }
+  call_config() {}
+  call_insti() {
+    this._adminService.obtener_info_admin(this.token).subscribe((response) => {
+      console.log(response);
+      this.institucion = response.data;
+    });
+  }
+  index_selecte = -1;
+  select_config(val: any) {
+    this.index_selecte = val;
+    this.config = this.config_const[this.index_selecte];
+    if (this.config.extrapagos) {
+      this.arr_rubro_const = Object.assign(JSON.parse(this.config.extrapagos));
+      this.arr_rubro = Object.assign(JSON.parse(this.config.extrapagos));
+    } else {
+      this.arr_rubro_const = [];
+      this.arr_rubro = [];
+    }
+    this.auxdate = this.config.anio_lectivo;
+    this.auxmescompleto = this.config.mescompleto;
+    this.config.mescompleto = '';
+    this.load_data = false;
+    this.fechas(1);
+  }
 
-	cerrar_add_rubro(){
-		$('#modalNuevoRubro').modal('hide');
-	}
-	fechas(id:any) {
-		this.arr_meses = [];
-		for (var i = 0; i < 10; i++) {
-			this.arr_meses.push({
-				date: new Date(this.config.anio_lectivo).setMonth(new Date(this.config.anio_lectivo).getMonth() + i),
-			});
-		}
-	}
-	addarr_rubro(addrubroForm: any){
-		
-		if(addrubroForm.valid){
-			
-			if(this.arr_rubro.find(element=>element.idrubro==this.rubro.idrubro)==undefined){
-				this.arr_rubro.push(this.rubro);
-				this.uniqueArray=JSON.stringify(this.arr_rubro) === JSON.stringify(this.arr_rubro_const);
+  cerrar_add_rubro() {
+    $('#modalNuevoRubro').modal('hide');
+  }
+  fechas(id: any) {
+    this.arr_meses = [];
+    for (var i = 0; i < 10; i++) {
+      this.arr_meses.push({
+        date: new Date(this.config.anio_lectivo).setMonth(
+          new Date(this.config.anio_lectivo).getMonth() + i
+        ),
+      });
+    }
+  }
+  addarr_rubro(addrubroForm: any) {
+    if (addrubroForm.valid) {
+      if (
+        this.arr_rubro.find(
+          (element) => element.idrubro == this.rubro.idrubro
+        ) == undefined
+      ) {
+        this.arr_rubro.push(this.rubro);
+        this.uniqueArray =
+          JSON.stringify(this.arr_rubro) ===
+          JSON.stringify(this.arr_rubro_const);
 
-				this.rubro={idrubro:'',
-				descripcion:'',
-				valor:''};
-				$('#modalNuevoRubro').modal('hide');
-			}else{
-				iziToast.error({
-					title: 'DANGER',
-					position: 'topRight',
-					message: 'Ya existe ese código de rubro',
-				});
-			}
-		}
-		
-	}
-	eliminarrubro(val:any){
-		this._adminService.obtener_detalles_ordenes_rubro(this.arr_rubro[val].idrubro,this.token).subscribe((response)=>{
+        this.rubro = { idrubro: '', descripcion: '', valor: '' };
+        $('#modalNuevoRubro').modal('hide');
+      } else {
+        iziToast.error({
+          title: 'DANGER',
+          position: 'topRight',
+          message: 'Ya existe ese código de rubro',
+        });
+      }
+    }
+  }
+  eliminarrubro(val: any) {
+    this._adminService
+      .obtener_detalles_ordenes_rubro(this.arr_rubro[val].idrubro, this.token)
+      .subscribe((response) => {
+        if (response.pagos.length == 0) {
+          this.arr_rubro.splice(val, 1);
+          this.uniqueArray =
+            JSON.stringify(this.arr_rubro) ===
+            JSON.stringify(this.arr_rubro_const);
+        } else {
+          iziToast.error({
+            title: 'DANGER',
+            position: 'topRight',
+            message: 'Hay pagos bajo este rubro',
+          });
+        }
+      });
+  }
 
-			if(response.pagos.length==0){
-				this.arr_rubro.splice(val, 1);
-				this.uniqueArray=JSON.stringify(this.arr_rubro) === JSON.stringify(this.arr_rubro_const);
+  addrubro() {
+    if (this.arr_rubro.length >= 0) {
+      this.config = this.config_const[this.index_selecte];
+      this.config.extrapagos = JSON.stringify(this.arr_rubro);
+      this._adminService
+        .actualizar_config_admin(this.config, this.token)
+        .subscribe(
+          (response) => {
+            $('#modalRubro').modal('hide');
+            iziToast.success({
+              title: 'ÉXITOSO',
+              position: 'topRight',
+              message:
+                'Se encuentra actualiza correctamente las configuraciones.',
+            });
+            location.reload();
+          },
+          (error) => {
+            this.load_btn = false;
+          }
+        );
+    }
+  }
+  load_enviar = true;
+  actualizar(actualizarForm: any) {
+    this.load_enviar = false;
+    if (actualizarForm.valid) {
+      this.load_btn = true;
 
-			}else{
-				iziToast.error({
-					title: 'DANGER',
-					position: 'topRight',
-					message: 'Hay pagos bajo este rubro',
-				});
-			}
-		});
-		
-	}
+      let lastConfigAnioLectivo = undefined;
+      if (this.config_const.length > 0) {
+        lastConfigAnioLectivo = new Date(
+          this.config_const[0].anio_lectivo
+        ).getFullYear();
+      }
 
-	addrubro(){
-		if(this.arr_rubro.length>=0){
-			this.config=this.config_const[this.index_selecte];
-			this.config.extrapagos=JSON.stringify(this.arr_rubro);
-			this._adminService.actualizar_config_admin(this.config, this.token).subscribe(
-				(response) => {
-					$('#modalRubro').modal('hide');
-					iziToast.success({
-						title: 'ÉXITOSO',
-						position: 'topRight',
-						message: 'Se encuentra actualiza correctamente las configuraciones.',
-					});
-					location.reload();
-				},
-				(error) => {
-					this.load_btn = false;
-				}
-			);
-		}
-	}
-	load_enviar=true;
-	actualizar(actualizarForm: any) {
-		this.load_enviar = false;
-		if (actualizarForm.valid) {
-			this.load_btn = true;
-	
-			let lastConfigAnioLectivo = new Date(this.config_const[0].anio_lectivo).getFullYear();
-			if (this.config.anio_lectivo > lastConfigAnioLectivo) {
-				this.config.nuevo = 1;
-			} else {
-				delete this.config.createdAt;
-				delete this.config.extrapagos;
-				delete this.config.facturacion;
-				delete this.config._id;
-				delete this.config.numpension;
-			}
-	
-			this._adminService.actualizar_config_admin(this.config, this.token).subscribe(
-				(response) => {
-					if (response.message == undefined) {
-						iziToast.success({
-							title: 'ÉXITOSO',
-							position: 'topRight',
-							message: 'Se ingresado correctamente las configuraciones.',
-						});
-					} else {
-						iziToast.error({
-							title: 'PELIGRO',
-							position: 'topRight',
-							message: response.message,
-						});
-					}
-	
-					this.load_btn = false;
-	
-					//this.ngOnInit();
-					$('#modalConfirmar').modal('hide');
-					location.reload();
-					this.load_enviar = true;
-	
-				},
-				(error) => {
-					this.load_btn = false;
-				}
-			);
-	
-		} else {
-			iziToast.error({
-				title: 'ERROR',
-				position: 'topRight',
-				message: 'Los datos del formulario no son validos',
-			});
-		}
-	}
-	
+      if (
+        !lastConfigAnioLectivo ||
+        this.config.anio_lectivo > lastConfigAnioLectivo
+      ) {
+        this.config.nuevo = 1;
+      } else {
+        delete this.config.createdAt;
+        delete this.config.extrapagos;
+        delete this.config.facturacion;
+        delete this.config._id;
+        delete this.config.numpension;
+      }
 
-	get cursos(): FormArray {
-		return this.configForm.get('cursos') as FormArray;
-	}	
-	get modulosUnicos(): FormArray {
-	return this.configForm.get('modulosUnicos') as FormArray;
-	}
-	
-	paralelosArray(cursoIndex: number): FormArray {
-		const curso = this.cursos.controls[cursoIndex] as FormGroup;
-		return curso.get('paralelos') as FormArray;
-	  }
-	  
-	  
+      this._adminService
+        .actualizar_config_admin(this.config, this.token)
+        .subscribe(
+          (response) => {
+            if (response.message == undefined) {
+              iziToast.success({
+                title: 'ÉXITOSO',
+                position: 'topRight',
+                message: 'Se ingresado correctamente las configuraciones.',
+              });
+            } else {
+              iziToast.error({
+                title: 'PELIGRO',
+                position: 'topRight',
+                message: response.message,
+              });
+            }
 
-	  getParalelosArray(curso: AbstractControl): FormArray {
-		return curso.get('paralelos') as FormArray;
-	  }
-	  listacurso=[
-		'1er',
-		'2do',
-		'3ro',
-		'4to',
-		'5to',
-		'6to',
-		'7mo',
-		'8vo',
-		'9no',
-		'10mo',
-		'11vo'
-	  ]
+            this.load_btn = false;
 
-	// Función para agregar un nuevo curso al formulario
-	agregarCurso(): void {
-		this.cursos.push(this.fb.group({
-		  nombre: [this.listacurso.find((element,index)=>index==this.cursos.length)||(this.cursos.length+1).toString()+'vo'],
-		  paralelos: this.fb.array([])
-		  // Otros campos de CursoSchema según sea necesario
-		}));
-	  }
-	  quitarCurso(cursoIndex: number): void {
-		const cursos = this.cursos;
-	  
-		if (cursos.length > cursoIndex) {
-		  cursos.removeAt(cursoIndex);
-		  console.log('Curso eliminado:', cursos.value);
-		} else {
-		  console.error('Índice de curso fuera de rango:', cursoIndex);
-		}
-	  }	  
-	
-	  // Función para agregar un nuevo módulo único al formulario
-	  agregarModuloUnico(): void {
-		this.modulosUnicos.push(this.fb.group({
-		  nombre: ['']
-		  // Otros campos de ModuloUnicoSchema según sea necesario
-		}));
-	  }
-	  quitarModuloUnico(moduloIndex: number): void {
-		const modulosUnicos = this.modulosUnicos;
-	  
-		if (modulosUnicos.length > moduloIndex) {
-		  modulosUnicos.removeAt(moduloIndex);
-		  console.log('Módulo único eliminado:', modulosUnicos.value);
-		} else {
-		  console.error('Índice de módulo único fuera de rango:', moduloIndex);
-		}
-	  }
-	  
+            //this.ngOnInit();
+            $('#modalConfirmar').modal('hide');
+            location.reload();
+            this.load_enviar = true;
+          },
+          (error) => {
+            this.load_btn = false;
+          }
+        );
+    } else {
+      iziToast.error({
+        title: 'ERROR',
+        position: 'topRight',
+        message: 'Los datos del formulario no son validos',
+      });
+    }
+  }
 
-	  agregarParalelo(cursoIndex: number): void {
-		const paralelos = (this.cursos.controls[cursoIndex].get('paralelos') as FormArray);
+  get cursos(): FormArray {
+    return this.configForm.get('cursos') as FormArray;
+  }
+  get modulosUnicos(): FormArray {
+    return this.configForm.get('modulosUnicos') as FormArray;
+  }
 
-		// Obtén la letra siguiente en la secuencia
-		const siguienteLetra = String.fromCharCode(65 + paralelos.length); // 65 es el código ASCII para 'A'
+  paralelosArray(cursoIndex: number): FormArray {
+    const curso = this.cursos.controls[cursoIndex] as FormGroup;
+    return curso.get('paralelos') as FormArray;
+  }
 
-		paralelos.push(this.fb.group({
-			nombre: [siguienteLetra]
-			// Otros campos de ModuloUnicoSchema según sea necesario
-		  }));
-		console.log('Nuevo paralelo añadido:', paralelos.value);
-	  } 
+  getParalelosArray(curso: AbstractControl): FormArray {
+    return curso.get('paralelos') as FormArray;
+  }
+  listacurso = [
+    '1er',
+    '2do',
+    '3ro',
+    '4to',
+    '5to',
+    '6to',
+    '7mo',
+    '8vo',
+    '9no',
+    '10mo',
+    '11vo',
+  ];
 
-	  quitarParalelo(cursoIndex: number, paraleloIndex: number): void {
-		const paralelos = (this.cursos.controls[cursoIndex].get('paralelos') as FormArray);
-	  
-		if (paralelos.length > paraleloIndex) {
-		  paralelos.removeAt(paraleloIndex);
-		  console.log('Paralelo eliminado:', paralelos.value);
-		} else {
-		  console.error('Índice de paralelo fuera de rango:', paraleloIndex);
-		}
-	  }
-	  
-	  
-	
-	  // Función para enviar el formulario al backend (simulado)
-	  guardarConfiguracion() {
-		if (this.configForm.valid) {
-		  const configuracion = this.configForm.value;
-		  console.log('Enviando configuración al backend:', configuracion);
-		  // Aquí podrías llamar a tu servicio o API para enviar la configuración al backend
-		} else {
-		  console.error('El formulario no es válido. Por favor, completa los campos obligatorios.',this.configForm,this.configForm.valid);
-		}
-	  }
+  // Función para agregar un nuevo curso al formulario
+  agregarCurso(): void {
+    this.cursos.push(
+      this.fb.group({
+        nombre: [
+          this.listacurso.find(
+            (element, index) => index == this.cursos.length
+          ) || (this.cursos.length + 1).toString() + 'vo',
+        ],
+        paralelos: this.fb.array([]),
+        // Otros campos de CursoSchema según sea necesario
+      })
+    );
+  }
+  quitarCurso(cursoIndex: number): void {
+    const cursos = this.cursos;
+
+    if (cursos.length > cursoIndex) {
+      cursos.removeAt(cursoIndex);
+      console.log('Curso eliminado:', cursos.value);
+    } else {
+      console.error('Índice de curso fuera de rango:', cursoIndex);
+    }
+  }
+
+  // Función para agregar un nuevo módulo único al formulario
+  agregarModuloUnico(): void {
+    this.modulosUnicos.push(
+      this.fb.group({
+        nombre: [''],
+        // Otros campos de ModuloUnicoSchema según sea necesario
+      })
+    );
+  }
+  quitarModuloUnico(moduloIndex: number): void {
+    const modulosUnicos = this.modulosUnicos;
+
+    if (modulosUnicos.length > moduloIndex) {
+      modulosUnicos.removeAt(moduloIndex);
+      console.log('Módulo único eliminado:', modulosUnicos.value);
+    } else {
+      console.error('Índice de módulo único fuera de rango:', moduloIndex);
+    }
+  }
+
+  agregarParalelo(cursoIndex: number): void {
+    const paralelos = this.cursos.controls[cursoIndex].get(
+      'paralelos'
+    ) as FormArray;
+
+    // Obtén la letra siguiente en la secuencia
+    const siguienteLetra = String.fromCharCode(65 + paralelos.length); // 65 es el código ASCII para 'A'
+
+    paralelos.push(
+      this.fb.group({
+        nombre: [siguienteLetra],
+        // Otros campos de ModuloUnicoSchema según sea necesario
+      })
+    );
+    console.log('Nuevo paralelo añadido:', paralelos.value);
+  }
+
+  quitarParalelo(cursoIndex: number, paraleloIndex: number): void {
+    const paralelos = this.cursos.controls[cursoIndex].get(
+      'paralelos'
+    ) as FormArray;
+
+    if (paralelos.length > paraleloIndex) {
+      paralelos.removeAt(paraleloIndex);
+      console.log('Paralelo eliminado:', paralelos.value);
+    } else {
+      console.error('Índice de paralelo fuera de rango:', paraleloIndex);
+    }
+  }
+
+  // Función para enviar el formulario al backend (simulado)
+  guardarConfiguracion() {
+    if (this.configForm.valid) {
+      const configuracion = this.configForm.value;
+      console.log('Enviando configuración al backend:', configuracion);
+      // Aquí podrías llamar a tu servicio o API para enviar la configuración al backend
+    } else {
+      console.error(
+        'El formulario no es válido. Por favor, completa los campos obligatorios.',
+        this.configForm,
+        this.configForm.valid
+      );
+    }
+  }
 }

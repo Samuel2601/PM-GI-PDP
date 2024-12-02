@@ -1833,8 +1833,8 @@ ruc_arr = [
     ruc: "",
   },
   {
-    base: "CRISTOREY",
-    ruc: "",
+    base: "MADRESALVADOR",
+    ruc: "0891728905001",
   },
 ];
 const marcar_finalizado_orden = async function (req, res) {

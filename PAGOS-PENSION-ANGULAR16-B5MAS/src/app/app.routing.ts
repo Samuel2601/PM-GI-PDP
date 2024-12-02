@@ -35,64 +35,103 @@ import { BillingComponent } from './components/config/billing/billing.component'
 import { ReporPensionComponent } from './components/dashboard/stundes-payments/repor-pension/repor-pension.component';
 
 const appRoute: Routes = [
-	{ path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
 
-	
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'reporte/:id',
+    component: ReporPensionComponent,
+    canActivate: [AuthGuard],
+  },
+  { path: 'control', component: PanelAdminComponent, canActivate: [AuthGuard] },
+  { path: 'login', component: LoginComponent },
 
-	{ path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
-	{ path: 'reporte/:id', component: ReporPensionComponent, canActivate: [AuthGuard] },
-	{ path: 'control', component: PanelAdminComponent, canActivate: [AuthGuard] },
-	{ path: 'login', component: LoginComponent },
-	//{ path: 'registrate', component: RegistroComponent },
-	{ path: 'forgot-password', component: ForgotPasswordComponent },
-	{
-		path: 'new-password/:id',
-		component: NewPasswordComponent,
-	},
-	{ path: 'estudiantes', component: IndexStudentsComponent, canActivate: [AuthGuard] },
-	{
-		path: 'estudiantes/create',
-		component: CreateStudentsComponent,
-		canActivate: [AuthGuard],
-	},
-	{
-		path: 'estudiantes/edit/:id',
-		component: EditStudentsComponent,
-		canActivate: [AuthGuard],
-	},
-	{
-		path: 'estudiantes/detalle/:id',
-		component: DetailStudentsComponent,
-		canActivate: [AuthGuard],
-	},
+  //{ path: 'registrate', component: RegistroComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  {
+    path: 'new-password/:id',
+    component: NewPasswordComponent,
+  },
+  {
+    path: 'estudiantes',
+    component: IndexStudentsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'estudiantes/create',
+    component: CreateStudentsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'estudiantes/edit/:id',
+    component: EditStudentsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'estudiantes/detalle/:id',
+    component: DetailStudentsComponent,
+    canActivate: [AuthGuard],
+  },
 
-	{ path: 'administrativo', component: IndexAdminsComponent, canActivate: [AuthGuard] },
-	{
-		path: 'administrativo/create',
-		component: CreateAdminsComponent,
-		canActivate: [AuthGuard],
-	},
-	{
-		path: 'administrativo/edit/:id',
-		component: EditAdminsComponent,
-		canActivate: [AuthGuard],
-	},
-	
-	//{ path: 'egresos', component: DischargeComponent, canActivate: [AuthGuard] },
-	//{ path: 'proveedores', component: SupplierComponent, canActivate: [AuthGuard] },
+  {
+    path: 'administrativo',
+    component: IndexAdminsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'administrativo/create',
+    component: CreateAdminsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'administrativo/edit/:id',
+    component: EditAdminsComponent,
+    canActivate: [AuthGuard],
+  },
 
-	{ path: 'documentos', component: IndexDocumentComponent, canActivate: [AuthGuard] },
-	//{path: 'documentos/create', component: CreateDocumentoComponent, canActivate:[AuthGuard]},
-	//{path: 'documentos/edit/:id', component: EditDocumentoComponent, canActivate:[AuthGuard]},
+  //{ path: 'egresos', component: DischargeComponent, canActivate: [AuthGuard] },
+  //{ path: 'proveedores', component: SupplierComponent, canActivate: [AuthGuard] },
 
-	{ path: 'pagos', component: IndexPaymentsComponent, canActivate: [AuthGuard] },
-	{ path: 'pagos/create', component: CreatePaymentsComponent, canActivate: [AuthGuard] },
-	{ path: 'pagos/:id', component: ShowPaymentsComponent, canActivate: [AuthGuard] },
+  {
+    path: 'documentos',
+    component: IndexDocumentComponent,
+    canActivate: [AuthGuard],
+  },
+  //{path: 'documentos/create', component: CreateDocumentoComponent, canActivate:[AuthGuard]},
+  //{path: 'documentos/edit/:id', component: EditDocumentoComponent, canActivate:[AuthGuard]},
 
-	{ path: 'configuraciones', component: SchoolYearConfigComponent, canActivate: [AuthGuard] },
-	{ path: 'facturacion', component: BillingComponent, canActivate: [AuthGuard] },
+  {
+    path: 'pagos',
+    component: IndexPaymentsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'pagos/create',
+    component: CreatePaymentsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'pagos/:id',
+    component: ShowPaymentsComponent,
+    canActivate: [AuthGuard],
+  },
 
-	/* {path: '**', component: NotFoundComponent}, */
+  {
+    path: 'configuraciones',
+    component: SchoolYearConfigComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'facturacion',
+    component: BillingComponent,
+    canActivate: [AuthGuard],
+  },
+
+  /* {path: '**', component: NotFoundComponent}, */
 ];
 
 export const appRoutingProviders: any[] = [];
