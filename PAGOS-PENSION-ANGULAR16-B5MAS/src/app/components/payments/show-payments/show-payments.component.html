@@ -1,50 +1,50 @@
 <div class="container">
-	<div class="sidebar">
-		<app-sidebar></app-sidebar>
-	</div>
-	
-	<div class="content">
-        <div class="container-fluid">
-            <div class="row justify-content-center">
-                <div class="col-auto">
-                    <!-- Header -->
-                    <div class="header mt-md-5">
-                        <div class="header-body">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <!-- Pretitle -->
-                                    <h6 class="header-pretitle">Módulo</h6>
-    
-                                    <!-- Title -->
-                                    <h1 class="header-title">Pagos</h1>
-                                </div>
-                            </div>
-                            <!-- / .row -->
-                        </div>
-                    </div>
-                    <div id="iframe1">
-                        <span id="link1"></span>
-                    </div>
-                    <!-- Alert -->
-    
-                    <ng-container *ngIf="!load_data">
-                        <ng-container *ngIf="pago != undefined">
-                            <!-- Card -->
-                            <div class="card mb-5">
-                                <div class="card-header">
-                                    <!-- Title -->
-                                    <h4 class="card-header-title">Pago de Pensión #{{ pago._id.toUpperCase() }}</h4>
-    
-                                    <a [routerLink]="['/pagos']">Regresar</a>
-                                </div>
-                                
-                                <div class="card">
-                                    <div class="card-header">
-                                        Acciones:
-                                    </div>
-                                    <div class="card-body">
-                                            <!-- 
-                                            
+  <div class="sidebar">
+    <app-sidebar></app-sidebar>
+  </div>
+
+  <div class="content">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col-auto">
+          <!-- Header -->
+          <div class="header mt-md-5">
+            <div class="header-body">
+              <div class="row align-items-center">
+                <div class="col">
+                  <!-- Pretitle -->
+                  <h6 class="header-pretitle">Módulo</h6>
+
+                  <!-- Title -->
+                  <h1 class="header-title">Pagos</h1>
+                </div>
+              </div>
+              <!-- / .row -->
+            </div>
+          </div>
+          <div id="iframe1">
+            <span id="link1"></span>
+          </div>
+          <!-- Alert -->
+
+          <ng-container *ngIf="!load_data">
+            <ng-container *ngIf="pago != undefined">
+              <!-- Card -->
+              <div class="card mb-5">
+                <div class="card-header">
+                  <!-- Title -->
+                  <h4 class="card-header-title">
+                    Pago de Pensión #{{ pago._id.toUpperCase() }}
+                  </h4>
+
+                  <a [routerLink]="['/pagos']">Regresar</a>
+                </div>
+
+                <div class="card">
+                  <div class="card-header">Acciones:</div>
+                  <div class="card-body">
+                    <!--
+
                                                 <button
                                                 id="tbnfacturar"
                                                 *ngIf="pago.estado != 'Emitido'"
@@ -63,17 +63,17 @@
                                             >
                                                 Emitir Factura Electrónica
                                             </button>
-                                            
+
                                                 <button
                                         id="tbnfacturar"
-                                        
+
                                         mat-raised-button
                                         class="btn btn-primary btn-sm"
                                         (click)="factura_electronica_soap()"
                                     >
                                         Emitir Factura
-                                    </button>	
-            
+                                    </button>
+
                                     <button
                                                     id="btnimprimircompro"
                                                     mat-raised-button
@@ -82,232 +82,283 @@
                                                 >
                                                     ARMADO
                                                 </button>
-                                                
-                                            
+
+
                                         -->
-                                        <button
-                                        id="btnimprimircompro"
-                                        mat-raised-button
-                                        class="btn btn-info btn-sm"
-                                        (click)="armado()"
-                                    >
-                                        Macro de Envio
-                                        </button>
+                    <button
+                      id="btnimprimircompro"
+                      mat-raised-button
+                      class="btn btn-info btn-sm"
+                      (click)="armado()"
+                    >
+                      Macro de Envio
+                    </button>
 
-                                        <button id="tbnfacturar" mat-raised-button  data-toggle="modal"
-                                        [attr.data-target]="'#modalConfirmarD'" *ngIf="pago.estado == 'Emitido'&&base=='CRISTOREY'" class="btn btn-warning btn-sm" >Devolución</button>
-                                        
-                                        <div class="modal fade" id="modalConfirmarD" style="display: none" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h4 class="modal-title">Devolución de Factura</h4>
-                                                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">×</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <p>¿Desea realizar está devolución?</p>
-                                                        
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">
-                                                            Cancelar
-                                                        </button>
-                                                        <button class="btn btn-primary btn-shadow btn-sm" type="button" (click)="eliminar_factura()">Si</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-    
-                                    </div>                                    
-                                </div>
-                                <div class="card">
-                                    <div class="card-header">
-                                        Comprobantes
-                                    </div>
-                                    <div class="card-body">
+                    <button
+                      id="tbnfacturar"
+                      mat-raised-button
+                      data-toggle="modal"
+                      [attr.data-target]="'#modalConfirmarD'"
+                      *ngIf="pago.estado == 'Emitido'"
+                      class="btn btn-warning btn-sm"
+                    >
+                      Devolución
+                    </button>
 
-                                        <button
-                                            id="btnimprimircompro"
-                                            mat-raised-button
-                                            class="btn btn-light btn-sm"
-                                            (click)="exportTable2()"
-                                        >
-                                            POS TM
-                                        </button>
-                                        
-                                        <button
-                                            id="btnimprimir"
-                                            mat-raised-button
-                                            class="btn btn-dark btn-sm"
-                                            (click)="exportTable()"
-                                        >
-                                            Normal
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-lg-6">
-                                            <table class="table mb-0 table-hover">
-                                                <tbody>
-                                                    <tr *ngIf="pago.estudiante">
-                                                        <th class="border-0 py-2 pl-0">Estudiante:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">
-                                                            {{ pago.estudiante.nombres }} {{ pago.estudiante.apellidos }}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Dirección:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">
-                                                            {{ pago.estudiante.direccion.toUpperCase() }}
-                                                        </td>
-                                                    </tr>
-    
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Fecha:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">{{ pago.createdAt | date : 'long' }}</td>
-                                                    </tr>
-    
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Encargado:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">
-                                                            <ng-container *ngIf="pago.encargado">
-                                                                    {{ pago.encargado.nombres }} {{ pago.encargado.apellidos }} (<span
-                                                                    *ngIf="pago.encargado.rol == 'admin'"
-                                                                    >Administrativo</span
-                                                                ><span *ngIf="pago.encargado.rol == 'secrt'">Colecturía</span
-                                                                ><span *ngIf="pago.encargado.rol == 'direc'">Directivo</span>)
-                                                            </ng-container>
-                                                            <ng-container *ngIf="!pago.encargado">
-                                                                ADMIN INCORP
-                                                            </ng-container>
-                                                            
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <table class="table mb-0 table-hover">
-                                                <tbody>
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Transaccion:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">{{ pago.transaccion }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Estado:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">{{ pago.estado }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Total Pago:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">
-                                                            <span>{{ pago.total_pagar | currency : 'USD' }}</span>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Facturar a:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">
-                                                            <span>{{ pago.estudiante.nombres_factura }}</span>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Cedula:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">
-                                                            <span>{{ pago.estudiante.dni_factura }}</span>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                        id="tbnfacturar"
-                                        *ngIf="pago.estado != 'Emitido'&&base=='CRISTOREY'"
-                                        mat-raised-button
-                                        class="btn btn-primary btn-sm"
-                                        (click)="factura_electronica_soap()"
-                                    >
-                                        Emitir Factura
-                                    </button>
-                            </div>
-    
-                            <div class="card mb-5" id="titular" style="display: none">
-                                <div class="card-header">
-                                    <!-- Title -->
-                                    <h4 class="card-header-title">Pago de Pensión #{{ pago._id }}</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-lg-6">
-                                            <table class="table mb-0 table-hover">
-                                                <tbody style="text-align: left">
-                                                    <tr *ngIf="pago.estudiante">
-                                                        <th class="border-0 py-2 pl-0">Estudiante:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">
-                                                            {{ pago.estudiante.nombres }} {{ pago.estudiante.apellidos }}
-                                                        </td>
-                                                    </tr>
-    
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Fecha:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">{{ pago.createdAt | date : 'long' }}</td>
-                                                    </tr>
-    
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Encargado:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">
-                                                            <ng-container *ngIf="pago.encargado">
-                                                                {{ pago.encargado.nombres }} {{ pago.encargado.apellidos }} (<span
-                                                                *ngIf="pago.encargado.rol == 'admin'"
-                                                                >Administrativo</span
-                                                            ><span *ngIf="pago.encargado.rol == 'secrt'">Colecturía</span
-                                                            ><span *ngIf="pago.encargado.rol == 'direc'">Directivo</span>)
-                                                        </ng-container>
-                                                        <ng-container *ngIf="!pago.encargado">
-                                                            ADMIN INCORP
-                                                        </ng-container>
-    
-                                                            
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <table class="table mb-0 table-hover">
-                                                <tbody style="text-align: left">
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Transaccion:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">{{ pago.transaccion }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Estado:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">{{ pago.estado }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="border-0 py-2 pl-0">Total Pago:</th>
-                                                        <td class="border-0 py-2 px-0 text-muted">
-                                                            <span>{{ pago.total_pagar | currency : 'USD' }}</span>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-    
-                            <!--
+                    <div
+                      class="modal fade"
+                      id="modalConfirmarD"
+                      style="display: none"
+                      aria-hidden="true"
+                    >
+                      <div
+                        class="modal-dialog modal-dialog-centered"
+                        role="document"
+                      >
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h4 class="modal-title">Devolución de Factura</h4>
+                            <button
+                              class="close"
+                              type="button"
+                              data-dismiss="modal"
+                              aria-label="Close"
+                            >
+                              <span aria-hidden="true">×</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <p>¿Desea realizar está devolución?</p>
+                          </div>
+                          <div class="modal-footer">
+                            <button
+                              class="btn btn-secondary btn-sm"
+                              type="button"
+                              data-dismiss="modal"
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              class="btn btn-primary btn-shadow btn-sm"
+                              type="button"
+                              (click)="eliminar_factura()"
+                            >
+                              Si
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header">Comprobantes</div>
+                  <div class="card-body">
+                    <button
+                      id="btnimprimircompro"
+                      mat-raised-button
+                      class="btn btn-light btn-sm"
+                      (click)="exportTable2()"
+                    >
+                      POS TM
+                    </button>
+
+                    <button
+                      id="btnimprimir"
+                      mat-raised-button
+                      class="btn btn-dark btn-sm"
+                      (click)="exportTable()"
+                    >
+                      Normal
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <table class="table mb-0 table-hover">
+                        <tbody>
+                          <tr *ngIf="pago.estudiante">
+                            <th class="border-0 py-2 pl-0">Estudiante:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              {{ pago.estudiante.nombres }}
+                              {{ pago.estudiante.apellidos }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Dirección:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              {{ pago.estudiante.direccion.toUpperCase() }}
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Fecha:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              {{ pago.createdAt | date : "long" }}
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Encargado:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              <ng-container *ngIf="pago.encargado">
+                                {{ pago.encargado.nombres }}
+                                {{ pago.encargado.apellidos }} (<span
+                                  *ngIf="pago.encargado.rol == 'admin'"
+                                  >Administrativo</span
+                                ><span *ngIf="pago.encargado.rol == 'secrt'"
+                                  >Colecturía</span
+                                ><span *ngIf="pago.encargado.rol == 'direc'"
+                                  >Directivo</span
+                                >)
+                              </ng-container>
+                              <ng-container *ngIf="!pago.encargado">
+                                ADMIN INCORP
+                              </ng-container>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="col-lg-6">
+                      <table class="table mb-0 table-hover">
+                        <tbody>
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Transaccion:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              {{ pago.transaccion }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Estado:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              {{ pago.estado }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Total Pago:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              <span>{{
+                                pago.total_pagar | currency : "USD"
+                              }}</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Facturar a:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              <span>{{ pago.estudiante.nombres_factura }}</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Cedula:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              <span>{{ pago.estudiante.dni_factura }}</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  id="tbnfacturar"
+                  *ngIf="pago.estado != 'Emitido'"
+                  mat-raised-button
+                  class="btn btn-primary btn-sm"
+                  (click)="factura_electronica_soap()"
+                >
+                  Emitir Factura
+                </button>
+              </div>
+
+              <div class="card mb-5" id="titular" style="display: none">
+                <div class="card-header">
+                  <!-- Title -->
+                  <h4 class="card-header-title">
+                    Pago de Pensión #{{ pago._id }}
+                  </h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <table class="table mb-0 table-hover">
+                        <tbody style="text-align: left">
+                          <tr *ngIf="pago.estudiante">
+                            <th class="border-0 py-2 pl-0">Estudiante:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              {{ pago.estudiante.nombres }}
+                              {{ pago.estudiante.apellidos }}
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Fecha:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              {{ pago.createdAt | date : "long" }}
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Encargado:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              <ng-container *ngIf="pago.encargado">
+                                {{ pago.encargado.nombres }}
+                                {{ pago.encargado.apellidos }} (<span
+                                  *ngIf="pago.encargado.rol == 'admin'"
+                                  >Administrativo</span
+                                ><span *ngIf="pago.encargado.rol == 'secrt'"
+                                  >Colecturía</span
+                                ><span *ngIf="pago.encargado.rol == 'direc'"
+                                  >Directivo</span
+                                >)
+                              </ng-container>
+                              <ng-container *ngIf="!pago.encargado">
+                                ADMIN INCORP
+                              </ng-container>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="col-lg-6">
+                      <table class="table mb-0 table-hover">
+                        <tbody style="text-align: left">
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Transaccion:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              {{ pago.transaccion }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Estado:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              {{ pago.estado }}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="border-0 py-2 pl-0">Total Pago:</th>
+                            <td class="border-0 py-2 px-0 text-muted">
+                              <span>{{
+                                pago.total_pagar | currency : "USD"
+                              }}</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!--
     <div class="card">
                       <div class="card-body">
                         <ng-container *ngIf="pago.estado == 'Enviado'">
                           <a style="cursor:pointer;" *ngIf="pago.estado == 'Enviado'" class="btn btn-warning text-white mr-3" data-toggle="modal" [attr.data-target]="'#openConfVenta'">Confirmar entrega de pedido</a>
                           <br>
-            
+
                           <div class="modal fade" id="openConfVenta" tabindex="-1" style="display: none;" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                               <div class="modal-content">
@@ -321,7 +372,7 @@
                                 <div class="modal-footer">
                                     <button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">Cancelar</button>
                                     <button *ngIf="!load_final" class="btn btn-danger btn-shadow btn-sm" (click)="finalzar(pago._id)" type="button">Si, Confirmar</button>
-                                    
+
                                     <button disabled *ngIf="load_final" type="button" class="btn btn-danger btn-shadow btn-sm">
                                       <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                       Confirmando...
@@ -342,13 +393,13 @@
                                 </div>
                                 <div class="modal-body">
                                   <p>Desea marcar esta orden como enviada?</p>
-      
+
                                   <input type="text" class="form-control" placeholder="Número de seguimiento" name="tracking" [(ngModel)]="tracking">
                                 </div>
                                 <div class="modal-footer">
                                     <button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">Cancelar</button>
                                     <button *ngIf="!load_send" class="btn btn-danger btn-shadow btn-sm" (click)="enviar(pago._id)" type="button">Si, confirmar</button>
-                                    
+
                                     <button disabled *ngIf="load_send" type="button" class="btn btn-danger btn-shadow btn-sm">
                                       <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                       Enviando...
@@ -357,9 +408,9 @@
                               </div>
                             </div>
                           </div>
-      
+
                           <a style="cursor:pointer;" data-toggle="modal" [attr.data-target]="'#modalPago'" *ngIf="pago.metodo_pago == 'Tarjeta de crédito'" class="btn btn-info text-white mr-3">Consultar pago</a>
-                      
+
                           <div class="modal fade" id="modalPago" tabindex="-1" style="display: none;" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                               <div class="modal-content">
@@ -399,8 +450,8 @@
                                         <th class="border-0 py-2 ps-0">IP Client:</th>
                                         <td class="border-0 py-2 px-0 text-muted" *ngIf="pago.additional_info">{{pago.additional_info.ip_address}}</td>
                                       </tr>
-      
-                                      
+
+
                                     </tbody>
                                   </table>
                                 </div>
@@ -409,13 +460,13 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">Cerrar</button>
-                                    
+
                                 </div>
                               </div>
                             </div>
                           </div>
                         </ng-container>
-      
+
                         <ng-container *ngIf="pago.estado == 'En espera'">
                           <a class="btn btn-primary text-white mr-3" style="cursor: pointer;" data-toggle="modal" [attr.data-target]="'#openConfirmarPago'" *ngIf="pago.estado == 'En espera'">Confirmar pago</a>
                           <div class="modal fade" id="openConfirmarPago" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -431,7 +482,7 @@
                                 <div class="modal-footer">
                                     <button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">Cancelar</button>
                                     <button *ngIf="!load_conf_pago" class="btn btn-danger btn-shadow btn-sm" (click)="confirmar_pago(pago._id)" type="button">Si, enviar</button>
-                                    
+
                                     <button disabled *ngIf="load_conf_pago" type="button" class="btn btn-danger btn-shadow btn-sm">
                                       <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                       Eliminando...
@@ -440,7 +491,7 @@
                               </div>
                             </div>
                           </div>
-                      
+
                           <a class="btn btn-danger text-white mr-3" style="cursor: pointer;" data-toggle="modal" [attr.data-target]="'#openEliminar'" *ngIf="pago.estado == 'En espera'">Eliminar pedido</a>
                           <div class="modal fade" id="openEliminar" tabindex="-1" style="display: none;" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -455,7 +506,7 @@
                                 <div class="modal-footer">
                                     <button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">Cancelar</button>
                                     <button *ngIf="!load_del" class="btn btn-danger btn-shadow btn-sm" (click)="eliminar(pago._id)" type="button">Si, eliminar</button>
-                                    
+
                                     <button disabled *ngIf="load_del" type="button" class="btn btn-danger btn-shadow btn-sm">
                                       <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                       Eliminando...
@@ -465,435 +516,585 @@
                             </div>
                           </div>
                         </ng-container>
-                        
+
                         <ng-container *ngIf="pago.estado == 'Registrado'">
                           <button class="btn btn-success" disabled>Pago finalizada</button>
                         </ng-container>
-                        
+
                       </div>
-                    
+
                     </div>
                     -->
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table mb-0 table-hover">
-                                            <tbody>
-                                                <tr *ngFor="let item of detalles">
-                                                    <td class="border-top-0">
-                                                        <div class="py-2">
-                                                            <div class="font-size-xs text-muted mb-1">Descripción:</div>
-                                                            <p *ngIf="item.tipo == 0"><b>Matricula
-                                                                <br>
-                                                                <b *ngIf="!item.descripcion">
-                                                                    {{item.idpension.curso}}{{item.idpension.paralelo}}	{{ item.idpension.anio_lectivo | date : 'YYYY' }}-
-                                                                    {{item.aniosup}}
-                                                                    </b>
-                                                                    
-                                                                    <b *ngIf="item.descripcion">
-                                                                        {{item.descripcion}}
-                                                                        </b>
-                                                            </b></p>
-                                                            <p *ngFor="let fecha of fecha; let val = index">
-                                                                <b *ngIf="val + 1 == item.tipo">
-                                                                    Pensión {{ item.tipo }} {{ fecha.date | date : 'MMMM' }}
-                                                                    <b *ngIf="!item.descripcion">
-                                                                        {{item.idpension.curso}}{{item.idpension.paralelo}}	{{ item.idpension.anio_lectivo | date : 'YYYY' }}-
-                                                                        {{item.aniosup}}
-                                                                        </b>
-                                                                        <b *ngIf="item.descripcion">
-                                                                            {{item.descripcion}}
-                                                                            </b>
-                                                                    </b>
-                                                                    
-                                                            </p>
-                                                            <p>
-                                                                <b *ngIf="item.descripcion">
-                                                                    {{item.descripcion}}
-                                                                    </b>
-                                                            </p>
-                                                            
-                                                        </div>
-    
-                                                        
-                                                    </td>
-    
-                                                    <td class="border-top-0">
-                                                        <!--Informacion de documento-->
-                                                        <div class="media pl-2 py-2">
-                                                            
-                                                            <div class="media-body pl-3">
-                                                                <h3 class="font-size-sm mb-3">
-                                                                    <a class="nav-link font-weight-bold">
-                                                                        Documento: {{
-                                                                        item.documento.documento
-                                                                    }}</a>
-                                                                    <br>
-                                                                    <span
-                                                                    *ngIf="item.estado == 'Pago atrasado'"
-                                                                    class="badge badge-warning"
-                                                                    style="background-color: #f1ee51; margin-left: 1rem"
-                                                                    >{{ item.estado }}</span
-                                                                >
-                                                                <span
-                                                                    *ngIf="item.estado == 'Pago anticipado'"
-                                                                    class="badge badge-warning"
-                                                                    style="background-color: #469df4; margin-left: 1rem"
-                                                                    >{{ item.estado }}</span
-                                                                >
-                                                                <span
-                                                                    *ngIf="item.estado == 'Pago a tiempo'"
-                                                                    class="badge badge-warning"
-                                                                    style="background-color: #67fa49; margin-left: 1rem"
-                                                                    >{{ item.estado }}</span
-                                                                >
-    
-                                                                <span
-                                                                    *ngIf="item.estado == 'Pago atrasado Abono'"
-                                                                    class="badge badge-warning"
-                                                                    style="background-color: #f1ee51; margin-left: 1rem"
-                                                                    >{{ item.estado }}</span
-                                                                >
-                                                                <span
-                                                                    *ngIf="item.estado == 'Pago anticipado Abono'"
-                                                                    class="badge badge-warning"
-                                                                    style="background-color: #469df4; margin-left: 1rem"
-                                                                    >{{ item.estado }}</span
-                                                                >
-                                                                <span
-                                                                    *ngIf="item.estado == 'Pago a tiempo Abono'"
-                                                                    class="badge badge-warning"
-                                                                    style="background-color: #67fa49; margin-left: 1rem"
-                                                                    >{{ item.estado }}</span
-                                                                >
-                                                                <span
-                                                                    *ngIf="item.estado.includes('Abono') && !item.estado.includes('Pago') "
-                                                                    class="badge badge-warning"
-                                                                    style="background-color: #d12ae155; margin-left: 1rem"
-                                                                    >{{ item.estado }}</span
-                                                                >
-                                                                </h3>
-                                                                <!--<ul class="list-unstyled font-size-xs mt-n2 mb-2" style="margin-left: 1rem">
+              <div class="card">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table mb-0 table-hover">
+                      <tbody>
+                        <tr *ngFor="let item of detalles">
+                          <td class="border-top-0">
+                            <div class="py-2">
+                              <div class="font-size-xs text-muted mb-1">
+                                Descripción:
+                              </div>
+                              <p *ngIf="item.tipo == 0">
+                                <b
+                                  >Matricula
+                                  <br />
+                                  <b *ngIf="!item.descripcion">
+                                    {{ item.idpension.curso
+                                    }}{{ item.idpension.paralelo }}
+                                    {{
+                                      item.idpension.anio_lectivo
+                                        | date : "YYYY"
+                                    }}-
+                                    {{ item.aniosup }}
+                                  </b>
+
+                                  <b *ngIf="item.descripcion">
+                                    {{ item.descripcion }}
+                                  </b>
+                                </b>
+                              </p>
+                              <p *ngFor="let fecha of fecha; let val = index">
+                                <b *ngIf="val + 1 == item.tipo">
+                                  Pensión {{ item.tipo }}
+                                  {{ fecha.date | date : "MMMM" }}
+                                  <b *ngIf="!item.descripcion">
+                                    {{ item.idpension.curso
+                                    }}{{ item.idpension.paralelo }}
+                                    {{
+                                      item.idpension.anio_lectivo
+                                        | date : "YYYY"
+                                    }}-
+                                    {{ item.aniosup }}
+                                  </b>
+                                  <b *ngIf="item.descripcion">
+                                    {{ item.descripcion }}
+                                  </b>
+                                </b>
+                              </p>
+                              <p>
+                                <b *ngIf="item.descripcion">
+                                  {{ item.descripcion }}
+                                </b>
+                              </p>
+                            </div>
+                          </td>
+
+                          <td class="border-top-0">
+                            <!--Informacion de documento-->
+                            <div class="media pl-2 py-2">
+                              <div class="media-body pl-3">
+                                <h3 class="font-size-sm mb-3">
+                                  <a class="nav-link font-weight-bold">
+                                    Documento: {{ item.documento.documento }}</a
+                                  >
+                                  <br />
+                                  <span
+                                    *ngIf="item.estado == 'Pago atrasado'"
+                                    class="badge badge-warning"
+                                    style="
+                                      background-color: #f1ee51;
+                                      margin-left: 1rem;
+                                    "
+                                    >{{ item.estado }}</span
+                                  >
+                                  <span
+                                    *ngIf="item.estado == 'Pago anticipado'"
+                                    class="badge badge-warning"
+                                    style="
+                                      background-color: #469df4;
+                                      margin-left: 1rem;
+                                    "
+                                    >{{ item.estado }}</span
+                                  >
+                                  <span
+                                    *ngIf="item.estado == 'Pago a tiempo'"
+                                    class="badge badge-warning"
+                                    style="
+                                      background-color: #67fa49;
+                                      margin-left: 1rem;
+                                    "
+                                    >{{ item.estado }}</span
+                                  >
+
+                                  <span
+                                    *ngIf="item.estado == 'Pago atrasado Abono'"
+                                    class="badge badge-warning"
+                                    style="
+                                      background-color: #f1ee51;
+                                      margin-left: 1rem;
+                                    "
+                                    >{{ item.estado }}</span
+                                  >
+                                  <span
+                                    *ngIf="
+                                      item.estado == 'Pago anticipado Abono'
+                                    "
+                                    class="badge badge-warning"
+                                    style="
+                                      background-color: #469df4;
+                                      margin-left: 1rem;
+                                    "
+                                    >{{ item.estado }}</span
+                                  >
+                                  <span
+                                    *ngIf="item.estado == 'Pago a tiempo Abono'"
+                                    class="badge badge-warning"
+                                    style="
+                                      background-color: #67fa49;
+                                      margin-left: 1rem;
+                                    "
+                                    >{{ item.estado }}</span
+                                  >
+                                  <span
+                                    *ngIf="
+                                      item.estado.includes('Abono') &&
+                                      !item.estado.includes('Pago')
+                                    "
+                                    class="badge badge-warning"
+                                    style="
+                                      background-color: #d12ae155;
+                                      margin-left: 1rem;
+                                    "
+                                    >{{ item.estado }}</span
+                                  >
+                                </h3>
+                                <!--<ul class="list-unstyled font-size-xs mt-n2 mb-2" style="margin-left: 1rem">
                                                                     <li class="mb-0">
                                                                         <span class="text-muted">Saldo:</span>
                                                                         {{ item.documento.valor | currency : 'USD' }}
                                                                     </li>
                                                                 </ul> -->
-                                                                
-    
-                                                                
-                                                            </div>
-    
-    
-                                                        </div>
-                                                    </td>
-                                                    <td class="border-top-0">
-                                                        <div class="py-2 pr-3 text-right">
-                                                            <div class="font-size-xs text-muted mb-1">Valor:</div>
-                                                            <div class="font-size-sm font-weight-bold text-dark">
-                                                                <span>{{ item.valor | currency : 'USD' }}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-    
-                                                <tr>
-                                                    <td style="padding-left: 1.3rem !important" colspan="2">
-                                                        <b>Total</b>
-                                                    </td>
-                                                    <td class="" colspan="2">
-                                                        <div class="py-2 pr-3 text-right">
-                                                            <span>{{ pago.total_pagar | currency : 'USD' }}</span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <table class="table mb-0 table-hover" id="detalle" style="display: none">
-                                            <thead style="font-size: 20px">
-                                                <th style="text-align: left">Descripción</th>
-                                                <th style="text-align: left">Documento/tiempo de pago</th>
-                                                <th style="text-align: left">Valor</th>
-                                            </thead>
-                                            <tbody style="font-size: 18px; margin: 5cm">
-                                                <tr *ngFor="let item of detalles">
-                                                    <td class="border-top-0" style="padding-top: 1cm">
-                                                        <div class="py-2">
-                                                            <div class="font-size-xs text-muted mb-1">Descripción:</div>
-                                                            <p *ngIf="item.tipo == 0"><b>Matricula
-                                                                <br>
-                                                                <b *ngIf="!item.descripcion">
-                                                                    {{item.idpension.curso}}{{item.idpension.paralelo}}	{{ item.idpension.anio_lectivo | date : 'YYYY' }}-
-                                                                    {{item.aniosup}}
-                                                                    </b>
-                                                                    
-                                                                    <b *ngIf="item.descripcion">
-                                                                        {{item.descripcion}}
-                                                                        </b>
-                                                            </b></p>
-                                                            <p *ngFor="let fecha of fecha; let val = index">
-                                                                <b *ngIf="val + 1 == item.tipo">
-                                                                    Pensión {{ item.tipo }} {{ fecha.date | date : 'MMMM' }}
-                                                                    <b *ngIf="!item.descripcion">
-                                                                        {{item.idpension.curso}}{{item.idpension.paralelo}}	{{ item.idpension.anio_lectivo | date : 'YYYY' }}-
-                                                                        {{item.aniosup}}
-                                                                        </b>
-                                                                        <b *ngIf="item.descripcion">
-                                                                            {{item.descripcion}}
-                                                                            </b>
-                                                                    </b>
-                                                                    
-                                                            </p>
-                                                            <p>
-                                                                <b *ngIf="item.descripcion">
-                                                                    {{item.descripcion}}
-                                                                    </b>
-                                                            </p>
-                                                            
-                                                        </div>
-                                                    </td>
-    
-                                                    <td class="border-top-0" style="padding-top: 1cm">
-                                                        
-                                                        <h3 class="font-size-sm mb-3">
-                                                            <a style="cursor: pointer" class="nav-link font-weight-bold">
-                                                                {{
-                                                                item.documento.documento
-                                                            }}</a>
-                                                            <br>
-                                                            <span
-                                                            *ngIf="item.estado == 'Pago atrasado'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #f1ee51; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago anticipado'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #469df4; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago a tiempo'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #67fa49; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-    
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago atrasado Abono'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #f1ee51; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago anticipado Abono'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #469df4; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago a tiempo Abono'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #67fa49; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                                    *ngIf="item.estado.includes('Abono') && !item.estado.includes('Pago') "
-                                                                    class="badge badge-warning"
-                                                                    style="background-color: #d12ae155; margin-left: 1rem"
-                                                                    >{{ item.estado }}</span
-                                                                >
-                                                        </h3>
-                                                    </td>
-                                                    <td class="border-top-0" style="padding-top: 1cm">
-                                                        <div class="py-2 pr-3 text-right">
-                                                            <div class="font-size-sm font-weight-bold text-dark">
-                                                                <span>{{ item.valor | currency : 'USD' }}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-    
-                                                <tr>
-                                                    <td style="text-align: right; padding-top: 1cm" colspan="2">
-                                                        <div class="py-2 pr-3 text-right">
-                                                            <p>Total</p>
-                                                        </div>
-                                                    </td>
-                                                    <td style="padding-top: 1cm" colspan="2">
-                                                        <div class="py-2 pr-3 text-right">
-                                                            <span>{{ pago.total_pagar | currency : 'USD' }}</span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <table class="table mb-0 table-hover" id="detallen" style="display: none">
-                                            <thead style="font-size: 20px">
-                                                <th style="text-align: left">Descrp.</th>
-                                                <th style="text-align: left">Docm.</th>
-                                                <th style="text-align: left">Valor</th>
-                                            </thead>
-                                            <tbody style="font-size: 18px; margin: 5cm">
-                                                <tr *ngFor="let item of detalles">
-                                                    <td class="border-top-0" style="padding-top: 1cm">
-                                                        <div class="py-2">
-                                                            <div class="font-size-xs text-muted mb-1">Descripción:</div>
-                                                            <p *ngIf="item.tipo == 0"><b>Matricula
-                                                                <br>
-                                                                <b *ngIf="!item.descripcion">
-                                                                    {{item.idpension.curso}}{{item.idpension.paralelo}}	{{ item.idpension.anio_lectivo | date : 'YYYY' }}-
-                                                                    {{item.aniosup}}
-                                                                    </b>
-                                                                    
-                                                                    <b *ngIf="item.descripcion">
-                                                                        {{item.descripcion}}
-                                                                        </b>
-                                                            </b></p>
-                                                            <p *ngFor="let fecha of fecha; let val = index">
-                                                                <b *ngIf="val + 1 == item.tipo">
-                                                                    Pensión {{ item.tipo }} {{ fecha.date | date : 'MMMM' }}
-                                                                    <b *ngIf="!item.descripcion">
-                                                                        {{item.idpension.curso}}{{item.idpension.paralelo}}	{{ item.idpension.anio_lectivo | date : 'YYYY' }}-
-                                                                        {{item.aniosup}}
-                                                                        </b>
-                                                                        <b *ngIf="item.descripcion">
-                                                                            {{item.descripcion}}
-                                                                            </b>
-                                                                    </b>
-                                                                    
-                                                            </p>
-                                                            <p>
-                                                                <b *ngIf="item.descripcion">
-                                                                    {{item.descripcion}}
-                                                                    </b>
-                                                            </p>
-                                                            
-                                                        </div>
-                                                    </td>
-    
-                                                    <td class="border-top-0" style="padding-top: 1cm">
-                                                        
-                                                        <h3 class="font-size-sm mb-3">
-                                                            <a style="cursor: pointer" class="nav-link font-weight-bold">
-                                                                {{
-                                                                item.documento.documento
-                                                            }}</a>
-                                                            <br>
-                                                            <span
-                                                            *ngIf="item.estado == 'Pago atrasado'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #f1ee51; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago anticipado'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #469df4; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago a tiempo'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #67fa49; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-    
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago atrasado Abono'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #f1ee51; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago anticipado Abono'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #469df4; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                            *ngIf="item.estado == 'Pago a tiempo Abono'"
-                                                            class="badge badge-warning"
-                                                            style="background-color: #67fa49; margin-left: 1rem"
-                                                            >{{ item.estado }}</span
-                                                        >
-                                                        <span
-                                                                    *ngIf="item.estado.includes('Abono') && !item.estado.includes('Pago') "
-                                                                    class="badge badge-warning"
-                                                                    style="background-color: #d12ae155; margin-left: 1rem"
-                                                                    >{{ item.estado }}</span
-                                                                >
-                                                        </h3>
-                                                    </td>
-                                                    <td class="border-top-0" style="padding-top: 1cm">
-                                                        <div class="py-2 pr-3 text-right">
-                                                            <div class="font-size-sm font-weight-bold text-dark">
-                                                                <span>{{ item.valor | currency : '$' }}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-    
-                                                <tr>
-                                                    <td style="text-align: right; padding-top: 1cm" colspan="2">
-                                                        <div class="py-2 pr-3 text-right">
-                                                            <p>Total</p>
-                                                        </div>
-                                                    </td>
-                                                    <td style="padding-top: 1cm" colspan="2">
-                                                        <div class="py-2 pr-3 text-right">
-                                                            <span>{{ pago.total_pagar | currency : '$' }}</span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                              </div>
                             </div>
-                        </ng-container>
-                        <ng-container *ngIf="pago == undefined && !load_data">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="row justify-content-center">
-                                        <div class="col-12 col-md-5 col-xl-4 my-5">
-                                            <div class="text-center">
-                                                <!-- Preheading -->
-                                                <h6 class="text-uppercase text-muted mb-4">404 error</h6>
-    
-                                                <!-- Heading -->
-                                                <h1 class="display-4 mb-3">There’s no page here 😭</h1>
-    
-                                                <!-- Subheading -->
-                                                <p class="text-muted mb-4">Looks like you ended up here by accident?</p>
-    
-                                                <!-- Button -->
-                                                <a [routerLink]="['/pagos']" class="btn btn-lg btn-primary"> Regresar a pagos </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                          </td>
+                          <td class="border-top-0">
+                            <div class="py-2 pr-3 text-right">
+                              <div class="font-size-xs text-muted mb-1">
+                                Valor:
+                              </div>
+                              <div
+                                class="font-size-sm font-weight-bold text-dark"
+                              >
+                                <span>{{ item.valor | currency : "USD" }}</span>
+                              </div>
                             </div>
-                        </ng-container>
-                    </ng-container>
-                    <ng-container *ngIf="load_data">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-12 text-center">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden"></span>
-                                        </div>
-                                    </div>
-                                </div>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td
+                            style="padding-left: 1.3rem !important"
+                            colspan="2"
+                          >
+                            <b>Total</b>
+                          </td>
+                          <td class="" colspan="2">
+                            <div class="py-2 pr-3 text-right">
+                              <span>{{
+                                pago.total_pagar | currency : "USD"
+                              }}</span>
                             </div>
-                        </div>
-                    </ng-container>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      class="table mb-0 table-hover"
+                      id="detalle"
+                      style="display: none"
+                    >
+                      <thead style="font-size: 20px">
+                        <th style="text-align: left">Descripción</th>
+                        <th style="text-align: left">
+                          Documento/tiempo de pago
+                        </th>
+                        <th style="text-align: left">Valor</th>
+                      </thead>
+                      <tbody style="font-size: 18px; margin: 5cm">
+                        <tr *ngFor="let item of detalles">
+                          <td class="border-top-0" style="padding-top: 1cm">
+                            <div class="py-2">
+                              <div class="font-size-xs text-muted mb-1">
+                                Descripción:
+                              </div>
+                              <p *ngIf="item.tipo == 0">
+                                <b
+                                  >Matricula
+                                  <br />
+                                  <b *ngIf="!item.descripcion">
+                                    {{ item.idpension.curso
+                                    }}{{ item.idpension.paralelo }}
+                                    {{
+                                      item.idpension.anio_lectivo
+                                        | date : "YYYY"
+                                    }}-
+                                    {{ item.aniosup }}
+                                  </b>
+
+                                  <b *ngIf="item.descripcion">
+                                    {{ item.descripcion }}
+                                  </b>
+                                </b>
+                              </p>
+                              <p *ngFor="let fecha of fecha; let val = index">
+                                <b *ngIf="val + 1 == item.tipo">
+                                  Pensión {{ item.tipo }}
+                                  {{ fecha.date | date : "MMMM" }}
+                                  <b *ngIf="!item.descripcion">
+                                    {{ item.idpension.curso
+                                    }}{{ item.idpension.paralelo }}
+                                    {{
+                                      item.idpension.anio_lectivo
+                                        | date : "YYYY"
+                                    }}-
+                                    {{ item.aniosup }}
+                                  </b>
+                                  <b *ngIf="item.descripcion">
+                                    {{ item.descripcion }}
+                                  </b>
+                                </b>
+                              </p>
+                              <p>
+                                <b *ngIf="item.descripcion">
+                                  {{ item.descripcion }}
+                                </b>
+                              </p>
+                            </div>
+                          </td>
+
+                          <td class="border-top-0" style="padding-top: 1cm">
+                            <h3 class="font-size-sm mb-3">
+                              <a
+                                style="cursor: pointer"
+                                class="nav-link font-weight-bold"
+                              >
+                                {{ item.documento.documento }}</a
+                              >
+                              <br />
+                              <span
+                                *ngIf="item.estado == 'Pago atrasado'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #f1ee51;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="item.estado == 'Pago anticipado'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #469df4;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="item.estado == 'Pago a tiempo'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #67fa49;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+
+                              <span
+                                *ngIf="item.estado == 'Pago atrasado Abono'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #f1ee51;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="item.estado == 'Pago anticipado Abono'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #469df4;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="item.estado == 'Pago a tiempo Abono'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #67fa49;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="
+                                  item.estado.includes('Abono') &&
+                                  !item.estado.includes('Pago')
+                                "
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #d12ae155;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                            </h3>
+                          </td>
+                          <td class="border-top-0" style="padding-top: 1cm">
+                            <div class="py-2 pr-3 text-right">
+                              <div
+                                class="font-size-sm font-weight-bold text-dark"
+                              >
+                                <span>{{ item.valor | currency : "USD" }}</span>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td
+                            style="text-align: right; padding-top: 1cm"
+                            colspan="2"
+                          >
+                            <div class="py-2 pr-3 text-right">
+                              <p>Total</p>
+                            </div>
+                          </td>
+                          <td style="padding-top: 1cm" colspan="2">
+                            <div class="py-2 pr-3 text-right">
+                              <span>{{
+                                pago.total_pagar | currency : "USD"
+                              }}</span>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      class="table mb-0 table-hover"
+                      id="detallen"
+                      style="display: none"
+                    >
+                      <thead style="font-size: 20px">
+                        <th style="text-align: left">Descrp.</th>
+                        <th style="text-align: left">Docm.</th>
+                        <th style="text-align: left">Valor</th>
+                      </thead>
+                      <tbody style="font-size: 18px; margin: 5cm">
+                        <tr *ngFor="let item of detalles">
+                          <td class="border-top-0" style="padding-top: 1cm">
+                            <div class="py-2">
+                              <div class="font-size-xs text-muted mb-1">
+                                Descripción:
+                              </div>
+                              <p *ngIf="item.tipo == 0">
+                                <b
+                                  >Matricula
+                                  <br />
+                                  <b *ngIf="!item.descripcion">
+                                    {{ item.idpension.curso
+                                    }}{{ item.idpension.paralelo }}
+                                    {{
+                                      item.idpension.anio_lectivo
+                                        | date : "YYYY"
+                                    }}-
+                                    {{ item.aniosup }}
+                                  </b>
+
+                                  <b *ngIf="item.descripcion">
+                                    {{ item.descripcion }}
+                                  </b>
+                                </b>
+                              </p>
+                              <p *ngFor="let fecha of fecha; let val = index">
+                                <b *ngIf="val + 1 == item.tipo">
+                                  Pensión {{ item.tipo }}
+                                  {{ fecha.date | date : "MMMM" }}
+                                  <b *ngIf="!item.descripcion">
+                                    {{ item.idpension.curso
+                                    }}{{ item.idpension.paralelo }}
+                                    {{
+                                      item.idpension.anio_lectivo
+                                        | date : "YYYY"
+                                    }}-
+                                    {{ item.aniosup }}
+                                  </b>
+                                  <b *ngIf="item.descripcion">
+                                    {{ item.descripcion }}
+                                  </b>
+                                </b>
+                              </p>
+                              <p>
+                                <b *ngIf="item.descripcion">
+                                  {{ item.descripcion }}
+                                </b>
+                              </p>
+                            </div>
+                          </td>
+
+                          <td class="border-top-0" style="padding-top: 1cm">
+                            <h3 class="font-size-sm mb-3">
+                              <a
+                                style="cursor: pointer"
+                                class="nav-link font-weight-bold"
+                              >
+                                {{ item.documento.documento }}</a
+                              >
+                              <br />
+                              <span
+                                *ngIf="item.estado == 'Pago atrasado'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #f1ee51;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="item.estado == 'Pago anticipado'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #469df4;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="item.estado == 'Pago a tiempo'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #67fa49;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+
+                              <span
+                                *ngIf="item.estado == 'Pago atrasado Abono'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #f1ee51;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="item.estado == 'Pago anticipado Abono'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #469df4;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="item.estado == 'Pago a tiempo Abono'"
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #67fa49;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                              <span
+                                *ngIf="
+                                  item.estado.includes('Abono') &&
+                                  !item.estado.includes('Pago')
+                                "
+                                class="badge badge-warning"
+                                style="
+                                  background-color: #d12ae155;
+                                  margin-left: 1rem;
+                                "
+                                >{{ item.estado }}</span
+                              >
+                            </h3>
+                          </td>
+                          <td class="border-top-0" style="padding-top: 1cm">
+                            <div class="py-2 pr-3 text-right">
+                              <div
+                                class="font-size-sm font-weight-bold text-dark"
+                              >
+                                <span>{{ item.valor | currency : "$" }}</span>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td
+                            style="text-align: right; padding-top: 1cm"
+                            colspan="2"
+                          >
+                            <div class="py-2 pr-3 text-right">
+                              <p>Total</p>
+                            </div>
+                          </td>
+                          <td style="padding-top: 1cm" colspan="2">
+                            <div class="py-2 pr-3 text-right">
+                              <span>{{
+                                pago.total_pagar | currency : "$"
+                              }}</span>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="pago == undefined && !load_data">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row justify-content-center">
+                    <div class="col-12 col-md-5 col-xl-4 my-5">
+                      <div class="text-center">
+                        <!-- Preheading -->
+                        <h6 class="text-uppercase text-muted mb-4">
+                          404 error
+                        </h6>
+
+                        <!-- Heading -->
+                        <h1 class="display-4 mb-3">There’s no page here 😭</h1>
+
+                        <!-- Subheading -->
+                        <p class="text-muted mb-4">
+                          Looks like you ended up here by accident?
+                        </p>
+
+                        <!-- Button -->
+                        <a
+                          [routerLink]="['/pagos']"
+                          class="btn btn-lg btn-primary"
+                        >
+                          Regresar a pagos
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </ng-container>
+          <ng-container *ngIf="load_data">
+            <div class="card">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-12 text-center">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <!-- / .row -->
+          </ng-container>
         </div>
-        
+      </div>
+      <!-- / .row -->
     </div>
+  </div>
 </div>
