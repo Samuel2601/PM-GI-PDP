@@ -1826,7 +1826,7 @@ function toXML(json) {
 ruc_arr = [
   {
     base: "CRISTOREY",
-    ruc: "",
+    ruc: "0891726503001",
   },
   {
     base: "CRISTOREY",
