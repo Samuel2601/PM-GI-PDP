@@ -1838,61 +1838,72 @@ ruc_arr = [
   },
 ];
 const marcar_finalizado_orden = async function (req, res) {
-  if (req.user) {
-    try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Registro = conn.model("registro", RegistroSchema);
-      Pago = conn.model("pago", VentaSchema);
-      var id = req.params["id"];
-      let data = req.body;
-      data.numeroIdPago = id;
-      data.ruc = ruc_arr.findOne(
-        (element) => element.base === req.user.base
-      ).ruc;
-      let msg = "";
+  if (!req.user) {
+    return res.status(403).send({ message: "NoAccess" });
+  }
 
-      var url_validar =
-        "http://34.172.21.101:8080/interfaceFacturaV2/ws/servicioFacturacionPort?wsdl";
-      soap.createClient(url_validar, function (err, client) {
-        if (err) {
-          console.log("ERROR CLIENTE:", err);
-        } else {
-          client.Facturador(data, function (err1, result) {
-            if (err1) {
-              console.log("ERROR:", err);
-            } else {
-              console.log("RESPUESTA: ", result.respuesta.respuestaGenerada);
-              if (
-                result.respuesta.respuestaGenerada == "Transaccion Exitosa" &&
-                result.respuesta.respuestaTransaccion == "OK"
-              ) {
-                cambiar_estado(id, req.user.base, req.user.sub, data);
+  try {
+    // Conexión a la base de datos correspondiente
+    const conn = mongoose.connection.useDb(req.user.base);
+    const Registro = conn.model("registro", RegistroSchema);
+    const Pago = conn.model("pago", VentaSchema);
 
-                msg = result.respuesta.respuestaGenerada;
-              } else {
-                msg = result.respuesta.respuestaGenerada;
-              }
-              res.status(200).send({ message: msg });
-            }
-          });
-        }
-      });
-    } catch (error) {
-      console.error(error);
-      if (error instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({
-          message: "Error de validación. Por favor, verifica tus datos.",
-        });
-      } else {
-        res.status(500).send({
-          message: "Algo salió mal. Por favor, intenta nuevamente más tarde.",
-        });
-      }
+    const id = req.params["id"];
+    const data = { ...req.body, numeroIdPago: id };
+
+    // Buscar el RUC basado en la base del usuario
+    const rucEntry = ruc_arr.find((element) => element.base === req.user.base);
+    if (!rucEntry || !rucEntry.ruc) {
+      return res.status(400).send({ message: "RUC no encontrado o inválido" });
     }
-  } else {
-    res.status(403).send({ message: "NoAccess" });
+    data.ruc = rucEntry.ruc;
+
+    // URL del servicio SOAP
+    const url_validar =
+      "http://34.172.21.101:8080/interfaceFacturaV2/ws/servicioFacturacionPort?wsdl";
+
+    // Crear cliente SOAP
+    soap.createClient(url_validar, function (err, client) {
+      if (err) {
+        console.error("ERROR CLIENTE:", err);
+        return res.status(500).send({ message: "Error al crear cliente SOAP" });
+      }
+
+      // Llamada al servicio Facturador
+      client.Facturador(data, function (err1, result) {
+        if (err1) {
+          console.error("ERROR FACTURADOR:", err1);
+          return res
+            .status(500)
+            .send({ message: "Error al procesar la factura" });
+        }
+
+        console.log("RESPUESTA: ", result?.respuesta?.respuestaGenerada);
+
+        if (
+          result?.respuesta?.respuestaGenerada === "Transaccion Exitosa" &&
+          result?.respuesta?.respuestaTransaccion === "OK"
+        ) {
+          cambiar_estado(id, req.user.base, req.user.sub, data);
+        }
+
+        const msg = result?.respuesta?.respuestaGenerada || "Error desconocido";
+        res.status(200).send({ message: msg });
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res.status(400).send({
+        message: "Error de validación. Por favor, verifica tus datos.",
+      });
+    }
+    res.status(500).send({
+      message: "Algo salió mal. Por favor, intenta nuevamente más tarde.",
+    });
   }
 };
+
 cambiar_estado = async function (id, base, admin, data) {
   let conn = mongoose.connection.useDb(base);
   Registro = conn.model("registro", RegistroSchema);
