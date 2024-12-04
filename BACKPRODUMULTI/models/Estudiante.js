@@ -14,7 +14,7 @@ var EstudianteSchema = Schema({
     f_nacimiento: {type: String, required: false},
     telefono: {type: String, required: false},
     dni: {type: String, required: true},
-    direccion: {type: String, required: true},
+    direccion: {type: String, required: false},
     estado:{type: String, default:'Activo', required: false},
     f_desac: {type: String, required: false},
     anio_desac: {type: String, required: false},

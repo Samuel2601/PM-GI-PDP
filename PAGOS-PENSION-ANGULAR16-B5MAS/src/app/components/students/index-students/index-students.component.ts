@@ -75,7 +75,7 @@ export class IndexStudentsComponent implements OnInit {
 	//ID clave de acceso:FF00XR3WS37WD8LQBF6UQ2MIXJMNT4C6RHUU825Q
 	//clave de acceso sercreta: evxpkjLuevPv5Q0nXXoBEoqJvy9QF2fwuMUzjj8Y
 	//comando de inicio rapido: npx flatfile init --team 50869 --key FF00XR3WS37WD8LQBF6UQ2MIXJMNT4C6RHUU825Q  --secret evxpkjLuevPv5Q0nXXoBEoqJvy9QF2fwuMUzjj8Y  --environment test --name "flatfile-workbook"
-	
+
 	//50869
 	//test
 	//X-Api-Key: <access key id>+<secret access key>
@@ -91,7 +91,7 @@ export class IndexStudentsComponent implements OnInit {
 		this._adminService.obtener_config_admin(this.token).subscribe((response) => {
 			if (response.message) {
 				this.router.navigate(['/configuracion']);
-			} else {				
+			} else {
 				this.config_const = response.data[0];
 				//console.log(this.config_const);
 				this._adminService.obtener_admin(aux, this.token).subscribe((response) => {
@@ -102,17 +102,17 @@ export class IndexStudentsComponent implements OnInit {
 						////console.log(this.rol);
 					}else{
 						let user= JSON.parse(localStorage.getItem('user_data')!);
-		
+
 						if(!this.rol){
 							this.rol=user.rol;
 							this.recarga();
 						}
 					}
-					
+
 				});
 			}
 		});
-		
+
 	}
 	recarga() {
 		//this.load_data_est=true;
@@ -129,7 +129,7 @@ export class IndexStudentsComponent implements OnInit {
 				this.estudiantes_const.forEach((element) => {
 				  const fechaDesactivacion = new Date(element.f_desac);
 				  const fechaAnioLectivo = new Date(this.config_const.anio_lectivo);
-			  
+
 				  if (element.estado === 'Desactivado') {
 					this.estudiantes.push({ ckechk: 0, element });
 				  } else {
@@ -143,7 +143,7 @@ export class IndexStudentsComponent implements OnInit {
 				this.estudiantes_const.forEach((element) => {
 				  const fechaDesactivacion = new Date(element.f_desac);
 				  const fechaAnioLectivo = new Date(this.config_const.anio_lectivo);
-			  
+
 				  if (element.estado !== 'Desactivado') {
 					this.estudiantes.push({ ckechk: 0, element });
 				  } else {
@@ -153,44 +153,44 @@ export class IndexStudentsComponent implements OnInit {
 				  }
 				});
 			  }
-			  
+
 			this.progressBarService.setProgress(this.progressBarService.getProgress()+50);
 			this.load_data_est = false;
 			this.progressBarService.setProgress(0);
 			/*
 		this.estudiantes_const.forEach(element => {
-			
+
 			if(element.estado!='Desactivado'&&element.estado!=undefined){
 				//////console.log(element.estado)
 				this.estudiantes.push({ckechk:0,element});
 			}
-			
+
 		});*/
 			//////console.log(this.estudiantes);
 			//this.load_data_est = false;
 		});
 	}
   importdatos(){
-    
+
   }
 /*
 	importdatos(){
-		
+
 		//console.log("Nien");
 		Flatfile.requestDataFromUser({
 			//FF00XR3WS37WD8LQBF6UQ2MIXJMNT4C6RHUU825Q --incorp
 			//049743df-0983-4d9d-9e83-beb35f411989 --samuel
 		embedId:'049743df-0983-4d9d-9e83-beb35f411989',
-		
+
 		onData:(chunk,next)=>{
 			//console.log(chunk);
 			chunk.records.forEach((element:any) => {
 				this.carga.push(element);
 			});
-			
+
 			//this.subir=chunk.records;
 			//console.log(this.carga);
-			
+
 			if(chunk.totalChunks!=1){
 				next();
 			}else{
@@ -200,7 +200,7 @@ export class IndexStudentsComponent implements OnInit {
 				//console.log(this.subir);
 				this.subir_estudiante();
 			}
-			
+
 		},
 		onInit:({session})=>{
 			session.off('close', () => {});
@@ -365,12 +365,12 @@ onFileChange(event:any) {
     reader.onload = () => {
       const csvData = reader.result;
       if(csvData){
-        const parsedData = Papa.parse(csvData.toString(), { header: true });        
+        const parsedData = Papa.parse(csvData.toString(), { header: true });
         //console.log(parsedData);
         this.encabezados=parsedData.meta.fields;
         //console.log(this.encabezados)
         this.abrirVentana(parsedData);
-      }     
+      }
     };
   }
 
@@ -380,18 +380,18 @@ onFileChange(event:any) {
 	   this.proveedor=[
 		 {'nombre':'apellidos','label':'Apellidos',"validacion": /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/, "obligatorio": true,"mensaje":"Solo letras"},
 		 {'nombre':'curso','label':'Curso', "obligatorio": true,"mensaje":"Obligatorio"},
-		 {'nombre':'direccion','label':'Dirección', "obligatorio": true,"mensaje":"Obligatorio"},
+		 {'nombre':'direccion','label':'Dirección', "obligatorio": false,"mensaje":"Obligatorio"},
 		 {'nombre':'dni','label':'Cedula',"validacion": /^[0-9]{10}$|^[0-9]{13}$/, "obligatorio": true,"mensaje":"Solo número de 10 a 13 caracteres"},
-		 {'nombre':'dni_factura','label':'Cedula a Facturar',"validacion": /^[0-9]{10}$|^[0-9]{13}$/, "obligatorio": true,"mensaje":"Solo número de 10 a 13 caracteres"},
-		 {'nombre':'dni_padre','label':'Cedula Padre',"validacion": /^[0-9]{10}$|^[0-9]{13}$/, "obligatorio": true,"mensaje":"Solo número de 10 a 13 caracteres"},
-		 {'nombre':'email','label':'Email',"validacion":/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "obligatorio": true,"mensaje":"Tiene que incluir @ y un . seguido de dos o tres caracteres"},
-		 {'nombre':'email_padre','label':'Email Padre',"validacion":/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "obligatorio": true,"mensaje":"Tiene que incluir @ y un . seguido de dos o tres caracteres"},
-		 {'nombre':'genero','label':'Genero', "obligatorio": true,"mensaje":"Obligatorio"},
+		 {'nombre':'dni_factura','label':'Cedula a Facturar',"validacion": /^[0-9]{10}$|^[0-9]{13}$/, "obligatorio": false,"mensaje":"Solo número de 10 a 13 caracteres"},
+		 {'nombre':'dni_padre','label':'Cedula Padre',"validacion": /^[0-9]{10}$|^[0-9]{13}$/, "obligatorio": false,"mensaje":"Solo número de 10 a 13 caracteres"},
+		 {'nombre':'email','label':'Email',"validacion":/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "obligatorio": false,"mensaje":"Tiene que incluir @ y un . seguido de dos o tres caracteres"},
+		 {'nombre':'email_padre','label':'Email Padre',"validacion":/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "obligatorio": false,"mensaje":"Tiene que incluir @ y un . seguido de dos o tres caracteres"},
+		 {'nombre':'genero','label':'Genero', "obligatorio": false,"mensaje":"Obligatorio"},
 		 {'nombre':'nombres','label':'Nombres',"validacion": /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/, "obligatorio": true,"mensaje":"Solo letras"},
-		 {'nombre':'nombres_factura','label':'Nombres Factura',"validacion": /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/, "obligatorio": true,"mensaje":"Solo letras"},
-		 {'nombre':'nombres_padre','label':'Nombres Padre',"validacion": /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/, "obligatorio": true,"mensaje":"Solo letras"},		 
-		 {'nombre':'paralelo','label':'Paralelo', "obligatorio": true,"mensaje":"Obligatorio"},		 
-		 {"nombre": "telefono","label": "Teléfono","validacion": /^[0-9]+$/, "obligatorio": true,"mensaje":"Solo números"},
+		 {'nombre':'nombres_factura','label':'Nombres Factura',"validacion": /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/, "obligatorio": false,"mensaje":"Solo letras"},
+		 {'nombre':'nombres_padre','label':'Nombres Padre',"validacion": /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/, "obligatorio": false,"mensaje":"Solo letras"},
+		 {'nombre':'paralelo','label':'Paralelo', "obligatorio": true,"mensaje":"Obligatorio"},
+		 {"nombre": "telefono","label": "Teléfono","validacion": /^[0-9]+$/, "obligatorio": false,"mensaje":"Solo números"},
 	   ]
 	   this.proveedor = this.proveedor.map((item:any) => ({
 		nombre: item.nombre,
@@ -403,12 +403,12 @@ onFileChange(event:any) {
 			encabezado.localeCompare(item.label, 'es', { sensitivity: 'accent' }) === 0
 		  ) || ''
 	  }));
-	  
+
 	  //console.log(proveedorConEncabezados);
 	  //this.proveedor=proveedorConEncabezados;
 	   modalRef.componentInstance.proveedores=this.proveedor ;
 	   modalRef.componentInstance.encabezados=this.encabezados;
- 
+
 	   modalRef.result.then((result) => {
 		 this.valid=result;
 		 if(this.valid!=undefined){
@@ -419,14 +419,14 @@ onFileChange(event:any) {
 		 }
 	   }, (reason) => {
 		 console.log('Modal dismissed:', reason);
-		 
+
 	   });
    }
    updateData(rowIndex: number, columnIndex: number, event: any) {
 	// rowIndex y columnIndex indican la posición de la celda que se está editando
 	// event.target.textContent contiene el nuevo valor ingresado por el usuario
 	const newValue = event.target.textContent.trim();
-  
+
 	// Ahora, puedes actualizar tus datos en proveedores_erro con la nueva información
 	this.proveedores_erro[rowIndex].proveedor[columnIndex].value = newValue;
   }
@@ -437,13 +437,13 @@ onFileChange(event:any) {
 	parsedData.data.forEach((row: any, index: any) => {
 		if(index<parsedData.data.length){
 			let save = true;
-	  
+
 			const proveedor: { [key: string]: any } = {};
 			const errores: any[] = [];
-		  
+
 			this.valid.forEach((element: any) => {
 			  const valorCampo = row[element.encabezado];
-		  
+
 			  if (element.obligatorio && (!valorCampo || (element.validacion && !element.validacion.test(valorCampo)))) {
 				errores.push({ campo: element.nombre, mensaje: element.mensaje });
 				save = false;
@@ -452,9 +452,9 @@ onFileChange(event:any) {
 				save = false;
 			  }
 				proveedor[element.nombre] = valorCampo||'';
-			  
+
 			});
-		  
+
 			if (!save) {
 			  this.proveedores_erro.push({ proveedor, index, errores });
 			} else {
@@ -462,8 +462,8 @@ onFileChange(event:any) {
 			}
 		}
 	  });
-	  	  
-   
+
+
     $('#modalAddProvMasivo').modal('hide');
 
     this.collectionSize=this.proveedores.length;
@@ -500,7 +500,7 @@ onFileChange(event:any) {
 		  }
 		}
 	  }
-	  getErrorMessage(errores:any,campo: string): string | undefined {		
+	  getErrorMessage(errores:any,campo: string): string | undefined {
 		const proveedorErro = errores.find((erro:any) => erro.campo === campo);
 		return proveedorErro ? proveedorErro.mensaje : undefined;
 	  }
@@ -623,7 +623,7 @@ onFileChange(event:any) {
 					position: 'topRight',
 					message: response.users[0].userEmail,
 				});
-			}			
+			}
 		});
 	}
 	infouser:any={};
@@ -637,8 +637,8 @@ onFileChange(event:any) {
 			if(response.users){
 				this.infouser=response.users;
 				this.loadinfouser=false;
-				
-			}			
+
+			}
 		});
 	}
 	filtrar_estudiante() {
@@ -676,7 +676,7 @@ onFileChange(event:any) {
 					term.test(item.element.genero) ||
 					term.test(item.element.apellidos) ||
 					term.test(item.element.email) ||
-					
+
 					term.test(item.element.dni) ||
 					term.test(item.element.telefono) ||
 					term.test(item.element._id)||
