@@ -7,7 +7,7 @@ var EstudianteSchema = Schema({
     nombres: {type: String, required: true},
     apellidos: {type: String, required: true},
 
-    email: {type: String, required: true},
+    email: {type: String, required: false},
     password:{type: String, required: false},
 
     genero: {type: String},
@@ -21,12 +21,12 @@ var EstudianteSchema = Schema({
     curso:{type: String, required: false},
     paralelo:{type: String, required: false},
     
-    nombres_padre: {type: String, required: true},
-    dni_padre: {type: String, required: true},
-    email_padre: {type: String, required: true},
+    nombres_padre: {type: String, required: false},
+    dni_padre: {type: String, required: false},
+    email_padre: {type: String, required: false},
     
-    nombres_factura: {type: String, required: true},
-    dni_factura: {type: String, required: true},
+    nombres_factura: {type: String, required: false},
+    dni_factura: {type: String, required: false},
 
     
     createdAt: {type:Date, default: Date.now, require: true}

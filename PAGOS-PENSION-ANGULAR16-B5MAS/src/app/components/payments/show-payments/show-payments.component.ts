@@ -6,6 +6,7 @@ import { GLOBAL } from 'src/app/service/GLOBAL';
 import { TableUtil, TableUtil2 } from '../show-payments/tableUtil';
 //import {createClient} from 'soap';
 import iziToast from 'izitoast';
+import { lastValueFrom } from 'rxjs';
 declare var $: any;
 
 @Component({
@@ -87,42 +88,55 @@ export class ShowPaymentsComponent implements OnInit {
         this.imagen = JSON.parse(
           localStorage.getItem('user_data') || ''
         )?.portada;
-        this._route.params.subscribe((params) => {
+        this._route.params.subscribe(async (params) => {
           this.id = params['id'];
           let aux = JSON.parse(localStorage.getItem('user_data')!);
           this.rol = aux.rol;
           this.base = aux.base;
           this.idp = aux._id;
-          this.init_data();
+          await this.init_data();
         });
       }
     });
   }
 
-  init_data() {
-    this._adminService
-      .obtener_detalles_ordenes_estudiante(this.id, this.token)
-      .subscribe((response) => {
-        if (response.data != undefined) {
-          this.pago = response.data;
-          console.log(response);
-          this.detalles = response.detalles;
-          this.detalles.forEach((element: any) => {
-            element.aniosup = new Date(
-              new Date(element.idpension.anio_lectivo).setFullYear(
-                new Date(element.idpension.anio_lectivo).getFullYear() + 1
-              )
-            ).getFullYear();
-          });
-          this.load_data = false;
-          this.detalle_data();
-        } else {
-          this.pago = undefined;
-          this.load_data = false;
-        }
+  async init_data() {
+    try {
+      const response = await lastValueFrom(
+        this._adminService.obtener_detalles_ordenes_estudiante(
+          this.id,
+          this.token
+        )
+      );
 
-        //console.log(this.detalles);
-      });
+      if (response.data != undefined) {
+        this.pago = response.data;
+        console.log(response);
+        this.detalles = response.detalles;
+
+        this.detalles.forEach((element: any) => {
+          element.aniosup = new Date(
+            new Date(element.idpension.anio_lectivo).setFullYear(
+              new Date(element.idpension.anio_lectivo).getFullYear() + 1
+            )
+          ).getFullYear();
+        });
+
+        this.load_data = false;
+
+        await this.detalle_data(); // Espera que termine
+
+        await this.armado2();
+
+        //await this.armado(); // Luego espera este
+      } else {
+        this.pago = undefined;
+        this.load_data = false;
+      }
+    } catch (error) {
+      console.error('Error al obtener los detalles:', error);
+      this.load_data = false;
+    }
   }
   exportTable() {
     TableUtil.exportToPdf(
@@ -146,43 +160,45 @@ export class ShowPaymentsComponent implements OnInit {
       this.info
     );
   }
-  detalle_data() {
-    this._estudianteService
-      .obtener_pension_estudiante_guest(this.pago.estudiante._id, this.token)
-      .subscribe((response) => {
-        this.pension = response.data;
-        for (var i = 0; i <= this.pension.length; i++) {
-          //console.log(this.pension[i]);
-          //////console.log(i);
+  async detalle_data() {
+    try {
+      const response = await lastValueFrom(
+        this._estudianteService.obtener_pension_estudiante_guest(
+          this.pago.estudiante._id,
+          this.token
+        )
+      );
 
-          if (this.pension[i]._id == this.detalles[0].idpension._id) {
-            this.idpension = this.pension[i]._id;
-            this.auxp = i;
-            this.auxmes = this.pension[i].anio_lectivo;
-            let j = 0;
+      this.pension = response.data;
 
-            for (j = 0; j < 10; j++) {
-              //if(j>=this.pension[i].meses){
-              this.fecha.push({
-                date: new Date(this.pension[i].anio_lectivo).setMonth(
-                  new Date(this.pension[i].anio_lectivo).getMonth() + j
-                ),
-              });
+      for (let i = 0; i < this.pension.length; i++) {
+        if (this.pension[i]._id === this.detalles[0].idpension._id) {
+          this.idpension = this.pension[i]._id;
+          this.auxp = i;
+          this.auxmes = this.pension[i].anio_lectivo;
+          this.fecha = [];
 
-              //}
-            }
-            //////console.log(this.fecha);
-            if (
-              this.pago.estado == 'Registrado' &&
-              this.pension[i].idanio_lectivo.facturacion != null
-            ) {
-              this.linkfact = this.pension[i].facturacion;
-              //this.facturar_electronica();
-            }
-            i = this.pension.length;
+          for (let j = 0; j < 10; j++) {
+            this.fecha.push({
+              date: new Date(this.pension[i].anio_lectivo).setMonth(
+                new Date(this.pension[i].anio_lectivo).getMonth() + j
+              ),
+            });
           }
+
+          if (
+            this.pago.estado === 'Registrado' &&
+            this.pension[i].idanio_lectivo.facturacion != null
+          ) {
+            this.linkfact = this.pension[i].facturacion;
+          }
+
+          break; // Salimos del bucle, ya encontramos el elemento
         }
-      });
+      }
+    } catch (error) {
+      console.error('Error al obtener los datos de la pensión:', error);
+    }
   }
 
   //public  = require('soap');
@@ -194,7 +210,7 @@ export class ShowPaymentsComponent implements OnInit {
 		// build SOAP request
 		var sr =
 			'<?xml version="1.0" encoding="utf-8"?>' +
-			'<soapenv:Envelope ' + 
+			'<soapenv:Envelope ' +
 				'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' +
 				'xmlns:api="http://127.0.0.1/Integrics/Enswitch/API" ' +
 				'xmlns:xsd="http://www.w3.org/2001/XMLSchema" ' +
@@ -257,7 +273,7 @@ export class ShowPaymentsComponent implements OnInit {
     }
   }
   private error_constru = '';
-  armado() {
+  async armado() {
     //console.log(this.pension[this.auxp]);
     //if(this.linkfact!=''){
     ////console.log(this._adminService.ejemplo(1112,this.token));
@@ -265,9 +281,7 @@ export class ShowPaymentsComponent implements OnInit {
 
     //console.log("this.detalles",this.detalles);
     //console.log("this.pension[this.auxp]",this.pension[this.auxp]);
-    let registro: any = {
-      //detalleFactura:[]
-    };
+
     this.registro.cedulaEstudiante = this.pago.estudiante.dni.toString();
     this.registro.nombreEstudiante = (
       this.pago.estudiante.apellidos +
@@ -444,8 +458,197 @@ export class ShowPaymentsComponent implements OnInit {
 			console.log("sin link");
 		}*/
     //console.log('registro', this.registro);
-    //console.log(this.registro);
+    console.log(this.registro);
   }
+
+  async armado2() {
+    try {
+      // Validate required data before processing
+      if (!this.pago?.estudiante) {
+        throw new Error('Invalid payment or student data');
+      }
+
+      // Check if all required billing information is available
+      const missingBillingData = [
+        this.pago.estudiante.dni,
+        this.pago.estudiante.apellidos,
+        this.pago.estudiante.nombres,
+        this.pago.estudiante.direccion,
+        this.pago.estudiante.telefono,
+        this.pago.estudiante.email,
+        this.pago.estudiante.dni_padre,
+        this.pago.estudiante.nombres_padre,
+        this.pago.estudiante.dni_factura,
+        this.pago.tipo_documento,
+      ].some((field) => field === null || field === undefined || field === '');
+
+      if (missingBillingData) {
+        // Create a list of missing billing data
+        const missingFields = [
+          !this.pago.estudiante.dni && 'Cédula del estudiante',
+          !this.pago.estudiante.apellidos && 'Apellidos del estudiante',
+          !this.pago.estudiante.nombres && 'Nombres del estudiante',
+          !this.pago.estudiante.direccion && 'Dirección del estudiante',
+          !this.pago.estudiante.telefono && 'Teléfono del estudiante',
+          !this.pago.estudiante.email && 'Email del estudiante',
+          !this.pago.estudiante.dni_padre && 'Cédula del padre',
+          !this.pago.estudiante.nombres_padre && 'Nombres del padre',
+          !this.pago.estudiante.dni_factura && 'Cédula de facturación',
+          !this.pago.tipo_documento && 'Tipo de documento',
+        ].filter(Boolean); // Filter out the null/undefined values
+
+        // Create the message with missing fields
+        const missingFieldsMessage = missingFields.length
+          ? `Faltan los siguientes datos de facturación: ${missingFields.join(', ')}.`
+          : 'Faltan datos de facturación del estudiante.';
+
+        // Display the error message with a longer duration
+        iziToast.error({
+          title: 'ERROR',
+          position: 'topRight',
+          message: missingFieldsMessage,
+          timeout: 10000, // 10 seconds duration
+        });
+
+        return; // Exit early if billing data is incomplete
+      }
+
+
+      // Extract student data with optional chaining and default values
+      this.registro = {
+        cedulaEstudiante: this.pago.estudiante.dni?.toString() ?? '',
+        nombreEstudiante: `${this.pago.estudiante.apellidos ?? ''} ${
+          this.pago.estudiante.nombres ?? ''
+        }`.trim(),
+        direccionEstudiante: this.pago.estudiante.direccion?.toString() ?? '',
+        telefonoEstudiante:
+          this.pago.estudiante.telefono?.toString() ?? '9999999999',
+        emailEstudiante: this.pago.estudiante.email?.toString() ?? '',
+        cedulaPadre: this.pago.estudiante.dni_padre.toString() ?? '',
+        nombrePadre: this.pago.estudiante.nombres_padre.toString() ?? '' ?? '',
+        facturarA: this.pago.estudiante.dni_factura.toString() ?? '',
+        codigoTipocomprobante: parseInt(this.pago.tipo_documento),
+        subtotal: 0, //parseFloat(this.pago.total_pagar.toFixed(2));
+        tarifaCero: parseFloat(this.pago.total_pagar.toFixed(2)),
+        tarifaDoce: parseFloat('0'),
+        valorIva: parseFloat('0'),
+        totalFactura: parseFloat(this.pago.total_pagar.toFixed(2)),
+        codigoTipopagosri: parseInt('20'),
+      };
+
+      // Process details with more robust logic
+      this.registro.detalleFactura = this.processDetalles(this.detalles);
+
+      console.log(this.registro);
+    } catch (error) {
+      console.error('Error in armado method:', error);
+      // Handle error appropriately (e.g., show user notification)
+      iziToast.error({
+        title: 'ERROR',
+        position: 'topRight',
+        message:
+          error instanceof Error
+            ? error.message
+            : String(error || 'An unexpected error occurred'),
+      });
+    }
+  }
+
+  private processDetalles(detalles: any[]): string {
+    if (!detalles || detalles.length === 0) {
+      return '';
+    }
+
+    return detalles
+      .map((dtll, index) => {
+        const aux = this.createDetalleItem(dtll, index + 1);
+        return this.formatDetalleItem(aux);
+      })
+      .join(',');
+  }
+
+  private createDetalleItem(dtll: any, itemNumber: number): any[] {
+    const aux = new Array(25).fill(0);
+
+    aux[3] = itemNumber;
+    aux[5] = 1;
+    aux[6] = dtll.tipo === 0 ? 99 : dtll.tipo;
+    aux[7] = this.pago.tipo_tarifa;
+    aux[9] = 2;
+
+    // Descriptive logic for item description
+    aux[10] = this.getItemDescription(dtll);
+    aux[11] = dtll.estado ?? '';
+    // Pricing and discount logic
+    const [discount, totalValue, discountedValue] = this.calculatePricing(dtll);
+
+    aux[12] = totalValue;
+    aux[15] = 1; //cantidad
+    aux[18] = "''"; //''
+    aux[19] = discount;
+    aux[20] = totalValue;
+    aux[21] = discountedValue;
+    aux[23] = 1;
+    this.registro.subtotal = this.registro.subtotal + aux[15] * aux[20];
+    return aux;
+  }
+
+  private getItemDescription(dtll: any): string {
+    if (dtll.tipo === 0) return 'Matricula';
+
+    if (dtll.tipo > 0 && dtll.tipo <= 11) {
+      const monthDate = this.fecha[dtll.tipo - 1];
+      const date = new Date(monthDate.date);
+      return `Pensión ${date.toLocaleString('default', {
+        month: 'long',
+      })} ${date.getFullYear()}`;
+    }
+
+    return dtll.descripcion || 'Sin descripción';
+  }
+
+  private calculatePricing(dtll: any): [number, number, number] {
+    const pension = this.pension[this.auxp];
+
+    if (
+      pension.condicion_beca === 'Si' &&
+      dtll.tipo > 0 &&
+      dtll.tipo <= 10 &&
+      dtll.valor === parseFloat(pension.val_beca).toFixed(2) &&
+      dtll.abono === 0
+    ) {
+      const fullValue = parseFloat(pension.idanio_lectivo.pension);
+      const discountValue = pension.val_beca;
+
+      return [
+        fullValue - discountValue, // discount
+        fullValue, // total value
+        discountValue, // discounted value
+      ];
+    }
+
+    return [0, dtll.valor, dtll.valor];
+  }
+
+  private formatDetalleItem(aux: any[]): string {
+    return (
+      aux
+        .map((value, index) => {
+          // Special handling for different types of values
+          if (index === 0) {
+            return `(${value}`;
+          }
+
+          if (typeof value === 'string' && index !== 18) {
+            return `,'${value}'`;
+          }
+
+          return `,${value}`;
+        })
+        .join('') + ')'
+    );
+  }
+
   facturar_electronica() {
     try {
       if (this.linkfact != '') {
