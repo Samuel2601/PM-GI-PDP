@@ -527,7 +527,7 @@ export class IndexStudentsComponent implements OnInit {
       (result) => {
         this.valid = result;
         if (this.valid != undefined) {
-          //console.log('Modal closed:', this.valid);
+          console.log('Modal closed:', this.valid);
           this.valid2(parsedData);
         } else {
           location.reload();
@@ -644,7 +644,7 @@ export class IndexStudentsComponent implements OnInit {
     this._adminService
       .registro_estudiante_masivo(this.proveedores, this.token)
       .subscribe((response) => {
-        //console.log(response);
+        console.log(response);
         this.subidoss = response.s;
         this.resubidos = response.r;
         this.resubidosc = response.rc;
@@ -710,7 +710,7 @@ export class IndexStudentsComponent implements OnInit {
         this.load_eliminados = false;
         this.progressBarService.setProgress(0);
         //this.ngOnInit();
-        location.reload();
+        //location.reload();
       });
   }
   mostrar_eliminado() {

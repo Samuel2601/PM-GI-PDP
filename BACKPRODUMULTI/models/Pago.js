@@ -6,8 +6,8 @@ var Schema = mongoose.Schema;
 var VentaSchema = Schema({
     estudiante: {type: Schema.ObjectId, ref: 'estudiante', required: true},
     
-    nombres_factura: {type: String, required: true},
-    dni_factura: {type: String, required: true},
+    nombres_factura: {type: String, required: false},
+    dni_factura: {type: String, required: false},
 
     total_pagar: {type: Number, require: true},
     transaccion: {type: String, require: true},

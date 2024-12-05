@@ -264,7 +264,7 @@
                 </div>
                 <button
                   id="tbnfacturar"
-                  *ngIf="pago.estado != 'Emitido'"
+                  *ngIf="pago.estado != 'Emitido' && loademit"
                   mat-raised-button
                   class="btn btn-primary btn-sm"
                   (click)="factura_electronica_soap()"

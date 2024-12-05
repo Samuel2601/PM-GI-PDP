@@ -273,6 +273,7 @@ export class ShowPaymentsComponent implements OnInit {
     }
   }
   private error_constru = '';
+  public loademit: boolean = false;
   async armado() {
     //console.log(this.pension[this.auxp]);
     //if(this.linkfact!=''){
@@ -499,7 +500,9 @@ export class ShowPaymentsComponent implements OnInit {
 
         // Create the message with missing fields
         const missingFieldsMessage = missingFields.length
-          ? `Faltan los siguientes datos de facturación: ${missingFields.join(', ')}.`
+          ? `Faltan los siguientes datos de facturación: ${missingFields.join(
+              ', '
+            )}.`
           : 'Faltan datos de facturación del estudiante.';
 
         // Display the error message with a longer duration
@@ -512,7 +515,6 @@ export class ShowPaymentsComponent implements OnInit {
 
         return; // Exit early if billing data is incomplete
       }
-
 
       // Extract student data with optional chaining and default values
       this.registro = {
@@ -540,6 +542,7 @@ export class ShowPaymentsComponent implements OnInit {
       this.registro.detalleFactura = this.processDetalles(this.detalles);
 
       console.log(this.registro);
+      this.loademit = true;
     } catch (error) {
       console.error('Error in armado method:', error);
       // Handle error appropriately (e.g., show user notification)
