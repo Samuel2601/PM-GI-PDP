@@ -1856,7 +1856,7 @@ const marcar_finalizado_orden = async function (req, res) {
     if (!rucEntry || !rucEntry.ruc) {
       return res.status(400).send({ message: "RUC no encontrado o inválido" });
     }
-    data.ruc = rucEntry.ruc;
+    data.rucEmpresa = rucEntry.ruc;
 
     // URL del servicio SOAP
     const url_validar =
