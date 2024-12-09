@@ -1829,7 +1829,7 @@ ruc_arr = [
     ruc: "0891726503001",
   },
   {
-    base: "CRISTOREY",
+    base: "Otro",
     ruc: "",
   },
   {
@@ -1861,7 +1861,7 @@ const marcar_finalizado_orden = async function (req, res) {
     // URL del servicio SOAP
     const url_validar =
       "http://34.172.21.101:8080/interfaceFacturaV2/ws/servicioFacturacionPort?wsdl";
-
+    console.log(data);
     // Crear cliente SOAP
     soap.createClient(url_validar, function (err, client) {
       if (err) {
