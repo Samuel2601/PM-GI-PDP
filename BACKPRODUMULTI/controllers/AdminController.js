@@ -2201,7 +2201,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
   }
 
   const session = await mongoose.startSession();
-  const documentosIds = [];
+  let documentosIds = [];
 
   try {
     // Iniciar transacción para asegurar atomicidad
