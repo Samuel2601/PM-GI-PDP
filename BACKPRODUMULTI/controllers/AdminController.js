@@ -2298,7 +2298,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
     );
 
     // Obtener valores únicos de `documento` en los `dpagosValidos`
-    documentosIds = [...new Set(dpagosValidos.map((dpago) => dpago.documento))];
+    //documentosIds = [...new Set(dpagosValidos.map((dpago) => dpago.documento))];
 
     // Confirmar transacción
     await session.commitTransaction();
