@@ -2201,6 +2201,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
   }
 
   const session = await mongoose.startSession();
+  const documentosIds = [];
 
   try {
     // Iniciar transacción para asegurar atomicidad
@@ -2296,6 +2297,9 @@ const registro_compra_manual_estudiante = async function (req, res) {
       { session }
     );
 
+    // Obtener valores únicos de `documento` en los `dpagosValidos`
+    documentosIds = [...new Set(dpagosValidos.map((dpago) => dpago.documento))];
+
     // Confirmar transacción
     await session.commitTransaction();
 
@@ -2320,6 +2324,16 @@ const registro_compra_manual_estudiante = async function (req, res) {
     // Cerrar sesión
     if (session) {
       session.endSession();
+    }
+    // Ejecutar `actualizarStockInterno` una vez finalizado todo el proceso
+    if (documentosIds.length > 0) {
+      try {
+        const conn = mongoose.connection.useDb(req.user.base); // Reutilizar conexión
+        await actualizarStockInterno(documentosIds, conn);
+        console.log("Stock actualizado correctamente.");
+      } catch (err) {
+        console.error("Error al actualizar el stock de documentos:", err);
+      }
     }
   }
 };
