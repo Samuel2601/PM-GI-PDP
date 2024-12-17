@@ -780,75 +780,49 @@ export class IndexStudentsComponent implements OnInit {
   }
   filtrar_estudiante() {
     this.load_data_est = true;
-    this.estudiantes = [];
-    var aux = this.filtro;
-    if (this.filtro) {
-      if (this.filtro.length <= 2) {
-        this.filtro = "'" + this.filtro + "'";
-      }
-      var term = new RegExp(this.filtro.toString().trim(), 'i');
-      if (this.load_eliminados) {
-        this.estudiantes_const.forEach((element) => {
-          if (element.estado == 'Desactivado') {
-            //////console.log(element.estado)
-            this.estudiantes.push({ ckechk: 0, element });
-          }
-        });
-      } else {
-        this.estudiantes_const.forEach((element) => {
-          if (element.estado != 'Desactivado' && element.estado != undefined) {
-            //////console.log(element.estado)
-            this.estudiantes.push({ ckechk: 0, element });
-          }
-        });
-      }
+    const term = this.filtro
+      ? new RegExp(this.filtro.toString().trim(), 'i')
+      : null;
 
-      this.estudiantes = this.estudiantes.filter(
-        (item) =>
-          term.test(
-            item.element.curso.toString() +
-              '-' +
-              item.element.paralelo.toString() +
-              ' ' +
-              item.element.genero
-          ) ||
-          term.test(
-            item.element.curso.toString() +
-              '-' +
-              item.element.paralelo.toString()
-          ) ||
-          term.test(item.element.nombres) ||
-          term.test("'" + item.element.curso + "'") ||
-          term.test("'" + item.element.paralelo + "'") ||
-          term.test(item.element.genero) ||
-          term.test(item.element.apellidos) ||
-          term.test(item.element.email) ||
-          term.test(item.element.dni) ||
-          term.test(item.element.telefono) ||
-          term.test(item.element._id) ||
-          term.test(item.element.createdAt) ||
-          term.test(item.element.email_padre)
-      );
-    } else {
-      if (this.load_eliminados) {
-        this.estudiantes_const.forEach((element) => {
-          if (element.estado == 'Desactivado') {
-            //////console.log(element.estado)
-            this.estudiantes.push({ ckechk: 0, element });
-          }
-        });
-      } else {
-        this.estudiantes_const.forEach((element) => {
-          if (element.estado != 'Desactivado' && element.estado != undefined) {
-            //////console.log(element.estado)
-            this.estudiantes.push({ ckechk: 0, element });
-          }
-        });
-      }
-    }
-    this.filtro = aux;
+    // Filtrar según estado (Desactivado o no)
+    const filteredByState = this.estudiantes_const.filter((element) =>
+      this.load_eliminados
+        ? element.estado === 'Desactivado'
+        : element.estado !== 'Desactivado' && element.estado !== undefined
+    );
+
+    // Si hay un filtro, aplicar búsqueda
+    const filteredByTerm = term
+      ? filteredByState.filter((element) => this.matchTerm(element, term))
+      : filteredByState;
+
+    // Transformar los resultados finales
+    this.estudiantes = filteredByTerm.map((element) => ({
+      ckechk: 0,
+      element,
+    }));
+
     this.load_data_est = false;
   }
+
+  /**
+   * Verifica si el término coincide con algún campo del estudiante.
+   */
+  private matchTerm(element: any, term: RegExp): boolean {
+    return (
+      term.test(`${element.curso}-${element.paralelo}`) || // Curso y paralelo combinados
+      term.test(element.nombres) ||
+      term.test(element.apellidos) ||
+      term.test(element.genero) ||
+      term.test(element.email) ||
+      term.test(element.dni) ||
+      term.test(element.telefono) ||
+      term.test(element._id) ||
+      term.test(element.createdAt) ||
+      term.test(element.email_padre)
+    );
+  }
+
   eliminar(id: any) {
     this.load_data_est = true;
     //this.load_data_est=true;

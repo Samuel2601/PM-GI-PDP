@@ -477,6 +477,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                   if (response.data) {
                     console.log(response.data[0]);
                     this.penest = response.data.map((item: any) => {
+                      //console.log(item);
                       return {
                         curso: item.curso,
                         paralelo: item.paralelo,
@@ -583,14 +584,14 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                               porpagar=costosextrapagos;
                               valor = 0;
                               tipo = 'rubro';
-  
+
                               this.detalles.find((element:any)=>{
                                 if(element.tipo>20&&element.idpension._id==elementpent._id){
                                   valor=valor+element.valor
                                   porpagar=porpagar-element.valor
                                 }
                               });
-  
+
                               this.pagopension.push({
                                 date: "Rubro",
                                 valor: valor,
@@ -949,7 +950,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
           <base href="/">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <link rel="icon" type="image/x-icon" href="favicon.ico">
-          
+
           <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
           <style>
@@ -997,11 +998,11 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
         }
 
       </style>
-      
+
         </head>
     <body>
     <div class="card informe">
-    
+
     ${table}
     </div>
 
@@ -1316,7 +1317,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     this.emails.forEach((element: any) => {
       auxemail.push(element.email);
     });
-    /*auxemail.forEach((element:any) => {      
+    /*auxemail.forEach((element:any) => {
       this._adminService.consultarEstadoGoogle(this.token,element).subscribe(response=>{
         if(response.users){
           console.log(element,response.users.suspended);

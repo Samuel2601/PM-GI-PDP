@@ -2618,6 +2618,10 @@ async function actualizarStockDocumento(element, conn, session) {
       _id: element.documento,
     });
 
+    // Convertir valores a números decimales con dos decimales
+    const valorDocumento = Number(element_documento.valor);
+    const valorActual = Number(element.valor);
+
     // Calcular el total de pagos previos para este documento
     const pagosPrevios = await Dpago.find({
       documento: element.documento,
@@ -2625,18 +2629,15 @@ async function actualizarStockDocumento(element, conn, session) {
     });
 
     // Sumar todos los valores de pagos previos más el valor actual
-    const totalPagado = pagosPrevios.reduce(
+    const totalPagadoPrevio = pagosPrevios.reduce(
       (total, pago) => total + parseFloat(pago.valor),
       parseFloat(element.valor)
     );
 
     // Calcular el nuevo stock
-    let new_stock = parseFloat(element_documento.valor) - totalPagado;
-
-    // Ajuste de precisión para valores cercanos a cero
-    if (Math.abs(new_stock) <= 0.009) {
-      new_stock = 0;
-    }
+    const new_stock = Number(
+      (valorDocumento - (totalPagadoPrevio + valorActual)).toFixed(2)
+    );
 
     // Verificar si el stock es válido
     if (new_stock >= 0) {
@@ -2667,6 +2668,79 @@ async function actualizarStockDocumento(element, conn, session) {
       success: false,
       message: error.message,
     };
+  }
+}
+
+async function actualizarStockDocumentos(documentos) {
+  console.log(req.body);
+  if (!req.user) {
+    return res.status(401).send({ message: "No autorizado" });
+  }
+  const conn = mongoose.connection.useDb(req.user.base);
+  const Documento = conn.model("document", DocumentoSchema);
+  const Dpago = conn.model("dpago", DpagoSchema);
+
+  try {
+    // Array para almacenar resultados de actualización
+    const resultados = [];
+
+    // Iterar sobre cada documento
+    for (const documentoId of documentos) {
+      // Obtener el documento actual
+      const documento = await Documento.findById(documentoId);
+
+      if (!documento) {
+        resultados.push({
+          documentoId,
+          success: false,
+          message: "Documento no encontrado",
+        });
+        continue;
+      }
+
+      // Encontrar todos los pagos relacionados con este documento
+      const pagosPrevios = await Dpago.find({ documento: documentoId });
+
+      // Calcular el total pagado
+      const totalPagado = pagosPrevios.reduce(
+        (total, pago) => total + Number(pago.valor),
+        0
+      );
+
+      // Calcular nuevo stock
+      const valorDocumento = Number(documento.valor);
+      const new_stock = Number((valorDocumento - totalPagado).toFixed(2));
+
+      // Verificar si el stock es válido
+      if (new_stock >= 0) {
+        const resultado = await Documento.updateOne(
+          { _id: documentoId },
+          {
+            valor: new_stock,
+            npagos: pagosPrevios.length,
+          },
+          { session }
+        );
+
+        resultados.push({
+          documentoId,
+          success: true,
+          newStock: new_stock,
+          result: resultado,
+        });
+      } else {
+        resultados.push({
+          documentoId,
+          success: false,
+          message: "Stock insuficiente",
+        });
+      }
+    }
+
+    return resultados;
+  } catch (error) {
+    console.error("Error en actualización de stock de documentos:", error);
+    throw error;
   }
 }
 
@@ -2947,4 +3021,5 @@ module.exports = {
   obtener_config_plana,
   actualizar_config_plana,
   crear_config_plana,
+  actualizarStockDocumentos
 };

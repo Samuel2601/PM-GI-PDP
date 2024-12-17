@@ -77,4 +77,7 @@ api.get('/obtener_institucion/:id',auth.auth,AdminController.obtener_institucion
 api.get('/obtener_config_plana',auth.auth,AdminController.obtener_config_plana);
 api.put('/actualizar_config_plana/:id',auth.auth,AdminController.actualizar_config_plana);
 api.post('/crear_config_plana',auth.auth,AdminController.crear_config_plana);
+
+api.post('/actualizarStockDocumentos',auth.auth,AdminController.actualizarStockDocumentos);
+
 module.exports = api;
