@@ -2326,10 +2326,6 @@ const registro_compra_manual_estudiante = async function (req, res) {
 
 // Función auxiliar para procesar detalles de pago
 async function procesarDetallePago(element, config, pago, conn, session) {
-  const Pension = conn.model("pension", PensionSchema);
-  const Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
-  const Documento = conn.model("document", DocumentoSchema);
-
   try {
     // Lógica de procesamiento de pago según tipo
     switch (true) {
@@ -2358,7 +2354,6 @@ async function procesarDetallePago(element, config, pago, conn, session) {
 // (implementar con la lógica existente de tu código original)
 async function procesarPagoMatricula(element, config, pago, conn, session) {
   const Pension = conn.model("pension", PensionSchema);
-  const Documento = conn.model("document", DocumentoSchema);
   const Dpago = conn.model("dpago", DpagoSchema);
   const Registro = conn.model("registro", RegistroSchema);
 
@@ -2424,7 +2419,6 @@ async function procesarPagoMatricula(element, config, pago, conn, session) {
 async function procesarPagoPension(element, config, pago, conn, session) {
   const Pension = conn.model("pension", PensionSchema);
   const Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
-  const Documento = conn.model("document", DocumentoSchema);
   const Dpago = conn.model("dpago", DpagoSchema);
   const Registro = conn.model("registro", RegistroSchema);
 
@@ -2545,7 +2539,6 @@ async function procesarPagoPension(element, config, pago, conn, session) {
 
 async function procesarPagoExtra(element, config, pago, conn, session) {
   const Pension = conn.model("pension", PensionSchema);
-  const Documento = conn.model("document", DocumentoSchema);
   const Registro = conn.model("registro", RegistroSchema);
 
   try {
