@@ -2195,249 +2195,488 @@ const eliminar_orden_pm = async function (req, res) {
   }
 };
 const registro_compra_manual_estudiante = async function (req, res) {
-  if (req.user) {
-    try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Config = conn.model("config", ConfigSchema);
-      Registro = conn.model("registro", RegistroSchema);
-      Pago = conn.model("pago", VentaSchema);
-      Pension = conn.model("pension", PensionSchema);
-      Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
-      Documento = conn.model("document", DocumentoSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
-      //var cn = await Config.find().sort({ createdAt: -1 }); //await Config.findById({_id:'61abe55d2dce63583086f108'});
+  console.log(req.body);
+  if (!req.user) {
+    return res.status(401).send({ message: "No autorizado" });
+  }
 
-      //let config = cn[0];
-      //let config = await Config.findById({_id:'61abe55d2dce63583086f108'});
-      var data = req.body;
+  const session = await mongoose.startSession();
 
-      let config = data.config;
-      var detalles = data.detalles;
+  try {
+    // Iniciar transacción para asegurar atomicidad
+    await session.startTransaction();
 
-      data.estado = "Registrado";
+    const conn = mongoose.connection.useDb(req.user.base);
+    const Config = conn.model("config", ConfigSchema);
+    const Registro = conn.model("registro", RegistroSchema);
+    const Pago = conn.model("pago", VentaSchema);
+    const Pension = conn.model("pension", PensionSchema);
+    const Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
+    const Documento = conn.model("document", DocumentoSchema);
+    const Dpago = conn.model("dpago", DpagoSchema);
+    //var cn = await Config.find().sort({ createdAt: -1 }); //await Config.findById({_id:'61abe55d2dce63583086f108'});
 
-      try {
-        let pago = await Pago.create(data);
-        let registro = {};
-        registro.admin = req.user.sub;
-        registro.estudiante = data.estudiante;
-        registro.tipo = "creo";
-        registro.descripcion = JSON.stringify(data);
-        await Registro.create(registro);
+    //let config = cn[0];
+    //let config = await Config.findById({_id:'61abe55d2dce63583086f108'});
 
-        for (var element of detalles) {
-          console.log(element);
-          element.pago = pago._id;
-          element.estudiante = pago.estudiante;
-          let valid = await Dpago.find({
-            idpension: element.idpension,
-            tipo: element.tipo,
-            estado: { $not: /Abono/ },
-          });
-          console.log(valid, valid.length == 0);
-          if (valid.length == 0) {
-            if (element.tipo == 0) {
-              let mat = 0;
-              if (element.valor == config.matricula) {
-                mat = 1;
-              } else {
-                var acu = 0;
-                abonos = await Dpago.find({
-                  estudiante: pago.estudiante,
-                  tipo: element.tipo,
-                });
-                for (var abonoaux of abonos) {
-                  acu = acu + abonoaux.valor;
-                }
+    const data = req.body;
+    //console.log(data);
+    const { config, detalles } = data;
 
-                if (acu + element.valor == config.matricula) {
-                  mat = 1;
-                } else {
-                  element.estado = element.estado;
-                }
-              }
+    data.estado = "Registrado";
 
-              let act = await Pension.updateOne(
-                { _id: element.idpension },
-                {
-                  matricula: mat,
-                }
-              );
-            } else if (element.tipo > 0 && element.tipo <= 10) {
-              let element_meses = await Pension.findById({
-                _id: element.idpension,
-              });
-              let mes = element_meses.meses;
-              if (
-                element_meses.condicion_beca == "Si" &&
-                element_meses.num_mes_res > 0 &&
-                element.valor <= element_meses.val_beca
-              ) {
-                let res_beca = element_meses.num_mes_res;
-                if (element.valor == element_meses.val_beca) {
-                  mes = mes + 1;
-                  res_beca = res_beca - 1;
-                } else {
-                  var acu = 0;
-                  abonos = await Dpago.find({
-                    estudiante: pago.estudiante,
-                    tipo: element.tipo,
-                  });
-                  for (var abonoaux of abonos) {
-                    acu = acu + abonoaux.valor;
-                  }
+    // Crear pago
+    const pago = await Pago.create([data], { session });
 
-                  if (
-                    parseFloat(acu + element.valor) ==
-                    parseFloat(element_meses.val_beca)
-                  ) {
-                    mes = mes + 1;
-                    res_beca = res_beca - 1;
-                  } else {
-                    element.estado = element.estado;
-                  }
-                }
-                await Pension.updateOne(
-                  { _id: element.idpension },
-                  {
-                    meses: mes,
-                    num_mes_res: res_beca,
-                  }
-                );
-                await Pension_Beca.updateOne(
-                  { idpension: element.idpension, etiqueta: element.tipo },
-                  {
-                    usado: 1,
-                  }
-                );
-              } else {
-                if (element.valor == config.pension) {
-                  mes = mes + 1;
-                } else {
-                  var acu = 0;
-                  abonos = await Dpago.find({
-                    estudiante: pago.estudiante,
-                    tipo: element.tipo,
-                  });
-                  for (var abonoaux of abonos) {
-                    acu = acu + abonoaux.valor;
-                  }
+    // Registrar la creación del pago
+    const registro = {
+      admin: req.user.sub,
+      estudiante: data.estudiante,
+      tipo: "creo",
+      descripcion: JSON.stringify(data),
+    };
+    await Registro.create([registro], { session });
 
-                  if (
-                    parseFloat(acu + element.valor) ==
-                    parseFloat(config.pension)
-                  ) {
-                    mes = mes + 1;
-                  } else {
-                    element.estado = element.estado;
-                  }
-                }
+    // Array para almacenar d_pagos válidos
+    const dpagosValidos = [];
 
-                await Pension.updateOne(
-                  { _id: element.idpension },
-                  {
-                    meses: mes,
-                  }
-                );
-              }
-            } else {
-              let pension_config = await Pension.findById({
-                _id: element.idpension,
-              }).populate("idanio_lectivo");
+    // Procesar detalles de pago
+    for (const element of detalles) {
+      // Clonar el elemento para evitar modificaciones directas
+      const elementoProcesado = { ...element };
+      elementoProcesado.pago = pago[0]._id;
+      elementoProcesado.estudiante = pago[0].estudiante;
 
-              var extrapagos = JSON.parse(
-                pension_config.idanio_lectivo.extrapagos
-              );
-              if (!element.estado.includes("Abono")) {
-                var auxpago = extrapagos.find(
-                  (elementpago) => elementpago.idrubro == element.tipo
-                );
-                if (auxpago) {
-                  var pagospen = [];
-                  if (pension_config.extrapagos) {
-                    pagospen = JSON.parse(pension_config.extrapagos);
-                  }
+      // Validar si el d_pago ya existe
+      const validExistente = await Dpago.find({
+        idpension: element.idpension,
+        tipo: element.tipo,
+        estado: { $not: /Abono/ },
+      });
 
-                  pagospen.push(auxpago);
-                  await Pension.updateOne(
-                    { _id: element.idpension },
-                    {
-                      extrapagos: JSON.stringify(pagospen),
-                    }
-                  );
-                }
-              }
-            }
+      if (validExistente.length === 0) {
+        // console.log("Pago", pago[0]);
+        // Lógica de procesamiento según el tipo de pago
+        const resultadoProcesamiento = await procesarDetallePago(
+          element,
+          config,
+          pago[0],
+          conn,
+          session
+        );
 
-            let registro = {};
-            registro.admin = req.user.sub;
-            registro.estudiante = element.estudiante;
-            registro.pago = element.pago;
-            registro.documento = element.documento;
-
-            registro.tipo = "creo";
-            registro.descripcion = JSON.stringify(element);
-
-            let element_documento = await Documento.findById({
-              _id: element.documento,
-            });
-
-            let new_stock =
-              parseFloat(element_documento.valor) - parseFloat(element.valor);
-            console.log(element_documento, new_stock);
-            if (new_stock >= -0.009 && new_stock <= 0.009) {
-              new_stock = 0;
-            }
-            if (new_stock >= 0) {
-              let new_pago = element_documento.npagos + 1;
-
-              await Documento.updateOne(
-                { _id: element.documento },
-                {
-                  valor: new_stock,
-                  npagos: new_pago,
-                }
-              );
-
-              await Dpago.create(element);
-              await Registro.create(registro);
-            }
-          }
+        if (resultadoProcesamiento) {
+          dpagosValidos.push(elementoProcesado);
         }
-        let valid2 = await Dpago.find({ pago: pago._id });
-        console.log(valid2);
-        if (valid2.length == 0) {
-          await Pago.findOneAndDelete({ _id: pago._id });
-          res
-            .status(200)
-            .send({ pago: pago, message: "no se puede registrar" });
-        } else {
-          // Calcular la suma de los valores en valid2
-          let sumaValores = 0;
-          valid2.forEach((element) => {
-            sumaValores += element.valor;
-          });
-
-          // Actualizar el campo total_pagar en el registro Pago
-          await Pago.updateOne({ _id: pago._id }, { total_pagar: sumaValores });
-
-          //mail_confirmar_envio(pago._id);
-          res
-            .status(200)
-            .send({ pago: pago, message: "Registrado Correctamente" });
-        }
-      } catch (error) {
-        console.log(error);
-        res.status(200).send({ message: "Algo salio mal" + error });
       }
-    } catch (error) {
-      console.log(error);
-      res.status(200).send({ message: "Algo salio mal" + error });
     }
-  } else {
-    res.status(500).send({ message: "NoAccess" });
+
+    // Verificar si hay d_pagos válidos
+    if (dpagosValidos.length === 0) {
+      // Rollback si no hay pagos válidos
+      await session.abortTransaction();
+      return res.status(400).send({
+        message: "No se pudieron registrar los pagos",
+      });
+    }
+
+    // Insertar d_pagos válidos
+    await Dpago.create(dpagosValidos, { session });
+
+    // Calcular total a pagar
+    const sumaValores = dpagosValidos.reduce(
+      (total, elemento) => total + elemento.valor,
+      0
+    );
+
+    // Actualizar total del pago
+    await Pago.updateOne(
+      { _id: pago[0]._id },
+      { total_pagar: sumaValores },
+      { session }
+    );
+
+    // Confirmar transacción
+    await session.commitTransaction();
+
+    res.status(200).send({
+      pago: pago[0],
+      message: "Registrado correctamente",
+    });
+  } catch (error) {
+    // Manejar cualquier error durante el proceso
+    console.error("Error en registro de compra:", error);
+
+    // Abortar transacción si existe
+    if (session) {
+      await session.abortTransaction();
+    }
+
+    res.status(500).send({
+      message: "Error en el registro",
+      detalles: error.message,
+    });
+  } finally {
+    // Cerrar sesión
+    if (session) {
+      session.endSession();
+    }
   }
 };
+
+// Función auxiliar para procesar detalles de pago
+async function procesarDetallePago(element, config, pago, conn, session) {
+  const Pension = conn.model("pension", PensionSchema);
+  const Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
+  const Documento = conn.model("document", DocumentoSchema);
+
+  try {
+    // Lógica de procesamiento de pago según tipo
+    switch (true) {
+      case element.tipo === 0: // Matrícula
+        return await procesarPagoMatricula(
+          element,
+          config,
+          pago,
+          conn,
+          session
+        );
+
+      case element.tipo > 0 && element.tipo <= 10: // Pensiones
+        return await procesarPagoPension(element, config, pago, conn, session);
+
+      default: // Pagos extra
+        return await procesarPagoExtra(element, config, pago, conn, session);
+    }
+  } catch (error) {
+    console.error("Error procesando detalle de pago:", error);
+    return false;
+  }
+}
+
+// Funciones de procesamiento específicas
+// (implementar con la lógica existente de tu código original)
+async function procesarPagoMatricula(element, config, pago, conn, session) {
+  const Pension = conn.model("pension", PensionSchema);
+  const Documento = conn.model("document", DocumentoSchema);
+  const Dpago = conn.model("dpago", DpagoSchema);
+  const Registro = conn.model("registro", RegistroSchema);
+
+  try {
+    let mat = 0;
+
+    // Verificar si el valor de la matrícula es exacto
+    if (element.valor === config.matricula) {
+      mat = 1;
+    } else {
+      // Calcular abonos previos
+      const abonos = await Dpago.find({
+        estudiante: pago.estudiante,
+        tipo: element.tipo,
+      });
+
+      const acu = abonos.reduce((total, abonoaux) => total + abonoaux.valor, 0);
+
+      // Verificar si la suma de abonos completa la matrícula
+      if (acu + element.valor === config.matricula) {
+        mat = 1;
+      }
+    }
+
+    // Actualizar estado de la pensión
+    await Pension.updateOne(
+      { _id: element.idpension },
+      { matricula: mat },
+      { session }
+    );
+
+    // Actualizar stock del documento
+    const resultadoStock = await actualizarStockDocumento(
+      element,
+      conn,
+      session
+    );
+
+    if (resultadoStock.success) {
+      // Preparar registro
+      const registr = new Registro(
+        {
+          admin: pago.encargado,
+          estudiante: element.estudiante,
+          pago: element.pago,
+          documento: element.documento,
+          tipo: "creo",
+          descripcion: JSON.stringify(element),
+        },
+        { session }
+      );
+
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error en procesamiento de matrícula:", error);
+    return false;
+  }
+}
+
+async function procesarPagoPension(element, config, pago, conn, session) {
+  const Pension = conn.model("pension", PensionSchema);
+  const Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
+  const Documento = conn.model("document", DocumentoSchema);
+  const Dpago = conn.model("dpago", DpagoSchema);
+  const Registro = conn.model("registro", RegistroSchema);
+
+  try {
+    // Buscar la pensión
+    const element_meses = await Pension.findById({ _id: element.idpension });
+    let mes = element_meses.meses;
+
+    // Verificar si aplica beca
+    if (
+      element_meses.condicion_beca === "Si" &&
+      element_meses.num_mes_res > 0 &&
+      element.valor <= element_meses.val_beca
+    ) {
+      let res_beca = element_meses.num_mes_res;
+
+      // Lógica de procesamiento con beca
+      if (element.valor === element_meses.val_beca) {
+        mes += 1;
+        res_beca -= 1;
+      } else {
+        // Calcular abonos previos
+        const abonos = await Dpago.find({
+          estudiante: pago.estudiante,
+          tipo: element.tipo,
+        });
+
+        const acu = abonos.reduce(
+          (total, abonoaux) => total + abonoaux.valor,
+          0
+        );
+
+        // Verificar si completa el valor de la beca
+        if (
+          parseFloat(acu + element.valor) === parseFloat(element_meses.val_beca)
+        ) {
+          mes += 1;
+          res_beca -= 1;
+        }
+      }
+
+      // Actualizar pensión
+      await Pension.updateOne(
+        { _id: element.idpension },
+        {
+          meses: mes,
+          num_mes_res: res_beca,
+        },
+        { session }
+      );
+
+      // Marcar beca como usada
+      await Pension_Beca.updateOne(
+        { idpension: element.idpension, etiqueta: element.tipo },
+        { usado: 1 },
+        { session }
+      );
+    } else {
+      // Lógica de procesamiento sin beca
+      if (element.valor === config.pension) {
+        mes += 1;
+      } else {
+        // Calcular abonos previos
+        const abonos = await Dpago.find({
+          estudiante: pago.estudiante,
+          tipo: element.tipo,
+        });
+
+        const acu = abonos.reduce(
+          (total, abonoaux) => total + abonoaux.valor,
+          0
+        );
+
+        // Verificar si completa el valor de la pensión
+        if (parseFloat(acu + element.valor) === parseFloat(config.pension)) {
+          mes += 1;
+        }
+      }
+
+      // Actualizar pensión
+      await Pension.updateOne(
+        { _id: element.idpension },
+        { meses: mes },
+        { session }
+      );
+    }
+
+    // Actualizar stock del documento
+    const resultadoStock = await actualizarStockDocumento(
+      element,
+      conn,
+      session
+    );
+
+    if (resultadoStock.success) {
+      // Preparar registro
+      const registr = new Registro(
+        {
+          admin: pago.encargado,
+          estudiante: element.estudiante,
+          pago: element.pago,
+          documento: element.documento,
+          tipo: "creo",
+          descripcion: JSON.stringify(element),
+        },
+        { session }
+      );
+
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error en procesamiento de pensión:", error);
+    return false;
+  }
+}
+
+async function procesarPagoExtra(element, config, pago, conn, session) {
+  const Pension = conn.model("pension", PensionSchema);
+  const Documento = conn.model("document", DocumentoSchema);
+  const Registro = conn.model("registro", RegistroSchema);
+
+  try {
+    // Buscar pensión con configuración de año lectivo
+    const pension_config = await Pension.findById({
+      _id: element.idpension,
+    }).populate("idanio_lectivo");
+
+    // Parsear pagos extra del año lectivo
+    const extrapagos = JSON.parse(
+      pension_config.idanio_lectivo.extrapagos || "[]"
+    );
+
+    // Verificar si no es un abono
+    if (!element.estado.includes("Abono")) {
+      // Buscar el pago extra correspondiente
+      const auxpago = extrapagos.find(
+        (elementpago) => elementpago.idrubro === element.tipo
+      );
+
+      if (auxpago) {
+        // Obtener pagos existentes de la pensión
+        const pagospen = pension_config.extrapagos
+          ? JSON.parse(pension_config.extrapagos)
+          : [];
+
+        // Agregar nuevo pago extra
+        pagospen.push(auxpago);
+
+        // Actualizar pensión con nuevos pagos extra
+        await Pension.updateOne(
+          { _id: element.idpension },
+          { extrapagos: JSON.stringify(pagospen) },
+          { session }
+        );
+      }
+    }
+
+    // Actualizar stock del documento
+    const resultadoStock = await actualizarStockDocumento(
+      element,
+      conn,
+      session
+    );
+
+    if (resultadoStock.success) {
+      // Preparar registro
+      const registr = new Registro(
+        {
+          admin: pago.encargado,
+          estudiante: element.estudiante,
+          pago: element.pago,
+          documento: element.documento,
+          tipo: "creo",
+          descripcion: JSON.stringify(element),
+        },
+        { session }
+      );
+
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error en procesamiento de pago extra:", error);
+    return false;
+  }
+}
+
+async function actualizarStockDocumento(element, conn, session) {
+  const Documento = conn.model("document", DocumentoSchema);
+  const Dpago = conn.model("dpago", DpagoSchema);
+
+  try {
+    // Obtener el documento actual
+    const element_documento = await Documento.findById({
+      _id: element.documento,
+    });
+
+    // Calcular el total de pagos previos para este documento
+    const pagosPrevios = await Dpago.find({
+      documento: element.documento,
+      estudiante: element.estudiante,
+    });
+
+    // Sumar todos los valores de pagos previos más el valor actual
+    const totalPagado = pagosPrevios.reduce(
+      (total, pago) => total + parseFloat(pago.valor),
+      parseFloat(element.valor)
+    );
+
+    // Calcular el nuevo stock
+    let new_stock = parseFloat(element_documento.valor) - totalPagado;
+
+    // Ajuste de precisión para valores cercanos a cero
+    if (Math.abs(new_stock) <= 0.009) {
+      new_stock = 0;
+    }
+
+    // Verificar si el stock es válido
+    if (new_stock >= 0) {
+      // Actualizar documento
+      const resultado = await Documento.updateOne(
+        { _id: element.documento },
+        {
+          valor: new_stock,
+          npagos: pagosPrevios.length + 1,
+        },
+        { session }
+      );
+
+      return {
+        success: true,
+        newStock: new_stock,
+        result: resultado,
+      };
+    }
+
+    return {
+      success: false,
+      message: "Stock insuficiente",
+    };
+  } catch (error) {
+    console.error("Error en actualización de stock de documento:", error);
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}
+
 const enviar_orden_compra = async function (pago) {
   try {
     var readHTMLFile = function (path, callback) {
