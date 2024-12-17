@@ -78,6 +78,6 @@ api.get('/obtener_config_plana',auth.auth,AdminController.obtener_config_plana);
 api.put('/actualizar_config_plana/:id',auth.auth,AdminController.actualizar_config_plana);
 api.post('/crear_config_plana',auth.auth,AdminController.crear_config_plana);
 
-api.post('/actualizarStockDocumentos',AdminController.actualizarStockDocumentos);
+//api.post('/actualizarStockDocumentos',AdminController.actualizarStockDocumentos);
 
 module.exports = api;
