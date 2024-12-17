@@ -2671,31 +2671,29 @@ async function actualizarStockDocumento(element, conn, session) {
   }
 }
 
-const actualizarStockDocumentos = async function (req, res) {
-  const conn = mongoose.connection.useDb(req.body.base);
+async function actualizarStockInterno(documentos, conn) {
   const Documento = conn.model("document", DocumentoSchema);
   const Dpago = conn.model("dpago", DpagoSchema);
-
+  const Registro = conn.model("registro", RegistroSchema);
+  // Array para almacenar resultados de actualización
+  const resultados = [];
   try {
-    // Array para almacenar resultados de actualización
-    const resultados = [];
-
     // Comprobar si `documentos` es una cadena
-    if (typeof req.body.documentos === "string") {
+    if (typeof documentos === "string") {
       console.log("Convirtiendo 'documentos' de cadena a arreglo...");
-      req.body.documentos = JSON.parse(req.body.documentos);
+      documentos = JSON.parse(documentos);
     }
-    console.log("req.body.documentos: ", req.body.documentos);
-    // Validar que req.body.documentos sea un arreglo
-    if (!Array.isArray(req.body.documentos)) {
+    console.log("documentos: ", documentos);
+    // Validar que documentos sea un arreglo
+    if (!Array.isArray(documentos)) {
       return res
         .status(400)
         .send({ message: "El campo 'documentos' debe ser un arreglo." });
     }
 
     // Validar y convertir IDs
-    const documentosIds = req.body.documentos
-      /*.map((id) => {
+    const documentosIds = documentos;
+    /*.map((id) => {
         try {
           return Types.ObjectId(id); // Convertir a ObjectId
         } catch (err) {
@@ -2723,6 +2721,34 @@ const actualizarStockDocumentos = async function (req, res) {
         continue;
       }
 
+      // Encontrar el valor original del documento desde `Registro`
+      const registro = await Registro.findOne({
+        tipo: "creo",
+        descripcion: { $regex: documento.documento.toString() }, // Buscar `documentoId` en `descripcion`
+      });
+
+      if (!registro) {
+        resultados.push({
+          documentoId,
+          success: false,
+          message: "Registro original no encontrado",
+        });
+        continue;
+      }
+
+      let valorOriginal;
+      try {
+        const descripcionParseada = JSON.parse(registro.descripcion);
+        valorOriginal = Number(descripcionParseada.valor);
+      } catch (error) {
+        resultados.push({
+          documentoId,
+          success: false,
+          message: "Error al parsear la descripción del registro",
+        });
+        continue;
+      }
+
       // Encontrar todos los pagos relacionados con este documento
       const pagosPrevios = await Dpago.find({ documento: documentoId });
 
@@ -2734,8 +2760,15 @@ const actualizarStockDocumentos = async function (req, res) {
 
       // Calcular nuevo stock
       const valorDocumento = Number(documento.valor);
-      const new_stock = Number((valorDocumento - totalPagado).toFixed(2));
-
+      const new_stock = Number((valorOriginal - totalPagado).toFixed(2));
+      if (new_stock != valorDocumento) {
+        console.log(
+          "ERROR: valor original no coincide con el nuevo stock",
+          documento,
+          valorDocumento,
+          valorOriginal
+        );
+      }
       // Verificar si el stock es válido
       if (new_stock >= 0) {
         const resultado = await Documento.updateOne(
@@ -2743,25 +2776,50 @@ const actualizarStockDocumentos = async function (req, res) {
           {
             valor: new_stock,
             npagos: pagosPrevios.length,
-          },
-          { session }
+          }
         );
 
         resultados.push({
           documentoId,
           success: true,
           newStock: new_stock,
-          result: resultado,
+          totalPagado: totalPagado,
+          valorOriginal: valorOriginal,
+          // result: resultado,
         });
       } else {
         resultados.push({
           documentoId,
           success: false,
           message: "Stock insuficiente",
+          newStock: new_stock,
+          totalPagado: totalPagado,
+          valorOriginal: valorOriginal,
         });
       }
     }
 
+    return resultados;
+  } catch (error) {
+    console.error("Error en actualización de stock de documentos:", error);
+    throw error;
+  }
+}
+
+const actualizarStockDocumentos = async function (req, res) {
+  const conn = mongoose.connection.useDb(req.body.base);
+  try {
+    if (typeof req.body.documentos === "string") {
+      req.body.documentos = JSON.parse(req.body.documentos);
+    }
+
+    if (!Array.isArray(req.body.documentos)) {
+      return res
+        .status(400)
+        .send({ message: "El campo 'documentos' debe ser un arreglo." });
+    }
+
+    const resultados = await actualizarStockInterno(req.body.documentos, conn);
     res.status(200).send({ resultados });
   } catch (error) {
     console.error("Error en actualización de stock de documentos:", error);
