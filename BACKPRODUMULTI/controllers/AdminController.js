@@ -2326,7 +2326,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
       session.endSession();
     }
     // Ejecutar `actualizarStockInterno` una vez finalizado todo el proceso
-    if (documentosIds.length > 0) {
+    /*if (documentosIds.length > 0) {
       try {
         const conn = mongoose.connection.useDb(req.user.base); // Reutilizar conexión
         await actualizarStockInterno(documentosIds, conn);
@@ -2335,7 +2335,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
         console.error("Error al actualizar el stock de documentos:", err);
       }
     }
-  }
+  }*/
 };
 
 // Función auxiliar para procesar detalles de pago
