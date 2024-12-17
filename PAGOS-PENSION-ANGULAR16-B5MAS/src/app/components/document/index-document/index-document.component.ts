@@ -52,7 +52,7 @@ export class IndexDocumentComponent implements OnInit {
 					this.init_data();
 				}
 			}
-			
+
 		});
 	}
 
@@ -62,6 +62,7 @@ export class IndexDocumentComponent implements OnInit {
 		this.load = true;
 		this.load_data_doc = true;
 		this._adminService.listar_documentos_admin(this.token).subscribe((response) => {
+      console.log(response.data.map((element:any)=>element._id));
 			this.documentos_const = response.data;
 
 			this.documentos_const.forEach((element) => {
@@ -83,8 +84,8 @@ export class IndexDocumentComponent implements OnInit {
 				//console.log(this.fact);
 			});
 		}
-		
-		
+
+
 	}
 	editar(element:any){
 		//console.log(element);
@@ -106,7 +107,7 @@ export class IndexDocumentComponent implements OnInit {
 				message: 'Tiene que ser 0 o más',
 			});
 		}
-		
+
 	}
 	select_todo() {
 		if (this.total == 1) {
@@ -160,14 +161,14 @@ export class IndexDocumentComponent implements OnInit {
 		this.documentos=[];
 		if (this.filtro) {
 			var term = new RegExp(this.filtro.toString().trim(), 'i');
-			
+
 			this.documentos_const.forEach((element) => {
 				this.documentos.push({ ckechk: 0, element });
 			});
 
 			this.documentos = this.documentos.filter(
-				(item) => term.test(item.element.documento) 
-				|| term.test(item.element._id) 
+				(item) => term.test(item.element.documento)
+				|| term.test(item.element._id)
 				|| term.test(item.element.cuenta)
 				|| term.test(item.element.createdAt)
 			);

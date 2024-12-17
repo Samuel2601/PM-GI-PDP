@@ -2671,7 +2671,7 @@ async function actualizarStockDocumento(element, conn, session) {
   }
 }
 
-async function actualizarStockDocumentos(documentos) {
+const actualizarStockDocumentos= async function (req, res) {
   console.log(req.body);
   if (!req.user) {
     return res.status(401).send({ message: "No autorizado" });
@@ -2685,7 +2685,7 @@ async function actualizarStockDocumentos(documentos) {
     const resultados = [];
 
     // Iterar sobre cada documento
-    for (const documentoId of documentos) {
+    for (const documentoId of req.body.documentos) {
       // Obtener el documento actual
       const documento = await Documento.findById(documentoId);
 
