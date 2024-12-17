@@ -2334,8 +2334,8 @@ const registro_compra_manual_estudiante = async function (req, res) {
       } catch (err) {
         console.error("Error al actualizar el stock de documentos:", err);
       }
-    }
-  }*/
+    }*/
+  }
 };
 
 // Función auxiliar para procesar detalles de pago
