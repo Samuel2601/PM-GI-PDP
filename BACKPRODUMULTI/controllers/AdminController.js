@@ -2680,8 +2680,37 @@ const actualizarStockDocumentos = async function (req, res) {
     // Array para almacenar resultados de actualización
     const resultados = [];
 
-    // Iterar sobre cada documento
-    for (const documentoId of req.body.documentos) {
+    // Comprobar si `documentos` es una cadena
+    if (typeof req.body.documentos === "string") {
+      console.log("Convirtiendo 'documentos' de cadena a arreglo...");
+      req.body.documentos = JSON.parse(req.body.documentos);
+    }
+    console.log("req.body.documentos: ", req.body.documentos);
+    // Validar que req.body.documentos sea un arreglo
+    if (!Array.isArray(req.body.documentos)) {
+      return res
+        .status(400)
+        .send({ message: "El campo 'documentos' debe ser un arreglo." });
+    }
+
+    // Validar y convertir IDs
+    const documentosIds = req.body.documentos
+      /*.map((id) => {
+        try {
+          return Types.ObjectId(id); // Convertir a ObjectId
+        } catch (err) {
+          return null; // Devolver null si no es válido
+        }
+      })
+      .filter((id) => id !== null);*/ // Eliminar valores nulos
+
+    if (documentosIds.length === 0) {
+      return res
+        .status(400)
+        .send({ message: "No se recibieron documentos válidos." });
+    }
+
+    for (const documentoId of documentosIds) {
       // Obtener el documento actual
       const documento = await Documento.findById(documentoId);
 
