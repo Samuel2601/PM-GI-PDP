@@ -2302,7 +2302,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
 
     // Confirmar transacción
     await session.commitTransaction();
-
+    console.log("Transacción confirmada");
     res.status(200).send({
       pago: pago[0],
       message: "Registrado correctamente",
