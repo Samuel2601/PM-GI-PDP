@@ -2671,7 +2671,7 @@ async function actualizarStockDocumento(element, conn, session) {
   }
 }
 
-const actualizarStockDocumentos= async function (req, res) {
+const actualizarStockDocumentos = async function (req, res) {
   console.log(req.body);
   if (!req.user) {
     return res.status(401).send({ message: "No autorizado" });
@@ -2737,12 +2737,12 @@ const actualizarStockDocumentos= async function (req, res) {
       }
     }
 
-    return resultados;
+    res.status(200).send({ resultados });
   } catch (error) {
     console.error("Error en actualización de stock de documentos:", error);
-    throw error;
+    res.status(501).send({ error });
   }
-}
+};
 
 const enviar_orden_compra = async function (pago) {
   try {
@@ -3021,5 +3021,5 @@ module.exports = {
   obtener_config_plana,
   actualizar_config_plana,
   crear_config_plana,
-  actualizarStockDocumentos
+  actualizarStockDocumentos,
 };
