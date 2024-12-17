@@ -2672,11 +2672,7 @@ async function actualizarStockDocumento(element, conn, session) {
 }
 
 const actualizarStockDocumentos = async function (req, res) {
-  console.log(req.body);
-  if (!req.user) {
-    return res.status(401).send({ message: "No autorizado" });
-  }
-  const conn = mongoose.connection.useDb(req.user.base);
+  const conn = mongoose.connection.useDb(req.body.base);
   const Documento = conn.model("document", DocumentoSchema);
   const Dpago = conn.model("dpago", DpagoSchema);
 
