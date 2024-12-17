@@ -2265,7 +2265,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
           conn,
           session
         );
-
+        console.log("resultadoProcesamiento", resultadoProcesamiento);
         if (resultadoProcesamiento) {
           dpagosValidos.push(elementoProcesado);
         }
