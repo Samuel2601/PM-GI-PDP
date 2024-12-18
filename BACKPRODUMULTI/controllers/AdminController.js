@@ -2398,7 +2398,7 @@ async function procesarPagoMatricula(element, config, pago, conn, session) {
       { matricula: mat },
       { session }
     );
-
+    return true;
     // Actualizar stock del documento
     const resultadoStock = await actualizarStockDocumento(
       element,
@@ -2588,7 +2588,7 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
         );
       }
     }
-
+    return true;
     // Actualizar stock del documento
     const resultadoStock = await actualizarStockDocumento(
       element,
@@ -2637,7 +2637,6 @@ async function actualizarStockDocumento(element, conn, session) {
     // Calcular el total de pagos previos para este documento
     const pagosPrevios = await Dpago.find({
       documento: element.documento,
-      estudiante: element.estudiante,
     });
 
     // Sumar todos los valores de pagos previos más el valor actual
