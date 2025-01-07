@@ -71,6 +71,7 @@ export class RegistroComponent implements OnInit {
         calle1: ['', Validators.required],
         calle2: ['', Validators.required],
         referencia: ['', Validators.required],
+        type_school: ['', Validators.required],
         portada: [],
       },
       {
@@ -306,7 +307,7 @@ export class RegistroComponent implements OnInit {
           });
         } else {
           this._adminService
-            .registrar_admin(this.registrationForm.value, this.file)
+            .create_institucion(this.registrationForm.value, this.file)
             .subscribe((response) => {
               console.log(response);
               if (response.message == 'Registrado con exito') {
@@ -340,6 +341,16 @@ export class RegistroComponent implements OnInit {
         this.imgSelect = 'assets/img/01.jpg';
         this.file = undefined;
       }
+    }else{
+      console.error('Debe seleccionar una opción', this.registrationForm);
+      iziToast.show({
+        title: 'ERROR',
+        titleColor: '#FF0000',
+        color: '#FFF',
+        class: 'text-danger',
+        position: 'topRight',
+        message: 'Debe seleccionar una opción',
+      });
     }
   }
   view_password() {
@@ -352,12 +363,12 @@ export class RegistroComponent implements OnInit {
     }
   }
   view_passworda() {
-    let type = $('#auxiliar').attr('type');
+    let type = $('#confirmPassword').attr('type');
 
     if (type == 'text') {
-      $('#auxiliar').attr('type', 'password');
+      $('#confirmPassword').attr('type', 'password');
     } else if (type == 'password') {
-      $('#auxiliar').attr('type', 'text');
+      $('#confirmPassword').attr('type', 'text');
     }
   }
 

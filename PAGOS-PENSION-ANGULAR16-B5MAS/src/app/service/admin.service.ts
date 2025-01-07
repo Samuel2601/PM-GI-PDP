@@ -8,7 +8,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 })
 export class AdminService {
 	public url;
-	
+
 	constructor(private _http: HttpClient) {
 		this.url = GLOBAL.url;
 	}
@@ -26,7 +26,7 @@ export class AdminService {
 		});
 		return this._http.post(this.url + 'cambiarEstadoGoogle', data,{ headers: headers });
 	}
-	
+
 	consultarEstadoGoogle( token: any,id: any):Observable<any>{
 		let headers = new HttpHeaders({
 			'Content-Type': 'application/json',
@@ -128,10 +128,10 @@ export class AdminService {
 
 		//const token = 'dop_v1_bdb76a778174aeda31018939d47d5c2be8763f6c8ba98d67c740b7a0a6b83655';
 		const headers = { 'Authorization': `Bearer ${token}` };
-		
-		
+
+
 		const url = 'https://api.digitalocean.com/v2/customers/my/billing_history';
-	  
+
 		return this._http.get(url, { headers });
 		//return this._http.get(url, httpOptions);
 	}
@@ -147,10 +147,10 @@ export class AdminService {
 
 		//const token = 'dop_v1_bdb76a778174aeda31018939d47d5c2be8763f6c8ba98d67c740b7a0a6b83655';
 		const headers = { 'Authorization': `Bearer ${token}` };
-		
-		
+
+
 		const url2 = "https://api.digitalocean.com/v2/customers/my/balance";
-	  
+
 		return  this._http.get(url2, { headers });
 		//return this._http.get(url, httpOptions);
 	}
@@ -277,7 +277,7 @@ export class AdminService {
 		return this._http.post(this.url + 'newpassword', data, { headers: headers });
 	}
 
-	registrar_admin(data: any, file: any): Observable<any> {
+	create_institucion(data: any, file: any): Observable<any> {
 		let headers = new HttpHeaders({ Authorization: 'registroadmin' });
 		const fd = new FormData();
 		fd.append('titulo', data.titulo);
@@ -294,12 +294,12 @@ export class AdminService {
 		fd.append('nombres', data.nombres);
 		fd.append('apellidos', data.apellidos);
 		fd.append('email', data.email);
-		fd.append('password', data.passwordadmin);
+		fd.append('password', data.password);
 		fd.append('telefono', data.telefono);
 		fd.append('dni', data.dni);
 		fd.append('base', data.base);
 		fd.append('portada', file);
-		return this._http.post(this.url + 'registrar_admin', fd, { headers: headers });
+		return this._http.post(this.url + 'create_institucion', fd, { headers: headers });
 	}
 
 	listar_estudiantes_tienda(token: any): Observable<any> {
@@ -339,7 +339,7 @@ export class AdminService {
 		  'Content-Type': 'application/json',
 		  Authorization: token,
 		});
-		
+
 		// Usamos comillas inversas para interpolar las variables en la URL
 		return this._http.get(`${this.url}listar_registro/${desde}/${hasta}`, { headers: headers });
 	  }
@@ -663,7 +663,7 @@ export class AdminService {
 		  'Content-Type': 'application/json',
 		  Authorization: token,
 		});
-		
+
 		// Usamos comillas inversas para interpolar las variables en la URL
 		return this._http.get(`${this.url}obtener_pagos_admin/${desde}/${hasta}`, { headers: headers });
 	}
@@ -672,7 +672,7 @@ export class AdminService {
 		  'Content-Type': 'application/json',
 		  Authorization: token,
 		});
-		
+
 		// Usamos comillas inversas para interpolar las variables en la URL
 		return this._http.get(`${this.url}obtener_pagos_dash/${desde}/${hasta}`, { headers: headers });
 	}

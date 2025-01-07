@@ -92,7 +92,7 @@ export class IndexStudentsComponent implements OnInit {
       .obtener_config_admin(this.token)
       .subscribe((response) => {
         if (response.message) {
-          this.router.navigate(['/configuracion']);
+          this.router.navigate(['/configuraciones']);
         } else {
           this.config_const = response.data[0];
           //console.log(this.config_const);

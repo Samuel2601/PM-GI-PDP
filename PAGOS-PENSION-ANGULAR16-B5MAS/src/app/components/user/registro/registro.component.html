@@ -155,6 +155,24 @@
                 </div>
               </div>
             </div>
+            <div class="col-12">
+              <div class="form-group">
+                <label for="type_school">Tipo de escuela (*)</label>
+                <select
+                  class="form-control"
+                  required
+                  name="type_school"
+                  formControlName="type_school"
+                  id="type_school"
+                >
+                  <option value="" disabled selected>
+                    Seleccione una opción
+                  </option>
+                  <option value="EGB">EGB</option>
+                  <option value="UE">UE</option>
+                </select>
+              </div>
+            </div>
 
             <div class="col-12">
               <div class="form-group">
@@ -328,7 +346,6 @@
                   class="form-control"
                   required
                   placeholder="calle1"
-                  pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9., ]+$"
                   name="calle1"
                   formControlName="calle1"
                 />
@@ -342,7 +359,6 @@
                   class="form-control"
                   required
                   placeholder="calle2"
-                  pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9., ]+$"
                   name="calle2"
                   formControlName="calle2"
                 />
@@ -356,7 +372,6 @@
                   class="form-control"
                   required
                   placeholder="referencia"
-                  pattern="^[A-ZÁÉÍÓÚa-záéíóú0-9., ]+$"
                   name="referencia"
                   formControlName="referencia"
                 />
