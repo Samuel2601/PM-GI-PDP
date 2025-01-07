@@ -233,68 +233,83 @@ const newpassword = async function (req, res) {
     res.status(200).send({ message: "NoAccess" });
   }
 };
-const registrar_admin = async function (req, res) {
+const create_institucion = async function (req, res) {
   try {
-    var data = req.body;
-    var admin_arr = [];
-    var base_arr = [];
-    let conn = mongoose.connection.useDb("Instituciones");
-    AdminInstituto = conn.model("admininstitutos", AdminInstitutoSchema);
-    Institucion = conn.model("instituto", InstitucionSchema);
-    Registro = conn.model("registro", RegistroSchema);
+    const data = req.body;
+    const conn = mongoose.connection.useDb("Instituciones");
+    const AdminInstituto = conn.model("admininstitutos", AdminInstitutoSchema);
+    const Institucion = conn.model("instituto", InstitucionSchema);
+    const Registro = conn.model("registro", RegistroSchema);
 
-    admin_arr = await AdminInstituto.find({ email: data.email });
-    base_arr = await AdminInstituto.find({ base: data.base });
-    if (admin_arr.length == 0 && base_arr.length == 0) {
-      bcrypt.hash(data.password, null, null, async function (err, hash) {
-        if (hash) {
-          data.password = hash;
-          data.estado = "habilitado";
-          data.rol = "admin";
-          var img_path = req.files.portada.path;
-          var name = img_path.split("/"); // usar / en produccion  \\ local
-          var portada_name = name[2];
-          data.portada = portada_name;
+    // Validar duplicados
+    const adminExiste = await AdminInstituto.exists({ email: data.email });
+    const baseExiste = await AdminInstituto.exists({ base: data.base });
 
-          var reg = await AdminInstituto.create(data);
-          data.idadmin = reg._id;
-
-          var reg1 = await Institucion.create(data);
-
-          let registro = {};
-          registro.admin = reg._id;
-          registro.tipo = "Registro";
-          registro.descripcion = JSON.stringify(data);
-          await Registro.create(registro);
-          let conn = mongoose.connection.useDb(reg.base.toString());
-          AdminInstituto = conn.model("admininstitutos", AdminInstitutoSchema);
-
-          Admin = conn.model("admin", AdminSchema);
-
-          //var reg = await AdminInstituto.create(reg);
-
-          var reg = await Admin.create(data);
-
-          res.status(200).send({ message: "Registrado con exito" });
-        } else {
-          res.status(200).send({ message: "ErrorServer" });
-        }
+    if (adminExiste || baseExiste) {
+      return res.status(409).send({
+        message: adminExiste
+          ? "Ya estás registrado con este correo"
+          : "Ya existe la base de datos",
+        data: undefined,
       });
-    } else {
-      if (admin_arr.length > 0) {
-        res
-          .status(200)
-          .send({ message: "Ya estás registrado", data: undefined });
-      } else if (base_arr.length > 0) {
-        res
-          .status(200)
-          .send({ message: "Ya existe la base de datos", data: undefined });
-      }
     }
+
+    // Encriptar contraseña
+    bcrypt.hash(data.password, null, null, async function (err, hash) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send({
+          message: "Error interno del servidor",
+          error: err.message,
+        });
+      }
+      if (hash) {
+        console.log(
+          "Registrando institución:",
+          data,
+          "con contraseña:",
+          data.password,
+          "hash:",
+          hash
+        );
+        data.password = hash;
+        data.estado = "habilitado";
+        data.rol = "admin";
+
+        // Procesar portada
+        if (req.files && req.files.portada) {
+          const portada_name = path.basename(req.files.portada.path);
+          data.portada = portada_name;
+        }
+
+        // Crear documentos
+        const regAdmin = await AdminInstituto.create(data);
+        data.idadmin = regAdmin._id;
+        const regInstitucion = await Institucion.create(data);
+
+        const registro = {
+          admin: regAdmin._id,
+          tipo: "Registro",
+          descripcion: JSON.stringify(data),
+        };
+        await Registro.create(registro);
+
+        // Crear en base específica
+        const connBase = mongoose.connection.useDb(data.base);
+        const Admin = connBase.model("admin", AdminSchema);
+        await Admin.create(data);
+
+        res.status(201).send({ message: "Registrado con éxito" });
+      }
+    });
   } catch (error) {
-    res.status(200).send({ message: "Algo salio mal" });
+    console.error("Error en el registro:", error);
+    res
+      .status(500)
+      .send({ message: "Error interno del servidor", error: error.message });
   }
 };
+
 const cambiar_base = async function (req, res) {
   if (req.user.email == "samuel.arevalo@espoch.edu.ec") {
     var data1 = req.body;
@@ -1082,6 +1097,7 @@ const reactivar_estudiante_admin = async function (req, res) {
         pension.matricula = 0;
         pension.curso = data.curso;
         pension.paralelo = data.paralelo;
+        pension.especialidad = data.especialidad||'EGB';
         var reg2 = await Pension.create(pension);
         res.status(200).send({ message: "Reactivado" });
       } else {
@@ -1275,175 +1291,6 @@ const obtener_config_admin = async (req, res) => {
     res.status(403).send({ message: "NoAccess" });
   }
 };
-/*
-const actualizar_config_admin = async (req, res) => {
-	let fecha_actual = new Date();
-	if (req.user) {
-		try {
-			let conn = mongoose.connection.useDb(req.user.base);
-			// var ConfigSchema = require('../models/Config');
-			Config = conn.model('config', ConfigSchema);
-			Registro = conn.model('registro', RegistroSchema);
-			Pension = conn.model('pension', PensionSchema);
-			Estudiante = conn.model('estudiante', EstudianteSchema);
-			let data = req.body;
-			let cfg = await Config.find().sort({ createdAt: -1 });
-			if (cfg.length == 0) {
-				let configfecha = new Date(data.anio_lectivo);
-				let mes = (fecha_actual.getFullYear() - configfecha.getFullYear()) * 12;
-				mes -= configfecha.getMonth();
-				mes += fecha_actual.getMonth();
-				mes = mes + 1;
-				if (mes > 10) {
-					data.numpension = 10;
-				} else if(mes>0){
-					data.numpension = mes;
-				}else{
-					data.numpension=0
-				}
-				delete data._id;
-				delete data.createdAt;
-				var re = await Config.create(data);
-				let vconfg = await Config.find().sort({ createdAt: -1 });
-				if (vconfg.length > 0) {
-					//let config = await Config.findById('61abe55d2dce63583086f108');
-					let config = vconfg[0];
-					let admin = vconfg[0];
-					var estudiantes = await Estudiante.find();
-					if (estudiantes.length > 0) {
-						for (var i = 0; i < estudiantes.length; i++) {
-							if (estudiantes[i].estado == 'Activo' && estudiantes[i].curso <= 9) {
-								var e = await Estudiante.updateOne(
-									{ _id: estudiantes[i]._id },
-									{
-										curso: (parseInt(estudiantes[i].curso) + 1).toString(),
-									}
-								);
-								var pension = {};
-								pension.idanio_lectivo = config._id;
-								pension.idestudiante = estudiantes[i]._id;
-								pension.anio_lectivo = config.anio_lectivo;
-								pension.condicion_beca = 'No';
-								pension.curso = (parseInt(estudiantes[i].curso) + 1).toString();
-								pension.paralelo = estudiantes[i].paralelo;
-								var p = await Pension.create(pension);
-							} else if (estudiantes[i].estado == 'Activo') {
-								var e = await Estudiante.updateOne(
-									{ _id: estudiantes[i]._id },
-									{
-										estado: 'Desactivado',
-									}
-								);
-							}
-						}
-					}
-
-					let registro = {};
-					registro.admin = req.user.sub;
-					registro.tipo = 'actualizo';
-					registro.descripcion = JSON.stringify(admin) + JSON.stringify(data);
-					await Registro.create(registro);
-					res.status(200).send({ data: vconfg[0] });
-				} else {
-					res.status(200).send({ message: 'Algo Salio mal' });
-				}
-			} else {
-				let configfecha = new Date(data.anio_lectivo);
-
-		//	if (fecha_actual.getTime() >= configfecha.getTime()) {
-					var aux = cfg[0]; //await Config.findById('61abe55d2dce63583086f108');
-					
-					if (configfecha.getTime() >= aux.anio_lectivo.getTime()) {
-						let mes = (fecha_actual.getFullYear() - configfecha.getFullYear()) * 12;
-						mes -= configfecha.getMonth();
-						mes += fecha_actual.getMonth();
-						mes = mes + 1;
-
-						if (mes > 10) {
-							data.numpension = 10;
-						}  else if(mes>0){
-							data.numpension = mes;
-						}else{
-							data.numpension=0
-						}
-						let admin = cfg[0]; //await Config.findById('61abe55d2dce63583086f108');
-						
-						if (new Date(admin.anio_lectivo).getTime() != new Date(data.anio_lectivo).getTime()) {
-							delete data._id;
-							delete data.createdAt;
-							await Config.create(data);
-
-
-							let vconfg = await Config.find().sort({ createdAt: -1 });
-							if (vconfg.length > 0) {
-								//let config = await Config.findById('61abe55d2dce63583086f108');
-								let config = vconfg[0];
-								var estudiantes = await Estudiante.find();
-								if (estudiantes.length > 0) {
-									for (var i = 0; i < estudiantes.length; i++) {
-										if (estudiantes[i].estado == 'Activo' && estudiantes[i].curso <= 9) {
-											var e = await Estudiante.updateOne(
-												{ _id: estudiantes[i]._id },
-												{
-													curso: (parseInt(estudiantes[i].curso) + 1).toString(),
-												}
-											);
-											var pension = {};
-											pension.idanio_lectivo = config._id;
-											pension.idestudiante = estudiantes[i]._id;
-											pension.anio_lectivo = config.anio_lectivo;
-											pension.condicion_beca = 'No';
-											pension.curso = (parseInt(estudiantes[i].curso) + 1).toString();
-											pension.paralelo = estudiantes[i].paralelo;
-											var p = await Pension.create(pension);
-										} else if (estudiantes[i].curso > 9 && estudiantes[i].estado == 'Activo') {
-											var e = await Estudiante.updateOne(
-												{ _id: estudiantes[i]._id },
-												{
-													estado: 'Desactivado',
-												}
-											);
-										}
-									}
-								}
-
-								let registro = {};
-								registro.admin = req.user.sub;
-								registro.tipo = 'actualizo';
-								registro.descripcion =JSON.stringify(admin) + JSON.stringify(data);
-
-								await Registro.create(registro);
-								res.status(200).send({ data: config });
-							} else {
-								res.status(200).send({ message: 'Algo Salio mal' });
-							}
-						} else {
-							let config = await Config.updateOne(
-								{ _id: cfg[0]._id },
-								{
-									//envio_activacion : data.envio_activacion,
-									mescompleto: data.mescompleto,
-									pension: data.pension,
-									matricula: data.matricula,
-									extrapagos:data.extrapagos,
-									//anio_lectivo:data.anio_lectivo,
-									numpension: data.numpension,
-								}
-							);
-							res.status(200).send({ data: config });
-						}
-					} else {
-						res.status(200).send({ message: 'No puedes ingresar una fecha menor a la anterior' });
-					}
-			}
-		} catch (error) {
-			console.log(error);
-			res.status(200).send({ message: 'Algo Salio mal' });
-		}
-	} else {
-		res.status(500).send({ message: 'NoAccess' });
-	}
-};*/
 const actualizar_config_admin = async (req, res) => {
   if (!req.user) {
     return res.status(500).send({ message: "NoAccess" });
@@ -1486,6 +1333,7 @@ const actualizar_config_admin = async (req, res) => {
           condicion_beca: "No",
           curso: estudiante.curso.toString(),
           paralelo: estudiante.paralelo,
+          especialidad: estudiante.especialidad||'EGB',
         });
         await pension.save();
       }
@@ -3079,7 +2927,7 @@ module.exports = {
   obtener_portada,
   newpassword,
   forgotpassword,
-  registrar_admin,
+  create_institucion,
   eliminar_finalizado_orden,
   login_admin,
   registro_documento_admin,

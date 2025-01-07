@@ -19,6 +19,7 @@ var InstitucionSchema = Schema({
     referencia: {type: String, required: true},
     telefonocon: {type: String, required: true},
     telefonoinsti: {type: String, required: true},
+    type_school: {type: String, required: true, default: 'EGB'},
 
     createdAt: {type:Date, default: Date.now, require: true}
 });

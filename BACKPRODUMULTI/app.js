@@ -27,8 +27,11 @@ var estudiante_routes = require("./routes/estudiante");
 var admin_routes = require("./routes/admin");
 //var finan_routes = require('./routes/financiero');
 var google_routes = require("./routes/google");
-const { actualizarNumpension } = require("./controllers/scheduler");
+const {
+  actualizarNumpensionEnTodasLasBases,
+} = require("./controllers/scheduler");
 const apiexport = require("./controllers/consulta_externa");
+const router = require("./routes/instituciones");
 mongoose.connect(
   "mongodb://127.0.0.1:27017/Instituciones?retryWrites=false",
   { useUnifiedTopology: true, useNewUrlParser: true },
@@ -64,7 +67,8 @@ app.use("/api", admin_routes);
 //app.use('/api',finan_routes);
 app.use("/api", google_routes);
 app.use("/api", apiexport);
+app.use("/api", router);
 
-actualizarNumpension();
+actualizarNumpensionEnTodasLasBases();
 
 module.exports = app;
