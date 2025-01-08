@@ -2043,7 +2043,7 @@ const eliminar_orden_pm = async function (req, res) {
   }
 };
 const registro_compra_manual_estudiante = async function (req, res) {
-  console.log(req.body);
+  //console.log(req.body);
   if (!req.user) {
     return res.status(401).send({ message: "No autorizado" });
   }
@@ -2113,7 +2113,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
           conn,
           session
         );
-
+        console.log("resultadoProcesamiento", resultadoProcesamiento);
         if (resultadoProcesamiento) {
           dpagosValidos.push(elementoProcesado);
         }
@@ -2189,6 +2189,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
 // Función auxiliar para procesar detalles de pago
 async function procesarDetallePago(element, config, pago, conn, session) {
   try {
+    console.log("TIPO", element.tipo);
     // Lógica de procesamiento de pago según tipo
     switch (true) {
       case element.tipo === 0: // Matrícula
@@ -2667,7 +2668,7 @@ async function actualizarStockInterno(documentos, conn) {
     throw error;
   }
 }
-
+//PARA ENDPOINT
 const actualizarStockDocumentos = async function (req, res) {
   const conn = mongoose.connection.useDb(req.body.base);
   try {

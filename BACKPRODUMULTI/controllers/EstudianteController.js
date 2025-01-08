@@ -253,7 +253,7 @@ const registro_estudiante_masivo = async function (req, res) {
                   pension.matricula = element.matricula;
                   pension.curso = element.curso;
                   pension.paralelo = element.paralelo;
-                  pension.especialidad = data.especialidad || "EGB";
+                  pension.especialidad = element.especialidad || "EGB";
 
                   var reg2 = await Pension.create(pension);
 
