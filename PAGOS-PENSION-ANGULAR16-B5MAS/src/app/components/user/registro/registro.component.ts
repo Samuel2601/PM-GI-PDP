@@ -310,7 +310,7 @@ export class RegistroComponent implements OnInit {
             .create_institucion(this.registrationForm.value, this.file)
             .subscribe((response) => {
               console.log(response);
-              if (response.message == 'Registrado con exito') {
+              if (response.message === "Registrado con éxito") {
                 iziToast.show({
                   title: 'APROBADO',
                   class: 'iziToast-success',

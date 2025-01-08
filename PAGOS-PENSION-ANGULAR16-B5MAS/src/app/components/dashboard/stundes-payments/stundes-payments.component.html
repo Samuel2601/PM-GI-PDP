@@ -39,7 +39,7 @@
    <i class="fe fe-info mr-1"></i> No tienes Pagos realizados
   </div>
 
-  <div class="card">
+  <div class="card" *ngIf="estudiantes.length > 0">
    <div class="card-body">
     <ul class="nav nav-pills nav-overflow header-tabs">
      <ng-container *ngFor="let pen1 of config; let val = index">
@@ -72,10 +72,10 @@
    </div>
   </div>
   <!-- Div CANVAS -->
-  <div class="card-body">
+  <div class="card-body" *ngIf="estudiantes.length > 0">
    <app-grafic-sp></app-grafic-sp>
   </div>
-  <ng-container *ngIf="cursos != undefined">
+  <ng-container *ngIf="cursos != undefined && estudiantes.length > 0">
    <div class="card">
     <div class="card-header">
      <h3 class="card-header-title">Reportes</h3>

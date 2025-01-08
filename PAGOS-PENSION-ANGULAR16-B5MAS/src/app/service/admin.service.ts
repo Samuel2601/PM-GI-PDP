@@ -299,6 +299,7 @@ export class AdminService {
 		fd.append('dni', data.dni);
 		fd.append('base', data.base);
 		fd.append('portada', file);
+    fd.append('type_school', data.type_school);
 		return this._http.post(this.url + 'create_institucion', fd, { headers: headers });
 	}
 
