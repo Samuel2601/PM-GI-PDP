@@ -1563,6 +1563,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
 
     this.auxdasboarestudiante.dia = new Date();
     this.auxdasboarestudiante.config = this.pdffecha;
+    console.log(this.pagos_estudiante);
     this.auxdasboarestudiante.pagos_estudiante = this.pagos_estudiante;
 
     this.auxdasboarestudiante.estudiantes = this.estudiantes;
@@ -1576,42 +1577,49 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     this.auxdasboarestudiante.paralelo = this.paralelo;
     this.auxdasboarestudiante.deteconomico = this.deteconomico;
 
-    let fileContent = JSON.stringify(this.auxdasboarestudiante);
+    console.log(this.auxdasboarestudiante);
 
     this._configService.setProgress(this._configService.getProgress() + 10);
+    try {
+      for (const key in this.auxdasboarestudiante) {
+        if (
+          Object.prototype.hasOwnProperty.call(this.auxdasboarestudiante, key)
+        ) {
+          const element = this.auxdasboarestudiante[key];
 
-    for (const key in this.auxdasboarestudiante) {
-      if (
-        Object.prototype.hasOwnProperty.call(this.auxdasboarestudiante, key)
-      ) {
-        const element = this.auxdasboarestudiante[key];
-        if (Array.isArray(element)) {
-          const chunkSize = 1500;
-          var j = 0;
-          for (let i = 0; i < element.length; i += chunkSize) {
-            const chunk = element.slice(i, i + chunkSize);
-            localStorage.setItem(
-              key + '_' + j,
-              btoa(
-                String.fromCharCode.apply(
-                  null,
-                  Array.from(pako.deflate(JSON.stringify(chunk)))
+          if (Array.isArray(element)) {
+            const chunkSize = 500;
+            var j = 0;
+            console.log("KEY", key,Array.isArray(element));
+            for (let i = 0; i < element.length; i += chunkSize) {
+              const chunk = element.slice(i, i + chunkSize);
+              console.log("CHUNK", chunk);
+              localStorage.setItem(
+                key + '_' + j,
+                btoa(
+                  String.fromCharCode.apply(
+                    null,
+                    Array.from(pako.deflate(JSON.stringify(chunk)))
+                  )
                 )
-              )
-            );
+              );
+              this._configService.setProgress(
+                this._configService.getProgress() + 5
+              );
+              j++;
+            }
+          } else {
+            localStorage.setItem(key, JSON.stringify(element));
             this._configService.setProgress(
               this._configService.getProgress() + 5
             );
-            j++;
           }
-        } else {
-          localStorage.setItem(key, JSON.stringify(element));
-          this._configService.setProgress(
-            this._configService.getProgress() + 5
-          );
         }
       }
+    } catch (error) {
+      console.log(error);
     }
+
     this._configService.setProgress(100);
     setTimeout(() => {
       this._configService.setProgress(0);
@@ -2240,6 +2248,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
   }
   resumen: any[] = [];
   calcularResumen() {
+    this.resumen = [];
     for (const especialidad in this.pagos_estudiante) {
       const cursos = this.pagos_estudiante[especialidad];
       const especialidadResumen: any = { nombre: especialidad, cursos: [] };
@@ -2271,6 +2280,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
       this.resumen.push(especialidadResumen);
     }
     console.log(this.resumen);
+    console.log(this.cursos);
     setTimeout(() => {
       this.updateChart();
     }, 1000);
@@ -2336,7 +2346,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     return curso.valorPorPagar;
   }
 
-  getSumaTotalParse(val1:any, val2:any): number {
+  getSumaTotalParse(val1: any, val2: any): number {
     return parseFloat(val1) + parseFloat(val2);
   }
 

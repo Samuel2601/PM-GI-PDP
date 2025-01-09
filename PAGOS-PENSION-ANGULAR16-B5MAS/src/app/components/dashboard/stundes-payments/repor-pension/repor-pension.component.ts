@@ -103,9 +103,9 @@ export class ReporPensionComponent implements OnInit {
 
      // Asignar el resto de las palabras a pdffecha
      this.pdffecha = palabras.slice(1).join(' ');
-     if (JSON.stringify(this.pdffecha) != localStorage.getItem('config')) {
+     /*if (JSON.stringify(this.pdffecha) != localStorage.getItem('config')) {
       this._router.navigate(['/dashboard']);
-     }
+     }*/
     });
 
     if (localStorage.getItem('dia')) {
@@ -120,7 +120,7 @@ export class ReporPensionComponent implements OnInit {
       this.reportPension();
      }
     } else {
-     this._router.navigate(['/dashboard']);
+     //this._router.navigate(['/dashboard']);
      //this.actualizar_dashest=true;
      //this.armado_matriz(val,costosextrapagos,costopension,costomatricula);
     }
@@ -174,7 +174,7 @@ export class ReporPensionComponent implements OnInit {
    } while (j > 0);
    this.reporteRetirado();
   } else {
-   this._router.navigate(['/dashboard']);
+  // this._router.navigate(['/dashboard']);
   }
  }
  llamarBecado() {
@@ -207,7 +207,7 @@ export class ReporPensionComponent implements OnInit {
    } while (j > 0);
    this.reporteBeca();
   } else {
-   this._router.navigate(['/dashboard']);
+   //this._router.navigate(['/dashboard']);
   }
  }
  reporteRetirado() {
@@ -313,6 +313,7 @@ export class ReporPensionComponent implements OnInit {
       )
      );
     }
+    console.log(localStorage.getItem('cursos_' + j));
     if (localStorage.getItem('cursos_' + j)) {
      this.cursos.push(
       ...JSON.parse(
@@ -370,7 +371,7 @@ export class ReporPensionComponent implements OnInit {
    console.log(this.pagos_estudiante);
    // this.cargar_canvas3(costosextrapagos);
   } else {
-   this._router.navigate(['/dashboard']);
+   //this._router.navigate(['/dashboard']);
    //this.actualizar_dashest=true;
    // this.armado_matriz(val,costosextrapagos,costopension,costomatricula);
   }
