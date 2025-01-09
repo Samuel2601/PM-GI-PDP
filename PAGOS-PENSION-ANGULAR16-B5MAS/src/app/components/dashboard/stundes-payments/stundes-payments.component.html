@@ -39,171 +39,6 @@
       <i class="fe fe-info mr-1"></i> No tienes Pagos realizados
     </div>
 
-    <!-- resumen.component.html -->
-    <div class="container-fluid">
-      <!-- Botones de nivel -->
-      <div class="mb-4">
-        <button
-          class="btn btn-primary me-2"
-          (click)="showLevel = 'especialidad'"
-        >
-          Especialidad
-        </button>
-        <button class="btn btn-primary me-2" (click)="showLevel = 'curso'">
-          Cursos
-        </button>
-        <button class="btn btn-primary" (click)="showLevel = 'paralelo'">
-          Paralelos
-        </button>
-      </div>
-
-      <!-- Tabla -->
-      <div class="table-responsive">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Especialidad</th>
-              <ng-container *ngFor="let especialidad of resumen">
-                <th
-                  class="centered-header"
-                  [attr.colspan]="
-                    showLevel == 'curso'
-                      ? getCursosUniques(especialidad.cursos).length
-                      : showLevel == 'paralelo'
-                      ? especialidad.cursos.length
-                      : 1
-                  "
-                >
-                  {{ especialidad.nombre }}
-                </th>
-              </ng-container>
-            </tr>
-            <tr *ngIf="showLevel !== 'especialidad'">
-              <th>Cursos</th>
-              <ng-container *ngFor="let especialidad of resumen">
-                <ng-container *ngIf="showLevel == 'curso'">
-                  <th
-                    class="centered-header"
-                    *ngFor="let curso of getCursosUniques(especialidad.cursos)"
-                  >
-                    {{ curso }}
-                  </th>
-                </ng-container>
-                <ng-container *ngIf="showLevel == 'paralelo'">
-                  <th
-                    class="centered-header"
-                    *ngFor="let curso of getCursosUniques(especialidad.cursos)"
-                    [attr.colspan]="getCountCursor(especialidad, curso)"
-                  >
-                    {{ curso }}
-                  </th>
-                </ng-container>
-              </ng-container>
-            </tr>
-            <tr *ngIf="showLevel !== 'especialidad' && showLevel !== 'curso'">
-              <th>Paralelos</th>
-              <ng-container *ngFor="let especialidad of resumen">
-                <ng-container *ngFor="let curso of especialidad.cursos">
-                  <th class="centered-header">{{ curso.paralelo }}</th>
-                </ng-container>
-              </ng-container>
-            </tr>
-          </thead>
-
-          <tbody>
-            <!-- Fila de número de estudiantes -->
-            <tr>
-              <th scope="row">N° de Estudiantes</th>
-              <!-- Datos por especialidad -->
-              <ng-container *ngIf="showLevel === 'especialidad'">
-                <td *ngFor="let esp of resumen">
-                  {{ getTotalEstudiantesByEspecialidad(esp) }}
-                </td>
-              </ng-container>
-
-              <!-- Datos por curso -->
-              <ng-container *ngIf="showLevel === 'curso'">
-                <ng-container *ngFor="let esp of resumen">
-                  <ng-container
-                    *ngFor="let curso of getCursosUniques(esp.cursos)"
-                  >
-                    <td>{{ getTotalEstudiantesByCurso(esp, curso) }}</td>
-                  </ng-container>
-                </ng-container>
-              </ng-container>
-
-              <!-- Datos por paralelo -->
-              <ng-container *ngIf="showLevel === 'paralelo'">
-                <ng-container *ngFor="let esp of resumen">
-                  <ng-container *ngFor="let curso of esp.cursos">
-                    <td>{{ getTotalEstudiantesByParalelo(curso) }}</td>
-                  </ng-container>
-                </ng-container>
-              </ng-container>
-            </tr>
-
-            <!-- Fila de valor recaudado -->
-            <tr>
-              <th scope="row">Valor Recaudado</th>
-              <!-- Datos por especialidad -->
-              <ng-container *ngIf="showLevel === 'especialidad'">
-                <td *ngFor="let esp of resumen">
-                  {{ getTotalRecaudadoByEspecialidad(esp) | currency }}
-                </td>
-              </ng-container>
-
-              <!-- Datos por curso -->
-              <ng-container *ngIf="showLevel === 'curso'">
-                <ng-container *ngFor="let esp of resumen">
-                  <td *ngFor="let curso of getCursosUniques(esp.cursos)">
-                    {{ getTotalRecaudadoByCurso(esp, curso) | currency }}
-                  </td>
-                </ng-container>
-              </ng-container>
-
-              <!-- Datos por paralelo -->
-              <ng-container *ngIf="showLevel === 'paralelo'">
-                <ng-container *ngFor="let esp of resumen">
-                  <ng-container *ngFor="let curso of esp.cursos">
-                    <td>{{ getTotalRecaudadoByParalelo(curso) | currency }}</td>
-                  </ng-container>
-                </ng-container>
-              </ng-container>
-            </tr>
-
-            <!-- Fila de valor por pagar -->
-            <tr>
-              <th scope="row">Valor por Pagar</th>
-              <!-- Datos por especialidad -->
-              <ng-container *ngIf="showLevel === 'especialidad'">
-                <td *ngFor="let esp of resumen">
-                  {{ getTotalPorPagarByEspecialidad(esp) | currency }}
-                </td>
-              </ng-container>
-
-              <!-- Datos por curso -->
-              <ng-container *ngIf="showLevel === 'curso'">
-                <ng-container *ngFor="let esp of resumen">
-                  <td *ngFor="let curso of getCursosUniques(esp.cursos)">
-                    {{ getTotalPorPagarByCurso(esp, curso) | currency }}
-                  </td>
-                </ng-container>
-              </ng-container>
-
-              <!-- Datos por paralelo -->
-              <ng-container *ngIf="showLevel === 'paralelo'">
-                <ng-container *ngFor="let esp of resumen">
-                  <ng-container *ngFor="let curso of esp.cursos">
-                    <td>{{ getTotalPorPagarByParalelo(curso) | currency }}</td>
-                  </ng-container>
-                </ng-container>
-              </ng-container>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
     <div class="card" *ngIf="estudiantes.length > 0">
       <div class="card-body">
         <ul class="nav nav-pills nav-overflow header-tabs">
@@ -237,9 +72,17 @@
       </div>
     </div>
     <!-- Div CANVAS -->
-    <div class="card-body" *ngIf="estudiantes.length > 0">
-      <app-grafic-sp></app-grafic-sp>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-12">
+          <canvas
+            id="myChart3"
+            style="display: block; box-sizing: border-box"
+          ></canvas>
+        </div>
+      </div>
     </div>
+    <!-- DIV REPORTES -->
     <ng-container *ngIf="cursos != undefined && estudiantes.length > 0">
       <div class="card">
         <div class="card-header">
@@ -295,6 +138,7 @@
 
     <ng-container *ngIf="estudiantes && estudiantes.length != 0">
       <ng-container>
+        <!-- TAGS DE REPORTE GENERAL -->
         <div class="row">
           <div class="col-12 col-md-12">
             <!-- Card -->
@@ -341,6 +185,7 @@
         <div id="Total">
           <ng-container *ngIf="cursos != undefined">
             <div class="card">
+              <!--TABLERO DE CONTROL DE DETALLE ECONOMICO DE PENSIONES-->
               <div class="card-header">
                 <h3 class="card-header-title">
                   DETALLE ECONOMICO DE PENSIONES
@@ -390,6 +235,7 @@
                   </button>
                 </div>
               </div>
+              <!--MODAL DE CONTROL DE CASH-->
               <div
                 class="modal fade"
                 id="modalGenerarCash"
@@ -432,6 +278,7 @@
                   </div>
                 </div>
               </div>
+              <!--MODAL DE CONTROL DE CASH PARALELO-->
               <div
                 class="modal fade"
                 id="modalGenerarCashPARALELO"
@@ -474,6 +321,7 @@
                   </div>
                 </div>
               </div>
+              <!--MODAL DE CONTROL DE GOOGLE-->
               <div
                 class="modal fade"
                 id="modalDesGoogle"
@@ -527,6 +375,7 @@
                   </div>
                 </div>
               </div>
+              <!--MODAL DE CONTROL DE GOOGLE CONFIRMACION-->
               <div
                 class="modal fade"
                 id="modalDesGoogleConfir"
@@ -560,57 +409,269 @@
                   </div>
                 </div>
               </div>
-              <div class="table-responsive">
-                <table
-                  id="detalleeconomico"
-                  class="table table-sm table-nowrap card-table"
-                >
-                  <ng-container>
-                    <thead>
-                      <th>Descripción</th>
-                      <th *ngFor="let curso of cursos; let idcurso = index">
-                        {{ curso }}
-                      </th>
-                      <th>Total</th>
-                    </thead>
-                    <tbody>
-                      <tr
-                        *ngFor="let ct of deteconomico; let idxe = index"
-                        [ngClass]="idxe === 3 ? 'bg-info text-light' : ''"
-                      >
-                        <th *ngIf="idxe == 1" class="bg-success text-light">
-                          {{ ct.label }}
-                        </th>
-                        <th *ngIf="idxe == 2" class="bg-danger text-light">
-                          {{ ct.label }}
-                        </th>
-                        <th
-                          *ngIf="idxe != 1 && idxe != 2"
-                          class="bg-info text-light"
-                        >
-                          {{ ct.label }}
-                        </th>
+              <!--TABLA DE CONTROL DE DETALLE ECONOMICO DE PENSIONES-->
+              <!-- resumen.component.html -->
+              <div class="container-fluid">
+                <!-- Botones de nivel -->
+                <div class="my-4">
+                  <button
+                    class="btn btn-primary me-2"
+                    (click)="showLevel = 'especialidad'; updateChart()"
+                  >
+                    Especialidad
+                  </button>
+                  <button
+                    class="btn btn-primary me-2"
+                    (click)="showLevel = 'curso'; updateChart()"
+                  >
+                    Cursos
+                  </button>
+                  <button
+                    class="btn btn-primary"
+                    (click)="showLevel = 'paralelo'; updateChart()"
+                  >
+                    Paralelos
+                  </button>
+                </div>
 
-                        <th *ngFor="let curso of cursos; let idcurso = index">
-                          <span *ngIf="idxe == 0">
-                            {{ ct.data[idcurso] }}
-                          </span>
-                          <span *ngIf="idxe != 0">
-                            {{ ct.data[idcurso] | number : "1.2" }}
-                          </span>
+                <div class="table-responsive">
+                  <table class="table table-bordered" id="detalleeconomico">
+                    <thead>
+                      <tr>
+                        <th>Especialidad</th>
+                        <ng-container *ngFor="let especialidad of resumen">
+                          <th
+                            class="centered-header"
+                            [attr.colspan]="
+                              showLevel == 'curso'
+                                ? getCursosUniques(especialidad.cursos).length
+                                : showLevel == 'paralelo'
+                                ? especialidad.cursos.length
+                                : 1
+                            "
+                          >
+                            {{ especialidad.nombre }}
+                          </th>
+                        </ng-container>
+                      </tr>
+                      <tr *ngIf="showLevel !== 'especialidad'">
+                        <th>Cursos</th>
+                        <ng-container *ngFor="let especialidad of resumen">
+                          <ng-container *ngIf="showLevel == 'curso'">
+                            <th
+                              class="centered-header"
+                              *ngFor="
+                                let curso of getCursosUniques(
+                                  especialidad.cursos
+                                )
+                              "
+                            >
+                              {{ curso }}
+                            </th>
+                          </ng-container>
+                          <ng-container *ngIf="showLevel == 'paralelo'">
+                            <th
+                              class="centered-header"
+                              *ngFor="
+                                let curso of getCursosUniques(
+                                  especialidad.cursos
+                                )
+                              "
+                              [attr.colspan]="
+                                getCountCursor(especialidad, curso)
+                              "
+                            >
+                              {{ curso }}
+                            </th>
+                          </ng-container>
+                        </ng-container>
+                      </tr>
+                      <tr
+                        *ngIf="
+                          showLevel !== 'especialidad' && showLevel !== 'curso'
+                        "
+                      >
+                        <th>Paralelos</th>
+                        <ng-container *ngFor="let especialidad of resumen">
+                          <ng-container
+                            *ngFor="let curso of especialidad.cursos"
+                          >
+                            <th class="centered-header">
+                              {{ curso.paralelo }}
+                            </th>
+                          </ng-container>
+                        </ng-container>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <!-- Fila de número de estudiantes -->
+                      <tr>
+                        <th scope="row" class="bg-info text-white">
+                          N° de Estudiantes
                         </th>
-                        <th>
-                          <ng-container *ngIf="idxe == 0">{{
-                            sumarvaloresdetalle(ct.data) | number
-                          }}</ng-container>
-                          <ng-container *ngIf="idxe != 0">{{
-                            sumarvaloresdetalle(ct.data) | number : "1.2"
-                          }}</ng-container>
+                        <!-- Datos por especialidad -->
+                        <ng-container *ngIf="showLevel === 'especialidad'">
+                          <td *ngFor="let esp of resumen">
+                            {{ getTotalEstudiantesByEspecialidad(esp) }}
+                          </td>
+                        </ng-container>
+
+                        <!-- Datos por curso -->
+                        <ng-container *ngIf="showLevel === 'curso'">
+                          <ng-container *ngFor="let esp of resumen">
+                            <ng-container
+                              *ngFor="let curso of getCursosUniques(esp.cursos)"
+                            >
+                              <td>
+                                {{ getTotalEstudiantesByCurso(esp, curso) }}
+                              </td>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+
+                        <!-- Datos por paralelo -->
+                        <ng-container *ngIf="showLevel === 'paralelo'">
+                          <ng-container *ngFor="let esp of resumen">
+                            <ng-container *ngFor="let curso of esp.cursos">
+                              <td>
+                                {{ getTotalEstudiantesByParalelo(curso) }}
+                              </td>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </tr>
+
+                      <!-- Fila de valor recaudado -->
+                      <tr>
+                        <th scope="row" class="bg-success text-white">
+                          Valor Recaudado
                         </th>
+                        <!-- Datos por especialidad -->
+                        <ng-container *ngIf="showLevel === 'especialidad'">
+                          <td *ngFor="let esp of resumen">
+                            {{
+                              getTotalRecaudadoByEspecialidad(esp) | currency
+                            }}
+                          </td>
+                        </ng-container>
+
+                        <!-- Datos por curso -->
+                        <ng-container *ngIf="showLevel === 'curso'">
+                          <ng-container *ngFor="let esp of resumen">
+                            <td
+                              *ngFor="let curso of getCursosUniques(esp.cursos)"
+                            >
+                              {{
+                                getTotalRecaudadoByCurso(esp, curso) | currency
+                              }}
+                            </td>
+                          </ng-container>
+                        </ng-container>
+
+                        <!-- Datos por paralelo -->
+                        <ng-container *ngIf="showLevel === 'paralelo'">
+                          <ng-container *ngFor="let esp of resumen">
+                            <ng-container *ngFor="let curso of esp.cursos">
+                              <td>
+                                {{
+                                  getTotalRecaudadoByParalelo(curso) | currency
+                                }}
+                              </td>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </tr>
+
+                      <!-- Fila de valor por pagar -->
+                      <tr>
+                        <th scope="row" class="bg-danger text-white">
+                          Valor por Pagar
+                        </th>
+                        <!-- Datos por especialidad -->
+                        <ng-container *ngIf="showLevel === 'especialidad'">
+                          <td *ngFor="let esp of resumen">
+                            {{ getTotalPorPagarByEspecialidad(esp) | currency }}
+                          </td>
+                        </ng-container>
+
+                        <!-- Datos por curso -->
+                        <ng-container *ngIf="showLevel === 'curso'">
+                          <ng-container *ngFor="let esp of resumen">
+                            <td
+                              *ngFor="let curso of getCursosUniques(esp.cursos)"
+                            >
+                              {{
+                                getTotalPorPagarByCurso(esp, curso) | currency
+                              }}
+                            </td>
+                          </ng-container>
+                        </ng-container>
+
+                        <!-- Datos por paralelo -->
+                        <ng-container *ngIf="showLevel === 'paralelo'">
+                          <ng-container *ngFor="let esp of resumen">
+                            <ng-container *ngFor="let curso of esp.cursos">
+                              <td>
+                                {{
+                                  getTotalPorPagarByParalelo(curso) | currency
+                                }}
+                              </td>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
                       </tr>
                     </tbody>
-                  </ng-container>
-                </table>
+                    <tfoot>
+                      <tr class="bg-info text-white fw-bold">
+                        <th>Total</th>
+                        <!-- Datos por especialidad -->
+                        <ng-container *ngIf="showLevel === 'especialidad'">
+                          <td *ngFor="let esp of resumen">
+                            {{
+                              getSumaTotalParse(
+                                getTotalRecaudadoByEspecialidad(esp),
+                                getTotalPorPagarByEspecialidad(esp)
+                              ) | currency
+                            }}
+                          </td>
+                        </ng-container>
+
+                        <!-- Datos por curso -->
+                        <ng-container *ngIf="showLevel === 'curso'">
+                          <ng-container *ngFor="let esp of resumen">
+                            <td
+                              *ngFor="let curso of getCursosUniques(esp.cursos)"
+                            >
+                              {{
+                                getSumaTotalParse(
+                                  getTotalRecaudadoByCurso(esp, curso),
+                                  getTotalPorPagarByCurso(esp, curso)
+                                ) | currency
+                              }}
+                            </td>
+                          </ng-container>
+                        </ng-container>
+
+                        <!-- Datos por paralelo -->
+                        <ng-container *ngIf="showLevel === 'paralelo'">
+                          <ng-container *ngFor="let esp of resumen">
+                            <ng-container *ngFor="let curso of esp.cursos">
+                              <td>
+                                {{
+                                  getSumaTotalParse(
+                                    getTotalPorPagarByParalelo(curso),
+                                    getTotalRecaudadoByParalelo(curso)
+                                  ) | currency
+                                }}
+                              </td>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
               </div>
             </div>
           </ng-container>

@@ -11,6 +11,8 @@ import * as jspdf from 'jspdf';
 import iziToast from 'izitoast';
 import { InstitucionServiceService } from 'src/app/service/institucion.service.service';
 import { map } from 'rxjs/operators';
+import { ChartConfiguration } from 'chart.js';
+import { Chart } from 'chart.js/auto';
 declare var $: any;
 
 @Component({
@@ -2169,16 +2171,18 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
 
   getParaleloSum(paralelo: any[], index: number): number {
     return paralelo.reduce(
-      (acc, item) => acc + item.detalle[0][index ? 'porpagar' : 'valor'],
+      (acc, item) =>
+        acc +
+        item.detalle.reduce(
+          (acc1: any, item1: any) => acc1 + item1[index ? 'porpagar' : 'valor'],
+          0
+        ),
       0
     );
   }
 
   getTotalParalelo(paralelo: any[]): number {
-    return paralelo.reduce(
-      (acc, item) => acc + item.detalle[0].porpagar + item.detalle[1].porpagar,
-      0
-    );
+    return this.getParaleloSum(paralelo, 1) + this.getParaleloSum(paralelo, 0);
   }
 
   getMatriculados(paralelo: any[]): number {
@@ -2267,60 +2271,11 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
       this.resumen.push(especialidadResumen);
     }
     console.log(this.resumen);
+    setTimeout(() => {
+      this.updateChart();
+    }, 1000);
   }
-  nivelSeleccionado = 'paralelo'; // Nivel inicial
-  datosFiltrados: any[] = [];
-  cambiarNivel() {
-    switch (this.nivelSeleccionado) {
-      case 'especialidad':
-        this.datosFiltrados = this.resumen.map((especialidad) => ({
-          especialidad: especialidad.nombre,
-          numEstudiantes: especialidad.cursos.reduce(
-            (sum: any, curso: any) => sum + curso.numEstudiantes,
-            0
-          ),
-          valorRecaudado: especialidad.cursos.reduce(
-            (sum: any, curso: any) => sum + curso.valorRecaudado,
-            0
-          ),
-          valorPorPagar: especialidad.cursos.reduce(
-            (sum: any, curso: any) => sum + curso.valorPorPagar,
-            0
-          ),
-        }));
-        break;
-
-      case 'curso':
-        this.datosFiltrados = this.resumen.flatMap((especialidad) =>
-          especialidad.cursos.map((curso: any) => ({
-            especialidad: especialidad.nombre,
-            curso: curso.curso,
-            numEstudiantes: curso.numEstudiantes,
-            valorRecaudado: curso.valorRecaudado,
-            valorPorPagar: curso.valorPorPagar,
-          }))
-        );
-        break;
-
-      case 'paralelo':
-        this.datosFiltrados = this.resumen.flatMap((especialidad) =>
-          especialidad.cursos.map((curso: any) => ({
-            especialidad: especialidad.nombre,
-            curso: curso.curso,
-            paralelo: curso.paralelo,
-            numEstudiantes: curso.numEstudiantes,
-            valorRecaudado: curso.valorRecaudado,
-            valorPorPagar: curso.valorPorPagar,
-          }))
-        );
-        break;
-    }
-  }
-
   showLevel: 'especialidad' | 'curso' | 'paralelo' = 'especialidad';
-  getEspecialidades(): string[] {
-    return this.resumen.map((esp) => esp.nombre);
-  }
 
   getTotalEstudiantesByEspecialidad(especialidad: any): number {
     return especialidad.cursos.reduce((total: number, curso: any) => {
@@ -2371,13 +2326,179 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     }, 0);
   }
 
-  getTotalEstudiantesByParalelo(curso: any) {
+  getTotalEstudiantesByParalelo(curso: any): number {
     return curso.numEstudiantes;
   }
-  getTotalRecaudadoByParalelo(curso: any) {
+  getTotalRecaudadoByParalelo(curso: any): number {
     return curso.valorRecaudado;
   }
-  getTotalPorPagarByParalelo(curso: any) {
+  getTotalPorPagarByParalelo(curso: any): number {
     return curso.valorPorPagar;
+  }
+
+  getSumaTotalParse(val1:any, val2:any): number {
+    return parseFloat(val1) + parseFloat(val2);
+  }
+
+  chartType: ChartConfiguration['type'] = 'bar';
+  chartData: ChartConfiguration['data'] = {
+    labels: [],
+    datasets: [],
+  };
+  chartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+    },
+  };
+  load_chart = true;
+  updateChart() {
+    const canvas = <HTMLCanvasElement>document.getElementById('myChart3');
+    const ctx = canvas?.getContext('2d');
+
+    if (!ctx) {
+      console.error('Canvas context not found.');
+      return;
+    }
+
+    // Destruir el gráfico existente si ya existe
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+      existingChart.destroy();
+    }
+
+    // Configuración dinámica de etiquetas y datasets según el nivel
+    let labels: string[] = [];
+    let datasets: any[] = [];
+
+    if (this.showLevel === 'especialidad') {
+      labels = this.resumen.map((esp: any) => esp.nombre);
+      datasets = [
+        {
+          label: 'Número de Estudiantes',
+          data: this.resumen.map((esp: any) =>
+            this.getTotalEstudiantesByEspecialidad(esp)
+          ),
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        },
+        {
+          label: 'Valor Recaudado',
+          data: this.resumen.map((esp: any) =>
+            this.getTotalRecaudadoByEspecialidad(esp)
+          ),
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        },
+        {
+          label: 'Valor por Pagar',
+          data: this.resumen.map((esp: any) =>
+            this.getTotalPorPagarByEspecialidad(esp)
+          ),
+          backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        },
+      ];
+    } else if (this.showLevel === 'curso') {
+      labels = this.resumen.flatMap((esp: any) =>
+        this.getCursosUniques(esp.cursos).map(
+          (curso: any) => `${esp.nombre}-${curso}`
+        )
+      );
+      datasets = [
+        {
+          label: 'Número de Estudiantes',
+          data: this.resumen.flatMap((esp: any) =>
+            this.getCursosUniques(esp.cursos).map((curso: any) =>
+              this.getTotalEstudiantesByCurso(esp, curso)
+            )
+          ),
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        },
+        {
+          label: 'Valor Recaudado',
+          data: this.resumen.flatMap((esp: any) =>
+            this.getCursosUniques(esp.cursos).map((curso: any) =>
+              this.getTotalRecaudadoByCurso(esp, curso)
+            )
+          ),
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        },
+        {
+          label: 'Valor por Pagar',
+          data: this.resumen.flatMap((esp: any) =>
+            this.getCursosUniques(esp.cursos).map((curso: any) =>
+              this.getTotalPorPagarByCurso(esp, curso)
+            )
+          ),
+          backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        },
+      ];
+    } else if (this.showLevel === 'paralelo') {
+      labels = this.resumen.flatMap((esp: any) =>
+        esp.cursos.map(
+          (curso: any) => esp.nombre + curso.curso + ' - ' + curso.paralelo
+        )
+      );
+      datasets = [
+        {
+          label: 'Número de Estudiantes',
+          data: this.resumen.flatMap((esp: any) =>
+            esp.cursos.map((curso: any) =>
+              this.getTotalEstudiantesByParalelo(curso)
+            )
+          ),
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        },
+        {
+          label: 'Valor Recaudado',
+          data: this.resumen.flatMap((esp: any) =>
+            esp.cursos.map((curso: any) =>
+              this.getTotalRecaudadoByParalelo(curso)
+            )
+          ),
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        },
+        {
+          label: 'Valor por Pagar',
+          data: this.resumen.flatMap((esp: any) =>
+            esp.cursos.map((curso: any) =>
+              this.getTotalPorPagarByParalelo(curso)
+            )
+          ),
+          backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        },
+      ];
+    }
+    // Crear el gráfico
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets,
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+        interaction: {
+          mode: 'nearest', // Modo: Selecciona el punto más cercano
+          axis: 'x', // Eje: Interactúa con el eje X
+          intersect: false, // Muestra el punto más cercano aunque no esté exactamente bajo el cursor
+        },
+        plugins: {
+          tooltip: {
+            enabled: true, // Asegúrate de que el tooltip esté activado
+            callbacks: {
+              label: function (context) {
+                const datasetLabel = context.dataset.label || 'Dataset'; // Nombre del dataset
+                const value = context.raw; // Valor del punto
+                return `${datasetLabel}: ${Number(value).toFixed(2)}`; // Limita a 2 decimales
+              },
+            },
+          },
+        },
+      },
+    });
   }
 }
