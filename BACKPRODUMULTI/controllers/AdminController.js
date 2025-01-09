@@ -2049,7 +2049,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
   }
 
   const session = await mongoose.startSession();
-  const documentosIds = [];
+  let documentosIds = [];
 
   try {
     // Iniciar transacción para asegurar atomicidad
@@ -2247,7 +2247,7 @@ async function procesarPagoMatricula(element, config, pago, conn, session) {
       { matricula: mat },
       { session }
     );
-
+    return true;
     // Actualizar stock del documento
     const resultadoStock = await actualizarStockDocumento(
       element,
@@ -2368,7 +2368,7 @@ async function procesarPagoPension(element, config, pago, conn, session) {
         { session }
       );
     }
-
+    return true;
     // Actualizar stock del documento
     const resultadoStock = await actualizarStockDocumento(
       element,
@@ -2439,7 +2439,7 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
         );
       }
     }
-
+    return true;
     // Actualizar stock del documento
     const resultadoStock = await actualizarStockDocumento(
       element,
