@@ -72,29 +72,18 @@
             <ng-container *ngFor="let curso of cursos2">
               <div class="form-check form-check-inline">
                 <input
-                  *ngIf="curso.name != 'descr'"
-                  type="checkbox"
-                  (change)="cambiarSeleccionTodo('cursos2')"
-                  role="switch"
-                  class="form-check-input"
-                  [(ngModel)]="curso.seleccionado"
-                />
-                <input
-                  *ngIf="curso.name == 'descr'"
-                  (change)="cambiarSeleccionTodo2('cursos2')"
                   type="checkbox"
                   role="switch"
                   class="form-check-input"
+                  (change)="
+                    curso.name === 'descr'
+                      ? cambiarSeleccionTodo('cursos2')
+                      : cambiarSeleccionTodo2('cursos2')
+                  "
                   [(ngModel)]="curso.seleccionado"
                 />
-
                 <label class="form-check-label">
-                  <ng-container *ngIf="curso.name == 'descr'"
-                    >Todos</ng-container
-                  >
-                  <ng-container *ngIf="curso.name != 'descr'">{{
-                    curso.name
-                  }}</ng-container>
+                  {{ curso.name === "descr" ? "Todos" : curso.name }}
                 </label>
               </div>
             </ng-container>
@@ -110,26 +99,20 @@
           >
             <label for="" class="form-text">Paralelo</label>
 
-            <ng-container *ngFor="let curso of paralelo">
+            <ng-container *ngFor="let paralelo of paralelo">
               <div class="form-check form-check-inline">
                 <input
-                  *ngIf="curso.name != 'Todos'"
-                  type="checkbox"
-                  (change)="cambiarSeleccionTodo('paralelo')"
-                  role="switch"
-                  class="form-check-input"
-                  [(ngModel)]="curso.seleccionado"
-                />
-                <input
-                  *ngIf="curso.name == 'Todos'"
-                  (change)="cambiarSeleccionTodo2('paralelo')"
                   type="checkbox"
                   role="switch"
                   class="form-check-input"
-                  [(ngModel)]="curso.seleccionado"
+                  (change)="
+                    paralelo.name === 'Todos'
+                      ? cambiarSeleccionTodo('paralelo')
+                      : cambiarSeleccionTodo2('paralelo')
+                  "
+                  [(ngModel)]="paralelo.seleccionado"
                 />
-
-                <label class="form-check-label">{{ curso.name }}</label>
+                <label class="form-check-label">{{ paralelo.name }}</label>
               </div>
             </ng-container>
           </div>
@@ -144,17 +127,23 @@
           >
             <label for="" class="form-text">Especialidad</label>
 
-            <ng-container *ngFor="let curso of especialidad">
-              <div class="form-check form-check-inline">
+            <ng-container *ngFor="let especialidad of especialidades">
+              <div
+                class="form-check form-check-inline"
+                *ngIf="especialidad.view"
+              >
                 <input
-                  *ngIf="curso.name != 'Todos'"
                   type="checkbox"
                   role="switch"
                   class="form-check-input"
-                  [(ngModel)]="curso.seleccionado"
+                  (change)="
+                    especialidad.name === 'Todos'
+                      ? cambiarSeleccionTodo('especialidades')
+                      : cambiarSeleccionTodo2('especialidades')
+                  "
+                  [(ngModel)]="especialidad.seleccionado"
                 />
-
-                <label class="form-check-label">{{ curso.name }}</label>
+                <label class="form-check-label">{{ especialidad.name }}</label>
               </div>
             </ng-container>
           </div>
@@ -184,31 +173,19 @@
         tipreport == 'PensionRubro'
       "
     >
-      <ng-container *ngFor="let cuentas of cursos; let idx = index">
-        <ng-container *ngFor="let ctpagos of pagospension; let i = index">
+      <ng-container *ngFor="let especialidad of resumen; let k = index">
+        <ng-container *ngFor="let curso of especialidad.cursos">
           <div
-            id="{{ ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad }}"
+            id="{{ especialidad.code + curso.curso + curso.paralelo }}"
+            class="card mb-3"
+            [ngClass]="{ 'table-1': k !== 0 }"
             *ngIf="
-              ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad ==
-                cuentas + 'A' + ctpagos.especialidad ||
-              ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad ==
-                cuentas + 'B' + ctpagos.especialidad ||
-              ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad ==
-                cuentas + 'C' + ctpagos.especialidad ||
-              ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad ==
-                cuentas + 'D' + ctpagos.especialidad ||
-              ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad ==
-                cuentas + 'E' + ctpagos.especialidad ||
-              ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad ==
-                cuentas + 'F' + ctpagos.especialidad ||
-              ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad ==
-                cuentas + 'G' + ctpagos.especialidad
+              especialidad.cursos &&
+              shouldShowCard(especialidad.nombre, curso.curso, curso.paralelo)
             "
-            class="card"
-            [ngClass]="{ 'table-1': i !== 0 }"
+            style="break-inside: avoid"
           >
-            <!--style=" page-break-inside: avoid;"-->
-            <div class="card-header">
+            <div class="card-header bg-light">
               <div class="row align-items-center">
                 <div class="col-3" style="text-align: center; width: 20%">
                   <img
@@ -250,471 +227,477 @@
                   />
                 </div>
               </div>
-
-              <h4 class="card-header-title">
-                Curso:
-                {{
-                  ctpagos.curso + ctpagos.paralelo + " " + ctpagos.especialidad
-                }}
-              </h4>
             </div>
-            <div
-              class="card-body"
-              id="collapseExample-{{
-                ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad
-              }}"
-              style="max-width: 100%; overflow: hidden"
-            >
-              <div class="row">
-                <div class="col-md-auto">
-                  <table
-                    id="{{
-                      ctpagos.curso + ctpagos.paralelo + ctpagos.especialidad
-                    }}"
-                    class="table"
-                    style="table-layout: auto"
-                  >
-                    <thead class="table-info">
-                      <th>N°</th>
-                      <th>Nombres</th>
-                      <ng-container
-                        *ngIf="
-                          (tipreport == 'Pension' ||
-                            tipreport == 'PensionRubro') &&
-                          pagos_estudiante[ctpagos.curso] &&
-                          pagos_estudiante[ctpagos.curso][ctpagos.paralelo] &&
-                          pagos_estudiante[ctpagos.curso][ctpagos.paralelo][
-                            ctpagos.especialidad
-                          ]
-                        "
-                      >
-                        <ng-container
-                          *ngFor="
-                            let item of pagos_estudiante[ctpagos.curso][
-                              ctpagos.paralelo
-                            ][ctpagos.especialidad][0].detalle;
-                            let idenx = index
-                          "
-                        >
-                          <th>
-                            <ng-container
-                              *ngIf="item.tipo == 0 || item.tipo > 10"
-                            >
-                              {{ item.date | uppercase }}
-                            </ng-container>
-                            <ng-container
-                              *ngIf="item.tipo > 0 && item.tipo <= 10"
-                            >
-                              {{ item.date | date : "MMM" | uppercase }}
-                              {{ item.date | date : "YY" | uppercase }}
-                            </ng-container>
-                          </th>
-                        </ng-container>
-                      </ng-container>
-
-                      <ng-container
-                        *ngIf="
-                          (tipreport == 'Rubro' ||
-                            tipreport == 'PensionRubro') &&
-                          pagos_estudiante[ctpagos.curso] &&
-                          pagos_estudiante[ctpagos.curso][ctpagos.paralelo] &&
-                          pagos_estudiante[ctpagos.curso][ctpagos.paralelo][
-                            ctpagos.especialidad
-                          ]
-                        "
-                      >
-                        <ng-container
-                          *ngFor="
-                            let item of pagos_estudiante[ctpagos.curso][
-                              ctpagos.paralelo
-                            ][ctpagos.especialidad][0].rubro;
-                            let idenx = index
-                          "
-                        >
-                          <th>
-                            <ng-container>
-                              {{ item.date | uppercase }}
-                            </ng-container>
-                          </th>
-                        </ng-container>
-                      </ng-container>
-
-                      <th style="background-color: green">
-                        Valores Recaudados
-                      </th>
-                      <th style="background-color: rgb(200, 0, 0)">
-                        Valores por Recaudar
-                      </th>
-                    </thead>
-                    <tbody
+            <ng-container *ngIf="curso">
+              <h4
+                class="card-header-title mb-0 d-flex justify-content-between align-items-center mt-3 ml-3"
+              >
+                Curso: {{ curso.curso }} {{ curso.paralelo }}
+                {{ especialidad.nombre }}
+              </h4>
+            </ng-container>
+            <div class="card-body table-responsive">
+              <table class="table table-sm table-hover">
+                <thead>
+                  <tr>
+                    <th>N°</th>
+                    <th>Nombres</th>
+                    <ng-container
                       *ngIf="
-                        pagos_estudiante[ctpagos.curso] &&
-                        pagos_estudiante[ctpagos.curso][ctpagos.paralelo] &&
-                        pagos_estudiante[ctpagos.curso][ctpagos.paralelo][
-                          ctpagos.especialidad
-                        ]
+                        (tipreport == 'Pension' ||
+                          tipreport == 'PensionRubro') &&
+                        pagos_estudiante[especialidad.nombre][curso.curso][
+                          curso.paralelo
+                        ][0].detalle.length > 0
                       "
                     >
-                      <tr
+                      <ng-container
                         *ngFor="
-                          let item of pagos_estudiante[ctpagos.curso][
-                            ctpagos.paralelo
-                          ][ctpagos.especialidad];
-                          let idenx = index
+                          let item of pagos_estudiante[especialidad.nombre][
+                            curso.curso
+                          ][curso.paralelo][0].detalle
                         "
                       >
-                        <td>{{ idenx + 1 }}</td>
-                        <td style="text-align: left">
-                          {{ item.nombres }}
-                          <ng-container *ngIf="item.estado == 'Desactivado'">
-                            <i>(Retirado)</i>
+                        <th>
+                          <ng-container *ngIf="item.tipo == 0">
+                            {{ item.date | uppercase }}
+                          </ng-container>
+                          <ng-container
+                            *ngIf="item.tipo > 0 && item.tipo <= 10"
+                          >
+                            {{ item.date | date : "MMM" | uppercase }}
+                            {{ item.date | date : "YY" | uppercase }}
+                          </ng-container>
+                        </th>
+                      </ng-container>
+                    </ng-container>
+
+                    <ng-container
+                      *ngIf="
+                        (tipreport == 'Rubro' || tipreport == 'PensionRubro') &&
+                        pagos_estudiante[especialidad.nombre][curso.curso][
+                          curso.paralelo
+                        ][0].rubro.length > 0
+                      "
+                    >
+                      <ng-container
+                        *ngFor="
+                          let item of pagos_estudiante[especialidad.nombre][
+                            curso.curso
+                          ][curso.paralelo][0].rubro
+                        "
+                      >
+                        <th>
+                          <ng-container>
+                            {{ item.date | uppercase }}
+                          </ng-container>
+                        </th>
+                      </ng-container>
+                    </ng-container>
+                    <th style="background-color: rgb(57, 228, 57)">
+                      Valores Recaudados
+                    </th>
+                    <th style="background-color: rgb(224, 63, 63)">
+                      Valores por Recaudar
+                    </th>
+                    <th style="background-color: rgb(64, 177, 221)">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="
+                      let item of pagos_estudiante[especialidad.nombre][
+                        curso.curso
+                      ][curso.paralelo];
+                      let i = index
+                    "
+                  >
+                    <td>
+                      {{ i + 1 }}
+                    </td>
+                    <td>
+                      {{ item.nombres }}
+                      <ng-container *ngIf="item.estado == 'Desactivado'">
+                        <i>(Retirado)</i>
+                      </ng-container>
+                    </td>
+                    <ng-container
+                      *ngIf="
+                        tipreport == 'Pension' || tipreport == 'PensionRubro'
+                      "
+                    >
+                      <ng-container
+                        *ngFor="
+                          let detalle of item.detalle;
+                          let idetalle = index
+                        "
+                      >
+                        <td>
+                          <ng-container *ngIf="isNumber(detalle.valor)">
+                            <p *ngIf="detalle.valor > 0">
+                              {{ detalle.valor | number : "1.2" }}
+                            </p>
+
+                            <p
+                              *ngIf="detalle.valor <= 0 && detalle.porpagar > 0"
+                            >
+                              -
+                            </p>
+                            <p
+                              *ngIf="
+                                detalle.valor <= 0 && detalle.porpagar <= 0
+                              "
+                            >
+                              (Becado)
+                            </p>
                           </ng-container>
                         </td>
-                        <ng-container
-                          *ngIf="
-                            tipreport == 'Pension' ||
-                            tipreport == 'PensionRubro'
-                          "
-                        >
-                          <ng-container
-                            *ngFor="
-                              let detalle of item.detalle;
-                              let idetalle = index
-                            "
-                          >
-                            <td *ngIf="isNumber(detalle.valor)">
-                              <p *ngIf="detalle.valor > 0">
-                                {{ detalle.valor | number : "1.2" }}
-                              </p>
-
-                              <p
-                                *ngIf="
-                                  detalle.valor <= 0 && detalle.porpagar > 0
-                                "
-                              >
-                                -
-                              </p>
-                              <p
-                                *ngIf="
-                                  detalle.valor <= 0 && detalle.porpagar <= 0
-                                "
-                              >
-                                (Becado)
-                              </p>
-                            </td>
+                      </ng-container>
+                    </ng-container>
+                    <ng-container
+                      *ngIf="
+                        tipreport == 'Rubro' || tipreport == 'PensionRubro'
+                      "
+                    >
+                      <ng-container
+                        *ngFor="let detalle of item.rubro; let idetalle = index"
+                      >
+                        <td>
+                          <ng-container>
+                            {{ detalle.valor | number : "1.2" }}
                           </ng-container>
-                        </ng-container>
-                        <ng-container
-                          *ngIf="
-                            tipreport == 'Rubro' || tipreport == 'PensionRubro'
-                          "
-                        >
-                          <ng-container
-                            *ngFor="
-                              let detalle of item.rubro;
-                              let idetalle = index
-                            "
-                          >
-                            <td *ngIf="isNumber(detalle.valor)">
-                              <p *ngIf="detalle.valor > 0">
-                                {{ detalle.valor | number : "1.2" }}
-                              </p>
+                        </td>
+                      </ng-container>
+                    </ng-container>
+                    <ng-container *ngIf="tipreport == 'Pension'">
+                      <td>
+                        {{
+                          sumarvalores(item.detalle, "valor") | number : "1.2"
+                        }}
+                      </td>
+                      <td>
+                        {{
+                          sumarvalores(item.detalle, "porpagar")
+                            | number : "1.2"
+                        }}
+                      </td>
+                      <td>
+                        {{
+                          sumarvalores(item.detalle, "valor") +
+                            sumarvalores(item.detalle, "porpagar")
+                            | number : "1.2"
+                        }}
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="tipreport == 'Rubro'">
+                      <td>
+                        {{ sumarvalores(item.rubro, "valor") | number : "1.2" }}
+                      </td>
+                      <td>
+                        {{
+                          sumarvalores(item.rubro, "porpagar") | number : "1.2"
+                        }}
+                      </td>
+                      <td>
+                        {{
+                          sumarvalores(item.rubro, "valor") +
+                            sumarvalores(item.rubro, "porpagar")
+                            | number : "1.2"
+                        }}
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="tipreport == 'PensionRubro'">
+                      <td>
+                        {{
+                          sumarvalores(item.detalle, "valor") +
+                            sumarvalores(item.rubro, "valor") | number : "1.2"
+                        }}
+                      </td>
+                      <td>
+                        {{
+                          sumarvalores(item.detalle, "porpagar") +
+                            sumarvalores(item.rubro, "porpagar")
+                            | number : "1.2"
+                        }}
+                      </td>
+                      <td>
+                        {{
+                          sumarvalores(item.detalle, "valor") +
+                            sumarvalores(item.rubro, "valor") +
+                            sumarvalores(item.detalle, "porpagar") +
+                            sumarvalores(item.rubro, "porpagar")
+                            | number : "1.2"
+                        }}
+                      </td>
+                    </ng-container>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="2"><strong>TOTAL</strong></td>
 
-                              <p
-                                *ngIf="
-                                  detalle.valor <= 0 && detalle.porpagar > 0
-                                "
-                              >
-                                -
-                              </p>
-                              <p
-                                *ngIf="
-                                  detalle.valor <= 0 && detalle.porpagar <= 0
-                                "
-                              >
-                                (Becado)
-                              </p>
-                            </td>
-                          </ng-container>
-                        </ng-container>
+                    <!-- Totales Pensión -->
+                    <ng-container
+                      *ngIf="
+                        tipreport === 'Pension' || tipreport === 'PensionRubro'
+                      "
+                    >
+                      <td
+                        *ngFor="
+                          let item of pagos_estudiante[especialidad.nombre][
+                            curso.curso
+                          ][curso.paralelo][0].detalle
+                        "
+                      >
+                        <strong>{{
+                          calcularTotalColumna(
+                            pagos_estudiante[especialidad.nombre][curso.curso][
+                              curso.paralelo
+                            ],
+                            item.date,
+                            "detalle",
+                            true
+                          ) | number : "1.2"
+                        }}</strong>
+                      </td>
+                    </ng-container>
+
+                    <!-- Totales Rubro -->
+                    <ng-container
+                      *ngIf="
+                        tipreport === 'Rubro' || tipreport === 'PensionRubro'
+                      "
+                    >
+                      <td
+                        *ngFor="
+                          let item of pagos_estudiante[especialidad.nombre][
+                            curso.curso
+                          ][curso.paralelo][0].rubro
+                        "
+                      >
+                        <strong>{{
+                          calcularTotalColumna(
+                            pagos_estudiante[especialidad.nombre][curso.curso][
+                              curso.paralelo
+                            ],
+                            item.date,
+                            "rubro",
+                            true
+                          ) | number : "1.2"
+                        }}</strong>
+                      </td>
+                    </ng-container>
+                    <!-- Total de Valores Recaudados -->
+                    <td style="background-color: rgb(57, 228, 57)">
+                      <strong>
                         <ng-container *ngIf="tipreport == 'Pension'">
-                          <td>
-                            {{
-                              sumarvalores(item.detalle, "valor")
-                                | number : "1.2"
-                            }}
-                          </td>
-                          <td>
-                            {{
-                              sumarvalores(item.detalle, "porpagar")
-                                | number : "1.2"
-                            }}
-                          </td>
+                          {{
+                            calcularTotalTotal(
+                              pagos_estudiante[especialidad.nombre][
+                                curso.curso
+                              ][curso.paralelo],
+                              "detalle",
+                              true
+                            ) | number : "1.2"
+                          }}
                         </ng-container>
                         <ng-container *ngIf="tipreport == 'Rubro'">
-                          <td>
-                            {{
-                              sumarvalores(item.rubro, "valor") | number : "1.2"
-                            }}
-                          </td>
-                          <td>
-                            {{
-                              sumarvalores(item.rubro, "porpagar")
-                                | number : "1.2"
-                            }}
-                          </td>
+                          {{
+                            calcularTotalTotal(
+                              pagos_estudiante[especialidad.nombre][
+                                curso.curso
+                              ][curso.paralelo],
+                              "rubro",
+                              true
+                            ) | number : "1.2"
+                          }}
                         </ng-container>
-                        <ng-container *ngIf="tipreport == 'PensionRubro'">
-                          <td>
-                            {{
-                              sumarvalores(item.detalle, "valor") +
-                                sumarvalores(item.rubro, "valor")
-                                | number : "1.2"
-                            }}
-                          </td>
-                          <td>
-                            {{
-                              sumarvalores(item.detalle, "porpagar") +
-                                sumarvalores(item.rubro, "porpagar")
-                                | number : "1.2"
-                            }}
-                          </td>
+                        <ngo-container *ngIf="tipreport == 'PensionRubro'">
+                          {{
+                            getSumaIguales(
+                              calcularTotalTotal(
+                                pagos_estudiante[especialidad.nombre][
+                                  curso.curso
+                                ][curso.paralelo],
+                                "detalle",
+                                true
+                              ),
+                              calcularTotalTotal(
+                                pagos_estudiante[especialidad.nombre][
+                                  curso.curso
+                                ][curso.paralelo],
+                                "rubro",
+                                true
+                              )
+                            ) | number : "1.2"
+                          }}
+                        </ngo-container>
+                      </strong>
+                    </td>
+                    <td style="background-color: rgb(224, 63, 63)">
+                      <strong>
+                        <ng-container *ngIf="tipreport == 'Pension'">
+                          {{
+                            calcularTotalTotal(
+                              pagos_estudiante[especialidad.nombre][
+                                curso.curso
+                              ][curso.paralelo],
+                              "detalle",
+                              false
+                            ) | number : "1.2"
+                          }}
                         </ng-container>
-                      </tr>
-                      <tr class="table-info" style="font-weight: bold">
-                        <td colspan="2">Total</td>
-                        <ng-container
-                          *ngIf="
-                            tipreport == 'Pension' ||
-                            tipreport == 'PensionRubro'
-                          "
-                        >
-                          <ng-container
-                            *ngFor="
-                              let item of pagos_estudiante[ctpagos.curso][
-                                ctpagos.paralelo
-                              ][ctpagos.especialidad][0].detalle;
-                              let idenx = index
-                            "
-                          >
-                            <td>
-                              {{
-                                sumarrecuadado(
+                        <ng-container *ngIf="tipreport == 'Rubro'">
+                          {{
+                            calcularTotalTotal(
+                              pagos_estudiante[especialidad.nombre][
+                                curso.curso
+                              ][curso.paralelo],
+                              "rubro",
+                              false
+                            ) | number : "1.2"
+                          }}
+                        </ng-container>
+                        <ngo-container *ngIf="tipreport == 'PensionRubro'">
+                          {{
+                            getSumaIguales(
+                              calcularTotalTotal(
+                                pagos_estudiante[especialidad.nombre][
+                                  curso.curso
+                                ][curso.paralelo],
+                                "detalle",
+                                false
+                              ),
+                              calcularTotalTotal(
+                                pagos_estudiante[especialidad.nombre][
+                                  curso.curso
+                                ][curso.paralelo],
+                                "rubro",
+                                false
+                              )
+                            ) | number : "1.2"
+                          }}
+                        </ngo-container>
+                      </strong>
+                    </td>
+                    <td style="background-color: rgb(64, 177, 221)">
+                      <strong>
+                        <ng-container *ngIf="tipreport == 'Pension'">
+                          {{
+                            calcularTotalTotal(
+                              pagos_estudiante[especialidad.nombre][
+                                curso.curso
+                              ][curso.paralelo],
+                              "detalle",
+                              true
+                            ) +
+                              calcularTotalTotal(
+                                pagos_estudiante[especialidad.nombre][
+                                  curso.curso
+                                ][curso.paralelo],
+                                "detalle",
+                                false
+                              ) | number : "1.2"
+                          }}
+                        </ng-container>
+                        <ng-container *ngIf="tipreport == 'Rubro'">
+                          {{
+                            calcularTotalTotal(
+                              pagos_estudiante[especialidad.nombre][
+                                curso.curso
+                              ][curso.paralelo],
+                              "rubro",
+                              true
+                            ) +
+                              calcularTotalTotal(
+                                pagos_estudiante[especialidad.nombre][
+                                  curso.curso
+                                ][curso.paralelo],
+                                "rubro",
+                                false
+                              ) | number : "1.2"
+                          }}
+                        </ng-container>
+                        <ngo-container *ngIf="tipreport == 'PensionRubro'">
+                          {{
+                            getSumaIguales(
+                              calcularTotalTotal(
+                                pagos_estudiante[especialidad.nombre][
+                                  curso.curso
+                                ][curso.paralelo],
+                                "detalle",
+                                true
+                              ),
+                              calcularTotalTotal(
+                                pagos_estudiante[especialidad.nombre][
+                                  curso.curso
+                                ][curso.paralelo],
+                                "rubro",
+                                true
+                              )
+                            ) +
+                              getSumaIguales(
+                                calcularTotalTotal(
+                                  pagos_estudiante[especialidad.nombre][
+                                    curso.curso
+                                  ][curso.paralelo],
                                   "detalle",
-                                  "valor",
-                                  idenx,
-                                  ctpagos.curso,
-                                  ctpagos.paralelo,
-                                  ctpagos.especialidad
-                                ) | number : "1.2"
-                              }}
-                            </td>
-                          </ng-container>
-                        </ng-container>
-
-                        <ng-container
-                          *ngIf="
-                            (tipreport == 'Rubro' ||
-                              tipreport == 'PensionRubro') &&
-                            pagos_estudiante[ctpagos.curso][ctpagos.paralelo][
-                              ctpagos.especialidad
-                            ]
-                          "
-                        >
-                          <ng-container
-                            *ngFor="
-                              let item of pagos_estudiante[ctpagos.curso][
-                                ctpagos.paralelo
-                              ][ctpagos.especialidad][0].rubro;
-                              let idenx = index
-                            "
-                          >
-                            <td>
-                              {{
-                                sumarrecuadado(
+                                  false
+                                ),
+                                calcularTotalTotal(
+                                  pagos_estudiante[especialidad.nombre][
+                                    curso.curso
+                                  ][curso.paralelo],
                                   "rubro",
-                                  "valor",
-                                  idenx,
-                                  ctpagos.curso,
-                                  ctpagos.paralelo,
-                                  ctpagos.especialidad
-                                ) | number : "1.2"
-                              }}
-                            </td>
-                          </ng-container>
-                        </ng-container>
+                                  false
+                                )
+                              ) | number : "1.2"
+                          }}
+                        </ngo-container>
+                      </strong>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div
+              class="card-footer"
+              style="
+                position: relative;
+                margin-top: 3cm;
+                padding: 1rem;
+                page-break-inside: avoid;
+              "
+            >
+              <div style="margin-right: auto; margin-left: auto">
+                <table
+                  class="table table-sm table-nowrap card-table"
+                  style="width: 100%"
+                >
+                  <thead style="border: 0">
+                    <th style="border: 0"></th>
+                    <th style="border: 0"></th>
+                    <th style="border: 0"></th>
+                  </thead>
+                  <tbody>
+                    <tr style="border: 0; text-align: center">
+                      <th style="border: 0">
+                        <p>{{ director }}</p>
+                        <p>Director(a)</p>
+                      </th>
 
-                        <ng-container
-                          *ngIf="
-                            tipreport == 'Pension' &&
-                            pagos_estudiante[ctpagos.curso][ctpagos.paralelo][
-                              ctpagos.especialidad
-                            ]
-                          "
-                        >
-                          <td>
-                            {{
-                              sumarrecuadado(
-                                "detalle",
-                                "valor",
-                                pagos_estudiante[ctpagos.curso][
-                                  ctpagos.paralelo
-                                ][ctpagos.especialidad][0].detalle.length,
-                                ctpagos.curso,
-                                ctpagos.paralelo,
-                                ctpagos.especialidad
-                              ) | number : "1.2"
-                            }}
-                          </td>
-                          <td>
-                            {{
-                              sumarrecuadado(
-                                "detalle",
-                                "porpagar",
-                                pagos_estudiante[ctpagos.curso][
-                                  ctpagos.paralelo
-                                ][ctpagos.especialidad][0].detalle.length,
-                                ctpagos.curso,
-                                ctpagos.paralelo,
-                                ctpagos.especialidad
-                              ) | number : "1.2"
-                            }}
-                          </td>
-                        </ng-container>
-                        <ng-container
-                          *ngIf="
-                            tipreport == 'Rubro' &&
-                            pagos_estudiante[ctpagos.curso][ctpagos.paralelo][
-                              ctpagos.especialidad
-                            ]
-                          "
-                        >
-                          <td>
-                            {{
-                              sumarrecuadado(
-                                "rubro",
-                                "valor",
-                                pagos_estudiante[ctpagos.curso][
-                                  ctpagos.paralelo
-                                ][ctpagos.especialidad][0].detalle.length,
-                                ctpagos.curso,
-                                ctpagos.paralelo,
-                                ctpagos.especialidad
-                              ) | number : "1.2"
-                            }}
-                          </td>
-                          <td>
-                            {{
-                              sumarrecuadado(
-                                "rubro",
-                                "porpagar",
-                                pagos_estudiante[ctpagos.curso][
-                                  ctpagos.paralelo
-                                ][ctpagos.especialidad][0].detalle.length,
-                                ctpagos.curso,
-                                ctpagos.paralelo,
-                                ctpagos.especialidad
-                              ) | number : "1.2"
-                            }}
-                          </td>
-                        </ng-container>
-                        <ng-container
-                          *ngIf="
-                            tipreport == 'PensionRubro' &&
-                            pagos_estudiante[ctpagos.curso][ctpagos.paralelo][
-                              ctpagos.especialidad
-                            ]
-                          "
-                        >
-                          <td>
-                            {{
-                              sumarrecuadado(
-                                "detalle",
-                                "valor",
-                                pagos_estudiante[ctpagos.curso][
-                                  ctpagos.paralelo
-                                ][ctpagos.especialidad][0].detalle.length,
-                                ctpagos.curso,
-                                ctpagos.paralelo,
-                                ctpagos.especialidad
-                              ) +
-                                sumarrecuadado(
-                                  "rubro",
-                                  "valor",
-                                  pagos_estudiante[ctpagos.curso][
-                                    ctpagos.paralelo
-                                  ][ctpagos.especialidad][0].rubro.length,
-                                  ctpagos.curso,
-                                  ctpagos.paralelo,
-                                  ctpagos.especialidad
-                                ) | number : "1.2"
-                            }}
-                          </td>
-                          <td>
-                            {{
-                              sumarrecuadado(
-                                "detalle",
-                                "porpagar",
-                                pagos_estudiante[ctpagos.curso][
-                                  ctpagos.paralelo
-                                ][ctpagos.especialidad][0].detalle.length,
-                                ctpagos.curso,
-                                ctpagos.paralelo,
-                                ctpagos.especialidad
-                              ) +
-                                sumarrecuadado(
-                                  "rubro",
-                                  "porpagar",
-                                  pagos_estudiante[ctpagos.curso][
-                                    ctpagos.paralelo
-                                  ][ctpagos.especialidad][0].rubro.length,
-                                  ctpagos.curso,
-                                  ctpagos.paralelo,
-                                  ctpagos.especialidad
-                                ) | number : "1.2"
-                            }}
-                          </td>
-                        </ng-container>
-                      </tr>
-                      <tr style="border: 0">
-                        <td colspan="5" style="border: 0; height: 100px"></td>
-                      </tr>
-                    </tbody>
-                    <tfoot>
-                      <div style="margin-right: auto; margin-left: auto">
-                        <table
-                          id="detalleeconomico"
-                          class="table table-sm table-nowrap card-table"
-                          style="width: 100%; margin-top: 10cm"
-                        >
-                          <thead style="border: 0">
-                            <th style="border: 0"></th>
-                            <th style="border: 0"></th>
-                            <th style="border: 0"></th>
-                          </thead>
-                          <tbody>
-                            <tr style="border: 0; text-align: center">
-                              <th style="border: 0">
-                                <p>{{ director }}</p>
-                                <p>Director(a)</p>
-                              </th>
+                      <th style="border: 0">
+                        <p>{{ delegado }}</p>
+                        <p>Delegado del Obispo</p>
+                      </th>
 
-                              <th style="border: 0">
-                                <p>{{ delegado }}</p>
-                                <p>Delegado del Obispo</p>
-                              </th>
-
-                              <th style="border: 0">
-                                <p>{{ admin }}</p>
-                                <p>Responsable</p>
-                              </th>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </tfoot>
-                  </table>
-                </div>
+                      <th style="border: 0">
+                        <p>{{ admin }}</p>
+                        <p>Responsable</p>
+                      </th>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

@@ -63,7 +63,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     'alumno',
   ];
   public deteconomico: any = [];
-  public pagos_estudiante: Array<any> = [];
+  public pagos_estudiante: any;
   public estudiantes: Array<any> = [];
   public arr_becas: Array<any> = [];
   public penest: any = [];
@@ -115,11 +115,14 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
 
   async valildationEspecialidad() {
     const user_data = JSON.parse(localStorage.getItem('user_data') || '');
-    console.log(user_data);
+    if (user_data.base === 'CRISTOREY') {
+      this.load_google = true;
+    }
+    //console.log(user_data);
     await this._institucionService
       .getTypeInstitucion(user_data.base)
       .subscribe((response: any) => {
-        console.log(response);
+        //console.log(response);
         if (response.type_school === 'EGB') {
           this.especialidades.map((item: any) => {
             if (item.name === 'EGB') {
@@ -129,9 +132,10 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
             }
           });
         }
-        console.log(this.especialidades);
+        // console.log(this.especialidades);
       });
   }
+  load_google: boolean = false;
   async ngOnInit() {
     this.valildationEspecialidad();
     this.load_data = true;
@@ -146,7 +150,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
             .subscribe((responese) => {
               if (!responese.data) {
                 this.estudiantes = [];
-                this.pagos_estudiante = [];
+                this.pagos_estudiante = {};
                 this.cursos = [];
                 this.cursos2 = [];
                 this.deteconomico = [];
@@ -524,7 +528,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                 )
                 .subscribe((response) => {
                   if (response.data) {
-                    console.log(response.data[0]);
+                    //console.log(response.data[0]);
                     this.penest = response.data.map((item: any) => {
                       //console.log(item);
                       return {
@@ -600,7 +604,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                         extrapa = JSON.parse(this.config[val].extrapagos);
                       }
                       let lentmeses = extrapa.length + 10;
-                      this.pagos_estudiante = [];
+                      this.pagos_estudiante = {};
                       this.penest.forEach((elementpent: any) => {
                         if (
                           elementpent.idestudiante.estado != 'Desactivado' ||
@@ -945,7 +949,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                       borderColor: 'rgba(0,214,217,1)',
                       borderWidth: 2,
                     });
-                    console.log(this.deteconomico);
+                    // console.log(this.deteconomico);
                     this.cargar_canvas3(costosextrapagos);
                   }
                 });
@@ -1138,7 +1142,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     this.total_pagar = 0;
     this._configService.setProgress(this._configService.getProgress() + 10);
 
-    console.log(this.pagos_estudiante);
+    //console.log(this.pagos_estudiante);
 
     // Iterar sobre niveles jerárquicos: curso -> paralelo -> especialidad
     Object.keys(this.pagos_estudiante).forEach((cursoKey: any) => {
@@ -1563,7 +1567,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
 
     this.auxdasboarestudiante.dia = new Date();
     this.auxdasboarestudiante.config = this.pdffecha;
-    console.log(this.pagos_estudiante);
+    //console.log(this.pagos_estudiante);
     this.auxdasboarestudiante.pagos_estudiante = this.pagos_estudiante;
 
     this.auxdasboarestudiante.estudiantes = this.estudiantes;
@@ -1577,8 +1581,6 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     this.auxdasboarestudiante.paralelo = this.paralelo;
     this.auxdasboarestudiante.deteconomico = this.deteconomico;
 
-    console.log(this.auxdasboarestudiante);
-
     this._configService.setProgress(this._configService.getProgress() + 10);
     try {
       for (const key in this.auxdasboarestudiante) {
@@ -1588,36 +1590,60 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
           const element = this.auxdasboarestudiante[key];
 
           if (Array.isArray(element)) {
-            const chunkSize = 500;
-            var j = 0;
-            console.log("KEY", key,Array.isArray(element));
-            for (let i = 0; i < element.length; i += chunkSize) {
-              const chunk = element.slice(i, i + chunkSize);
-              console.log("CHUNK", chunk);
-              localStorage.setItem(
-                key + '_' + j,
-                btoa(
-                  String.fromCharCode.apply(
-                    null,
-                    Array.from(pako.deflate(JSON.stringify(chunk)))
-                  )
-                )
+            if (element.length > 0) {
+              try {
+                const chunkSize = 500;
+                let j = 0;
+
+                for (let i = 0; i < element.length; i += chunkSize) {
+                  const chunk = element.slice(i, i + chunkSize);
+
+                  // Comprimir y almacenar el chunk en localStorage
+                  localStorage.setItem(
+                    `${key}_${j}`,
+                    btoa(
+                      String.fromCharCode.apply(
+                        null,
+                        Array.from(pako.deflate(JSON.stringify(chunk)))
+                      )
+                    )
+                  );
+
+                  this._configService.setProgress(
+                    this._configService.getProgress() + 5
+                  );
+                  j++;
+                }
+              } catch (chunkError) {
+                console.error(
+                  `Error procesando el array de la clave ${key}:`,
+                  chunkError
+                );
+              }
+            } else {
+              console.warn(
+                `El array de la clave ${key} está vacío. No se procesará.`
               );
+            }
+          } else {
+            try {
+              // Almacenar directamente el elemento no-array
+              localStorage.setItem(key, JSON.stringify(element));
+
               this._configService.setProgress(
                 this._configService.getProgress() + 5
               );
-              j++;
+            } catch (singleError) {
+              console.error(
+                `Error almacenando el valor de la clave ${key}:`,
+                singleError
+              );
             }
-          } else {
-            localStorage.setItem(key, JSON.stringify(element));
-            this._configService.setProgress(
-              this._configService.getProgress() + 5
-            );
           }
         }
       }
-    } catch (error) {
-      console.log(error);
+    } catch (globalError) {
+      console.error('Error general procesando los datos:', globalError);
     }
 
     this._configService.setProgress(100);
@@ -1782,7 +1808,6 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     curso?: any,
     paralelo?: any
   ) {
-    console.log(val, genero, especialidad, curso, paralelo);
     let admtitulo = '';
 
     if (this.config_sistem.rol == 'admin') {
@@ -1932,7 +1957,6 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
         } else if (especialidad) {
           $('#btnEspecialidad' + val).hide();
           genero = { 0: 0, 1: 0, 2: 0 };
-          console.log(this.pagospension);
           this.pagospension.forEach((element: any) => {
             $('#btnCurso' + element.curso + especialidad).hide();
             if (element.especialidad === especialidad) {
@@ -1941,7 +1965,6 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
               genero[2] = genero[2] + element.genero[2];
             }
           });
-          console.log(genero);
           TableUtil.exportToPdftotal(
             val.toString(),
             this.pdffecha.toString(),
@@ -1972,7 +1995,6 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
           val.includes('E') ||
           val.includes('F')
         ) {
-          console.log('#btncursos' + val);
           $('#btncursos' + val).hide();
           genero = { 0: 0, 1: 0, 2: 0 };
           this.pagospension.forEach((element: any) => {
@@ -2279,8 +2301,6 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
 
       this.resumen.push(especialidadResumen);
     }
-    console.log(this.resumen);
-    console.log(this.cursos);
     setTimeout(() => {
       this.updateChart();
     }, 1000);
@@ -2511,4 +2531,5 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
       },
     });
   }
+  load_info: boolean = true;
 }

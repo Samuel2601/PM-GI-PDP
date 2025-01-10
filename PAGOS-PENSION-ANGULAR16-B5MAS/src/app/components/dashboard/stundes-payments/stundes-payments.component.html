@@ -38,7 +38,7 @@
     <div class="alert alert-danger" *ngIf="estudiantes?.length == 0">
       <i class="fe fe-info mr-1"></i> No tienes Pagos realizados
     </div>
-
+    <!-- DIV AÑOS LECTIVOS -->
     <div class="card" *ngIf="estudiantes.length > 0">
       <div class="card-body">
         <ul class="nav nav-pills nav-overflow header-tabs">
@@ -73,6 +73,27 @@
     </div>
     <!-- Div CANVAS -->
     <div class="card-body">
+      <!-- Botones de nivel -->
+      <div class="my-4">
+        <button
+          class="btn btn-primary me-2"
+          (click)="showLevel = 'especialidad'; updateChart()"
+        >
+          Especialidad
+        </button>
+        <button
+          class="btn btn-primary me-2"
+          (click)="showLevel = 'curso'; updateChart()"
+        >
+          Cursos
+        </button>
+        <button
+          class="btn btn-primary"
+          (click)="showLevel = 'paralelo'; updateChart()"
+        >
+          Paralelos
+        </button>
+      </div>
       <div class="row">
         <div class="col-12">
           <canvas
@@ -82,59 +103,76 @@
         </div>
       </div>
     </div>
+    <!-- Mensaje de información -->
+    <div class="alert alert-secondary" role="alert">
+      <i class="bi bi-info me-2"></i>
+      Los valores mostrados en el gráfico y la tabla de
+      <strong>Detalle Económico de Pensiones</strong>
+      <u> no incluyen rubros adicionales</u>. Los datos corresponden
+      exclusivamente a pensiones y matrículas.
+    </div>
+    <div
+      class="alert alert-info"
+      role="alert"
+      *ngIf="load_info"
+      (click)="load_info = false"
+    >
+      <i class="bi bi-info me-2"></i>
+      Si necesita generar un reporte que incluya solo rubros, o combinados con
+      pensiones y matrículas, puede seleccionarlo desde la sección
+      <strong>Reportes</strong>.
+    </div>
     <!-- DIV REPORTES -->
-    <ng-container *ngIf="cursos != undefined && estudiantes.length > 0">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-header-title">Reportes</h3>
-        </div>
-        <div class="card-body">
-          <div class="row g-3 align-items-center">
-            <div class="col-md-auto">
-              <select
-                name="tipreport"
-                id="tipreport"
-                class="form-select form-select-md"
-                [(ngModel)]="auxtiprep"
-                (ngModelChange)="cargarContenido($event)"
-              >
-                <option value="Genero">Genero</option>
-                <option value="Pension">Pension</option>
-                <option value="Rubro">Rubro</option>
-                <option value="PensionRubro">Pension+Rubro</option>
-                <option value="Becado">Becados</option>
-                <option value="Retirados">Retirados</option>
-              </select>
-            </div>
+    <div class="card" *ngIf="cursos != undefined && estudiantes.length > 0">
+      <div class="card-header">
+        <h3 class="card-header-title">Reportes</h3>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-auto">
+            <select
+              name="tipreport"
+              id="tipreport"
+              class="form-select form-select-md"
+              [(ngModel)]="auxtiprep"
+              (ngModelChange)="cargarContenido($event)"
+            >
+              <option value="Genero">Género</option>
+              <option value="Pension">Pensión</option>
+              <option value="Rubro">Rubro</option>
+              <option value="PensionRubro">Pensión + Rubro</option>
+              <option value="Becado">Becados</option>
+              <option value="Retirados">Retirados</option>
+            </select>
+          </div>
 
-            <div class="col-md-auto">
-              <button
-                *ngIf="tipreport == 'Genero'"
-                class="btn btn-primary mb-3"
-                (click)="imprimir_reporte()"
-              >
-                Impr. {{ tipreport }}
-              </button>
+          <div class="col-md-auto">
+            <button
+              *ngIf="tipreport == 'Genero'"
+              class="btn btn-primary mb-3"
+              (click)="imprimir_reporte()"
+            >
+              Impr. {{ tipreport }}
+            </button>
 
-              <a
-                *ngIf="
-                  tipreport == 'Pension' ||
-                  tipreport == 'Rubro' ||
-                  tipreport == 'PensionRubro' ||
-                  tipreport == 'Becado' ||
-                  tipreport == 'Retirados'
-                "
-                class="btn btn-primary mb-3"
-                [routerLink]="['/reporte', tipreport + ' ' + pdffecha]"
-                target="_blank"
-              >
-                Impr. {{ tipreport }}
-              </a>
-            </div>
+            <a
+              *ngIf="
+                tipreport == 'Pension' ||
+                tipreport == 'Rubro' ||
+                tipreport == 'PensionRubro' ||
+                tipreport == 'Becado' ||
+                tipreport == 'Retirados'
+              "
+              class="btn btn-primary mb-3"
+              [routerLink]="['/reporte', tipreport + ' ' + pdffecha]"
+              target="_blank"
+            >
+              Impr. {{ tipreport }}
+            </a>
           </div>
         </div>
       </div>
-    </ng-container>
+    </div>
 
     <ng-container *ngIf="estudiantes && estudiantes.length != 0">
       <ng-container>
@@ -220,6 +258,7 @@
                     CASH PARALELO
                   </button>
                   <button
+                    *ngIf="load_google"
                     class="rainbow-button"
                     [ngStyle]="{
                       'background-image':
@@ -412,28 +451,6 @@
               <!--TABLA DE CONTROL DE DETALLE ECONOMICO DE PENSIONES-->
               <!-- resumen.component.html -->
               <div class="container-fluid">
-                <!-- Botones de nivel -->
-                <div class="my-4">
-                  <button
-                    class="btn btn-primary me-2"
-                    (click)="showLevel = 'especialidad'; updateChart()"
-                  >
-                    Especialidad
-                  </button>
-                  <button
-                    class="btn btn-primary me-2"
-                    (click)="showLevel = 'curso'; updateChart()"
-                  >
-                    Cursos
-                  </button>
-                  <button
-                    class="btn btn-primary"
-                    (click)="showLevel = 'paralelo'; updateChart()"
-                  >
-                    Paralelos
-                  </button>
-                </div>
-
                 <div class="table-responsive">
                   <table class="table table-bordered" id="detalleeconomico">
                     <thead>
