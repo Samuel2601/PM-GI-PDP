@@ -856,6 +856,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                           }
                         }
                       });
+                      console.log(this.pagos_estudiante);
                       this._configService.setProgress(
                         this._configService.getProgress() + 5
                       );
@@ -2275,6 +2276,8 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
       const cursos = this.pagos_estudiante[especialidad];
       const especialidadResumen: any = { nombre: especialidad, cursos: [] };
 
+      // Recolectamos todos los cursos y paralelos primero
+      const cursosArray = [];
       for (const curso in cursos) {
         for (const paralelo in cursos[curso]) {
           const estudiantes = cursos[curso][paralelo];
@@ -2289,7 +2292,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
             });
           });
 
-          especialidadResumen.cursos.push({
+          cursosArray.push({
             curso,
             paralelo,
             numEstudiantes,
@@ -2299,8 +2302,30 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
         }
       }
 
+      // Ordenamos el array de cursos
+      cursosArray.sort((a, b) => {
+        // Primero ordenamos por curso
+        const cursoA = parseInt(a.curso) || a.curso;
+        const cursoB = parseInt(b.curso) || b.curso;
+
+        if (cursoA !== cursoB) {
+          // Si son números, comparación numérica
+          if (typeof cursoA === 'number' && typeof cursoB === 'number') {
+            return cursoA - cursoB;
+          }
+          // Si son strings, comparación alfabética
+          return cursoA.toString().localeCompare(cursoB.toString());
+        }
+
+        // Si los cursos son iguales, ordenamos por paralelo
+        return a.paralelo.localeCompare(b.paralelo);
+      });
+
+      // Asignamos el array ordenado
+      especialidadResumen.cursos = cursosArray;
       this.resumen.push(especialidadResumen);
     }
+    console.log(this.resumen);
     setTimeout(() => {
       this.updateChart();
     }, 1000);
