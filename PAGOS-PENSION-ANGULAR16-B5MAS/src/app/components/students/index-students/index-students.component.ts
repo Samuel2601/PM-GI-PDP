@@ -92,7 +92,7 @@ export class IndexStudentsComponent implements OnInit {
       .obtener_config_admin(this.token)
       .subscribe((response) => {
         if (response.message) {
-          this.router.navigate(['/configuracion']);
+          this.router.navigate(['/configuraciones']);
         } else {
           this.config_const = response.data[0];
           //console.log(this.config_const);
@@ -303,6 +303,11 @@ export class IndexStudentsComponent implements OnInit {
         validators: [{ validate: 'required', error: 'Obligatorio' }],
       },
       {
+        label: 'Especialidad',
+        key: 'especialidad',
+        // validators: [{ validate: 'required', error: 'Obligatorio' }],
+      },
+      {
         label: 'Nombres Padre',
         key: 'nombres_padre',
       },
@@ -407,9 +412,16 @@ export class IndexStudentsComponent implements OnInit {
     });
     this.proveedor = [
       {
+        nombre: 'nombres',
+        label: 'Nombres',
+        validacion: /^[a-zA-ZñÑÁÉÍÓÚáéíóú. \s]+$/,
+        obligatorio: true,
+        mensaje: 'Solo letras',
+      },
+      {
         nombre: 'apellidos',
         label: 'Apellidos',
-        validacion: /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/,
+        validacion: /^[a-zA-ZñÑÁÉÍÓÚáéíóú. \s]+$/,
         obligatorio: true,
         mensaje: 'Solo letras',
       },
@@ -418,6 +430,17 @@ export class IndexStudentsComponent implements OnInit {
         label: 'Curso',
         obligatorio: true,
         mensaje: 'Obligatorio',
+      },
+      {
+        nombre: 'paralelo',
+        label: 'Paralelo',
+        obligatorio: true,
+        mensaje: 'Obligatorio',
+      },
+      {
+        nombre: 'especialidad',
+        label: 'Especialidad',
+        obligatorio: false,
       },
       {
         nombre: 'direccion',
@@ -433,7 +456,6 @@ export class IndexStudentsComponent implements OnInit {
         mensaje:
           'Debe ser un número de 10 o 13 dígitos, o un código alfanumérico de 8 caracteres (e.g., EP030107, FJ200685)',
       },
-
       {
         nombre: 'dni_factura',
         label: 'Cedula a Facturar',
@@ -451,14 +473,14 @@ export class IndexStudentsComponent implements OnInit {
       {
         nombre: 'email',
         label: 'Email',
-        validacion: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        validacion: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
         obligatorio: false,
         mensaje: 'Tiene que incluir @ y un . seguido de dos o tres caracteres',
       },
       {
         nombre: 'email_padre',
         label: 'Email Padre',
-        validacion: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        validacion: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
         obligatorio: false,
         mensaje: 'Tiene que incluir @ y un . seguido de dos o tres caracteres',
       },
@@ -469,31 +491,18 @@ export class IndexStudentsComponent implements OnInit {
         mensaje: 'Obligatorio',
       },
       {
-        nombre: 'nombres',
-        label: 'Nombres',
-        validacion: /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/,
-        obligatorio: true,
-        mensaje: 'Solo letras',
-      },
-      {
         nombre: 'nombres_factura',
         label: 'Nombres Factura',
-        validacion: /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/,
+        validacion: /^[a-zA-ZñÑÁÉÍÓÚáéíóú. \s]+$/,
         obligatorio: false,
         mensaje: 'Solo letras',
       },
       {
         nombre: 'nombres_padre',
         label: 'Nombres Padre',
-        validacion: /^[a-zA-ZñÑÁÉÍÓÚáéíóú \s]+$/,
+        validacion: /^[a-zA-ZñÑÁÉÍÓÚáéíóú. \s]+$/,
         obligatorio: false,
         mensaje: 'Solo letras',
-      },
-      {
-        nombre: 'paralelo',
-        label: 'Paralelo',
-        obligatorio: true,
-        mensaje: 'Obligatorio',
       },
       {
         nombre: 'telefono',
@@ -641,6 +650,7 @@ export class IndexStudentsComponent implements OnInit {
     this.progressBarService.setProgress(
       this.progressBarService.getProgress() + 10
     );
+    console.log(this.proveedores);
     this._adminService
       .registro_estudiante_masivo(this.proveedores, this.token)
       .subscribe((response) => {

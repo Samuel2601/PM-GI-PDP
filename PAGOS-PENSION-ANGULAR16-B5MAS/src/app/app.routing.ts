@@ -50,7 +50,7 @@ const appRoute: Routes = [
   { path: 'control', component: PanelAdminComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
 
-  //{ path: 'registrate', component: RegistroComponent },
+  { path: 'registrate', component: RegistroComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   {
     path: 'new-password/:id',

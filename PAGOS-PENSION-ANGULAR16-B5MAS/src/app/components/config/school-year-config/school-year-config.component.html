@@ -33,7 +33,8 @@
                         >Años Lectivos</a
                       >
                     </li>
-                    <li class="nav-item" *ngIf="tip_conf != 2">
+                    <!--
+                      <li class="nav-item" *ngIf="tip_conf != 2">
                       <a class="nav-link" (click)="select_nav(2)"
                         >Institución</a
                       >
@@ -53,6 +54,7 @@
                         >Configuración</a
                       >
                     </li>
+                    -->
                   </ul>
                 </div>
               </div>
@@ -85,7 +87,8 @@
                 <div class="col-8 col-lg-8 col-xl-8">
                   <!-- Alert -->
                   <div class="alert alert-danger" *ngIf="bol">
-                    <i class="bi bi-info-circle"></i> {{ bol }}
+                    <i class="bi bi-info-circle"></i>
+                    {{ bol }}
                   </div>
 
                   <!-- Card -->
@@ -101,12 +104,17 @@
                         </h4>
                       </div>
 
-                      <div class="card-body" *ngIf="!load_data">
+                      <div
+                        class="card-body"
+                        *ngIf="!load_data"
+                        style="height: auto"
+                      >
                         <div class="card-header-title">
                           <div class="row">
                             <div class="col">
                               <h4 class="card-header-title">
-                                Mese de cobro: {{ config.numpension }}
+                                Mese de cobro:
+                                {{ config.numpension }}
                               </h4>
                             </div>
 
@@ -239,7 +247,7 @@
                           </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row mb-3" style="display: none;">
                           <label for="inputEmail3" class="form-label"
                             >Mes de cobro completo</label
                           >
@@ -431,7 +439,9 @@
                           </button>
                         </div>
                         <div class="modal-header">
-                          <label for=""> <b>Rubros </b> </label>
+                          <label for="">
+                            <b>Rubros </b>
+                          </label>
 
                           <div
                             class="d-grid gap-2 d-md-flex justify-content-md-end"
@@ -462,9 +472,15 @@
                                     let index = index
                                   "
                                 >
-                                  <td>{{ item.idrubro }}</td>
-                                  <td>{{ item.descripcion }}</td>
-                                  <td>{{ item.valor }}</td>
+                                  <td>
+                                    {{ item.idrubro }}
+                                  </td>
+                                  <td>
+                                    {{ item.descripcion }}
+                                  </td>
+                                  <td>
+                                    {{ item.valor }}
+                                  </td>
                                   <td>
                                     <button
                                       type="button"
@@ -840,6 +856,7 @@
                                             <th scope="col">N°</th>
                                             <th scope="col">Curso</th>
                                             <th scope="col">Paralelo</th>
+                                            <th scope="col">Especialidad</th>
                                             <th></th>
                                           </tr>
                                         </thead>
@@ -850,7 +867,9 @@
                                               let i = index
                                             "
                                           >
-                                            <td>{{ i + 1 }}</td>
+                                            <td>
+                                              {{ i + 1 }}
+                                            </td>
                                             <td>
                                               <label
                                                 class="col-form-label"

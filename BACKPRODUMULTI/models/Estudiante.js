@@ -20,6 +20,7 @@ var EstudianteSchema = Schema({
     anio_desac: {type: String, required: false},
     curso:{type: String, required: false},
     paralelo:{type: String, required: false},
+    especialidad:{type: String, required: false, default:'EGB'},
     
     nombres_padre: {type: String, required: false},
     dni_padre: {type: String, required: false},

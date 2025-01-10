@@ -189,7 +189,7 @@ export class LoginComponent implements OnInit {
 						message: 'No coincide las contraseñas',
 					});
 				} else {
-					this._adminService.registrar_admin(this.admin, this.file).subscribe((response) => {
+					this._adminService.create_institucion(this.admin, this.file).subscribe((response) => {
 						if (response.message == 'Registrado con exito') {
 							iziToast.success({
 								title: 'APROBADO',

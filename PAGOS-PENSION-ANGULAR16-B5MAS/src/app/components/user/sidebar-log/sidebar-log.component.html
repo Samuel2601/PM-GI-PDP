@@ -53,10 +53,10 @@
 			<ul class="navbar-nav">
 				<li class="nav-item">
 					<a class="nav-link" *ngIf="pathname!='/login'"  [routerLink]="['/login']" routerLinkActive="active">
-						<i class="bi bi-door-open"> Inicio</i> 
+						<i class="bi bi-door-open"> Inicio</i>
 					</a>
 					<a class="nav-link active" *ngIf="pathname=='/login'"  [routerLink]="['/login']" routerLinkActive="active">
-						<i class="bi bi-door-open"> Inicio</i> 
+						<i class="bi bi-door-open"> Inicio</i>
 					</a>
 				</li>
 			</ul>
@@ -64,10 +64,10 @@
 			<!--
 				*ngIf="URLactual.hostname=='incorp.tk'"
 			-->
-			<ul class="navbar-nav" style="display: none;" >
+			<ul class="navbar-nav"  >
 				<li class="nav-item">
 					<a class="nav-link" *ngIf="pathname!='/registrate'"  [routerLink]="['/registrate']" routerLinkActive="active">
-						<i class="bi bi-cloud-haze2"> Registrate</i> 
+						<i class="bi bi-cloud-haze2"> Registrate</i>
 					</a>
 					<a class="nav-link active" *ngIf="pathname=='/registrate'"  [routerLink]="['/registrate']" routerLinkActive="active">
 						<i class="bi bi-cloud-haze2"> Registrate</i>
@@ -77,13 +77,13 @@
 			<ul class="navbar-nav">
 				<li class="nav-item">
 					<a class="nav-link" *ngIf="pathname!='/forgot-password'"  [routerLink]="['/forgot-password']" routerLinkActive="active">
-						<i class="bi bi-indent"> Recuperar Contraseña</i> 
+						<i class="bi bi-indent"> Recuperar Contraseña</i>
 					</a>
 					<a class="nav-link active" *ngIf="pathname=='/forgot-password'"  [routerLink]="['/forgot-password']" routerLinkActive="active">
-						<i class="bi bi-indent"> Recuperar Contraseña</i> 
+						<i class="bi bi-indent"> Recuperar Contraseña</i>
 					</a>
 				</li>
-			</ul>			
+			</ul>
 		</div>
 	</div>
 </nav>
