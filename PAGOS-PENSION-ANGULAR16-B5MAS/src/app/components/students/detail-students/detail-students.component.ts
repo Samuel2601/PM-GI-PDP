@@ -301,11 +301,11 @@ export class DetailStudentsComponent implements OnInit {
 			<title>` +
 					this.estudiante.nombres +
 					` ` +
-					this.estudiante.apellidos + ` `+this.pensionesestudiante[this.idexpension].curso + this.pensionesestudiante[this.idexpension].paralelo +
+					this.estudiante.apellidos + ` `+this.pensionesestudiante[this.idexpension].curso + this.pensionesestudiante[this.idexpension].paralelo + this.pensionesestudiante[this.idexpension].especialidad +
 					`(` +
 					new Date(this.pensionesestudiante[this.idexpension].anio_lectivo).getFullYear() +
 					`)</title>
-					
+
 		   <style>
 
 		  .nav-link{
@@ -325,31 +325,31 @@ export class DetailStudentsComponent implements OnInit {
 		  }
 		   </style>
 		   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-	
+
 		  </head>
 			<body>
 		  ${titulo}
-	   
+
 			<table style="border-collapse: collapse;text-align:center; margin-top: 7%;margin-right: auto;
 			margin-left: auto; max-width: 50%;"  class="table table-bordered">
 				${printContents}
 			</table>
-				
+
 			</body>
 
 		</html>`;
 		const popupWin = window.open('', 'Reporte', 'top=0,left=0,height=auto,width=auto');
 
 		if (popupWin&&printContents) { // Comprueba si la ventana emergente se abrió correctamente
-		  popupWin.document.open();  
+		  popupWin.document.open();
 		  popupWin.document.write(plantillaHTML);
-	
+
 		  setTimeout(() => {
 			// Imprime el contenido en la ventana emergente
 			popupWin.print();
 			//popupWin.close();
-		  }, 1000);	
-	
+		  }, 1000);
+
 		} else {
 		  console.error("No se pudo abrir la ventana emergente.");
 		}

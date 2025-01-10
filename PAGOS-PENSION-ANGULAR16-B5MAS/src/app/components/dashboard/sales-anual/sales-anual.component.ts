@@ -69,7 +69,7 @@ export class SalesAnualComponent implements OnInit{
 				 +
 				`)</title>
        <style>
-      
+
       td {
         border:  1px solid;
       }
@@ -82,24 +82,24 @@ export class SalesAnualComponent implements OnInit{
       thead.th {
         border:  1px solid;
       }
-    
+
        </style>
        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
      </head>
        <body onload="window.print();window.close()">
 
-      
-       
+
+
        ${printContents}
 
-       
-           
+
+
        </body>
        <footer style="margin-top: 10%;margin-right: auto;margin-left: auto;">
        <div style="margin-right: auto;margin-left: auto;">
                           <table id="detalleeconomico" class="table table-sm table-nowrap card-table" style="width: 100%" >
-                            
+
                               <thead style="border:0">
                                 <th style="border:0"></th>
                                 <th style="border:0">&nbsp&nbsp</th>
@@ -121,10 +121,10 @@ export class SalesAnualComponent implements OnInit{
                                   this.admin +
                                   `</p><p>  Responsable </p></th>
                                                            </tr>
-                                                         
+
                                                          </tbody>
-                           
-                          </table>                          
+
+                          </table>
       </div>
 
 
@@ -163,6 +163,7 @@ export class SalesAnualComponent implements OnInit{
 
       if(response.data){
         this.ventas = response.data;
+        console.log(this.ventas);
         if (this.ventas != undefined) {
           for (var i = 0; i < this.ventas.length; i++) {
             if (
@@ -174,7 +175,7 @@ export class SalesAnualComponent implements OnInit{
             ) {
               this.totalfactual += this.ventas[i].valor;
             }
-  
+
             if (
               i == 0 &&
               new Date(this.ventas[i].createdAt).getFullYear() == new Date(this.factual).getFullYear()
@@ -184,7 +185,7 @@ export class SalesAnualComponent implements OnInit{
                   new Date(this.ventas[i].idpension.anio_lectivo).getFullYear().toString() +
                   ' ' +
                   this.ventas[i].idpension.curso +
-                  this.ventas[i].idpension.paralelo,
+                  this.ventas[i].idpension.paralelo+(this.ventas[i].idpension.especialidad||'EGB'),
                 data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 backgroundColor: 'rgba(54,162,235,0.2)',
                 borderColor: 'rgba(54,162,235,1)',
@@ -199,7 +200,7 @@ export class SalesAnualComponent implements OnInit{
                 new Date(this.ventas[i].idpension.anio_lectivo).getFullYear().toString() +
                 ' ' +
                 this.ventas[i].idpension.curso +
-                this.ventas[i].idpension.paralelo;
+                this.ventas[i].idpension.paralelo+(this.ventas[i].idpension.especialidad||'EGB');
               let con = -1;
               for (var j = 0; j < this.anio.length; j++) {
                 if (this.anio[j].label.toString() == aux) {
@@ -209,13 +210,13 @@ export class SalesAnualComponent implements OnInit{
               if (con == -1) {
                 var auxcolor1 = Math.random() * 255;
                 var auxcolor2 = Math.random() * 255;
-  
+
                 this.anio.push({
                   label:
                     new Date(this.ventas[i].idpension.anio_lectivo).getFullYear().toString() +
                     ' ' +
                     this.ventas[i].idpension.curso +
-                    this.ventas[i].idpension.paralelo,
+                    this.ventas[i].idpension.paralelo+(this.ventas[i].idpension.especialidad||'EGB'),
                   data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   backgroundColor: 'rgba(' + auxcolor2 + ',' + auxcolor1 + ',200,0.2)',
                   borderColor: 'rgba(' + auxcolor2 + ',' + auxcolor1 + ',200,1)',
@@ -230,15 +231,15 @@ export class SalesAnualComponent implements OnInit{
               }
             }
           }
-  
+
           if (document.getElementById('myChart2') != null) {
             this.anio.forEach((element) => {
-              
+
               //this.myChart.data.datasets.push(element);
               this.auxanio.push(element);
-  
+
               this.pagosmes += element.data[this.auxfactual];
-              
+
             });
             this.pagos=[{label:'valores Recaudados',data:{
               'Enero':0,
@@ -250,11 +251,11 @@ export class SalesAnualComponent implements OnInit{
                 this.pagos[0].data[this.arraymes[index]]=this.pagos[0].data[this.arraymes[index]]+elementdata
               });
             });
-  
+
             var canvas = <HTMLCanvasElement>document.getElementById('myChart2');
             var ctx: CanvasRenderingContext2D | any;
             ctx = canvas.getContext('2d');
-  
+
             var myChart = new Chart(ctx, {
               type: 'bar',
               data: {
@@ -274,15 +275,15 @@ export class SalesAnualComponent implements OnInit{
                 },
               },
             });
-  
+
             this.ordenarmes();
           }
-  
+
         }
       }
     });
       }});
-  
+
 
 	}
 	ordenarmes(eve?:any){
@@ -299,6 +300,6 @@ export class SalesAnualComponent implements OnInit{
       return 0;
 
     });
-		
+
 	}
 }

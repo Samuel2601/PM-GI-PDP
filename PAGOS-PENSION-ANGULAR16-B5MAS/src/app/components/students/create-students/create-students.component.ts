@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminService } from 'src/app/service/admin.service';
+import { InstitucionServiceService } from 'src/app/service/institucion.service.service';
 import { EstudianteService } from 'src/app/service/student.service';
 
 declare var iziToast: {
@@ -44,12 +45,35 @@ export class CreateStudentsComponent implements OnInit {
 	constructor(
 		private _estudianteService: EstudianteService,
 		private _adminService: AdminService,
-		private _router: Router
+		private _router: Router,
+    private _institucionService: InstitucionServiceService
 	) {
 		this.token = localStorage.getItem('token');
 	}
+  public especialidades: any = [
+    { name: 'Inicial', seleccionado: false, view: true, code: 'INICIAL', cursos:[1,2] },
+    { name: 'EGB', seleccionado: false, view: true, code: 'EGB', cursos:[1,2,3,4,5,6,7,8,9,10] },
+    { name: 'BGU', seleccionado: false, view: true, code: 'BGU', cursos:[1,2,3] },
+  ];
+  async valildationEspecialidad() {
+    const user_data = JSON.parse(localStorage.getItem('user_data') || '');
 
+    await this._institucionService
+      .getTypeInstitucion(user_data.base)
+      .subscribe((response: any) => {
+        if (response.type_school === 'EGB') {
+          this.especialidades.map((item: any) => {
+            if (item.name === 'EGB') {
+              item.view = true;
+            } else {
+              item.view = false;
+            }
+          });
+        }
+      });
+  }
 	ngOnInit(): void {
+    this.valildationEspecialidad();
 		let aux = localStorage.getItem('identity');
 		this._adminService.obtener_admin(aux, this.token).subscribe((response) => {
 
@@ -71,10 +95,10 @@ export class CreateStudentsComponent implements OnInit {
 			this._adminService.obtener_config_admin(this.token).subscribe((response)=>{
 				this.config=response.data;
 				//this.config_const=response.data;
-				
-				//console.log(this.config);
+
+				console.log(this.config);
 			});
-			
+
 		});
 
 		(function () {
@@ -182,17 +206,18 @@ export class CreateStudentsComponent implements OnInit {
 			this.estudiante.curso=(parseInt(this.estudiante.curso)+(this.auxidp-this.idp)).toString();
 			this.auxidp=this.idp;
 		}
-		
+
 		if(this.idp>=0&&bal==0&&this.estudiante.curso>0){
 			this.estudiante_pension.push({anio_lectivo:this.config[this.idp],
 			curso:this.estudiante.curso,
 			paralelo:this.estudiante.paralelo,
+      especialidad:this.estudiante.especialidad,
 			aux:this.idp
 		});
-			
+
 
 			//this.config.splice(this.idp, 1);
-			
+
 			this.idp=-1;
 		}
 		this.estudiante_pension.sort(function (a, b) {
@@ -267,13 +292,13 @@ export class CreateStudentsComponent implements OnInit {
 			this.estudiante_pension[this.idet].arr_etiquetas=[];
 		}
 		if (this.idet!=-1&& this.estudiante_pension[this.idet].arr_etiquetas.find(( etiqueta:any ) => etiqueta === arr_label[0]) == undefined) {
-			
+
 			this.estudiante_pension[this.idet].arr_etiquetas.push({
 				etiqueta: arr_label[0],
 				titulo: arr_label[1],
 				idpension: arr_label[2],
 			});
-			
+
 			//this.etiquetas.splice(ir,1)
 			this.new_etiqueta = '';
 		}
@@ -303,14 +328,14 @@ export class CreateStudentsComponent implements OnInit {
 							color: '#FFF',
 							class: 'text-danger',
 							position: 'topRight',
-							message: 'Tienes que proporcionarnos las fechas con beca y el valor de la beca: '+element.curso+element.paralelo+'-'+new Date(element.anio_lectivo.anio_lectivo).getFullYear(),
+							message: 'Tienes que proporcionarnos las fechas con beca y el valor de la beca: '+element.curso+element.paralelo+element.especialidad+'-'+new Date(element.anio_lectivo.anio_lectivo).getFullYear(),
 						});
 					}
 				}
 			});
 			if(conf==0){
 				if (registroForm.valid) {
-					
+
 					this.load_btn = true;
 					if (this.ch_r == 'repre') {
 						this.estudiante.nombres_factura = this.estudiante.nombres_padre;
@@ -318,7 +343,7 @@ export class CreateStudentsComponent implements OnInit {
 					}
 					this.estudiante.pensiones=this.estudiante_pension;
 					//console.log(this.estudiante);
-					
+
 					this._adminService.registro_estudiante(this.estudiante, this.token).subscribe(
 						(response) => {
 							//////console.log(response);
@@ -358,7 +383,7 @@ export class CreateStudentsComponent implements OnInit {
 							//////console.log(error);
 						}
 					);
-					
+
 				} else {
 					iziToast.show({
 						title: 'ERROR',
@@ -382,8 +407,8 @@ export class CreateStudentsComponent implements OnInit {
 				message: 'Indica a que año lectivo pertenece',
 			});
 		}
-		
-		
-		
+
+
+
 	}
 }

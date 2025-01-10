@@ -2,7 +2,7 @@
 	<div class="sidebar">
 		<app-sidebar></app-sidebar>
 	</div>
-	
+
 	<div class="content">
         <ng-container *ngIf="(rol != undefined && (rol == 'secrt' || rol == 'admin')) || yo == 1">
             <div class="container-fluid">
@@ -16,7 +16,7 @@
                                     <div class="col">
                                         <!-- Pretitle -->
                                         <h6 class="header-pretitle">Módulo</h6>
-    
+
                                         <!-- Title -->
                                         <h1 class="header-title">Pago de Pensiones</h1>
                                     </div>
@@ -24,7 +24,7 @@
                                 <!-- / .row -->
                             </div>
                         </div>
-    
+
                         <!-- Alert -->
                         <div class="container">
                             <div class="row">
@@ -33,8 +33,8 @@
                                         <div class="card-header">
                                             <!-- Title -->
                                             <h4 class="card-header-title">Pago manual</h4>
-                                        </div>                            
-                
+                                        </div>
+
                                         <div class="card-body">
                                             <div class="row form-group">
                                                 <div class="col-lg-6">
@@ -57,7 +57,7 @@
                                                             Buscar!
                                                         </button>
                                                     </div>
-                                                    
+
                                                     <div
                                                         class="modal fade"
                                                         id="modalEstudiante"
@@ -158,52 +158,52 @@
                                                                 <ng-container *ngIf="pension.length>0">
                                                                     <ng-container *ngFor="let item of pension; let val = index">
                                                                         <option value="{{val}}"   >
-                                                                            <b 
-                                                                                >{{ item.curso}} {{ item.paralelo }} {{item.anio_lectivo|date:'YYYY'}}
+                                                                            <b
+                                                                                >{{ item.curso}} {{ item.paralelo }} {{ item.especialidad || 'EGB' }} {{item.anio_lectivo|date:'YYYY'}}
                                                                             </b>
                                                                         </option>
                                                                     </ng-container>
                                                                 </ng-container>
-                                                                
+
                                                             </select>
-                
+
                                                             <select
                                                                 class="form-control custom-select"
                                                                 id="select-input"
                                                                 required
                                                                 name="idp"
-                                                                
+
                                                                 [(ngModel)]="idp"
-                                                                
+
                                                                 *ngIf="dpago.length==0"
                                                             >
                                                                 <option value="-1" selected disabled>Seleccionar</option>
                                                                 <ng-container *ngIf="pension.length>0">
                                                                     <ng-container *ngFor="let item of pension; let val = index">
                                                                         <option value="{{val}}"   >
-                                                                            <b 
-                                                                                >{{ item.curso}} {{ item.paralelo }} {{item.anio_lectivo|date:'YYYY'}}
+                                                                            <b
+                                                                                >{{ item.curso}} {{ item.paralelo }}  {{ item.especialidad || 'EGB' }} {{item.anio_lectivo|date:'YYYY'}}
                                                                             </b>
                                                                         </option>
                                                                     </ng-container>
                                                                 </ng-container>
-                                                                
+
                                                             </select>
                                                             <!--(ngModelChange)="selecct_pension($event)"-->
                                                             <button class="btn btn-primary" (click)="selecct_pension()"> Cargar</button>
-                
+
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                             </div>
                                         </div>
-                                        <hr />                
+                                        <hr />
                                         <div class="card-body">
                                             <div class="row form-group">
                                                 <div class="col-lg-6">
                                                     <label for="validationCustom01" class="form-label"><b>Documento</b></label> <br />
-                
+
                                                     <div class="input-group">
                                                         <input
                                                             class="form-control"
@@ -230,7 +230,7 @@
                                                         >
                                                             Nuevo!
                                                         </button>
-                                                    </div>                
+                                                    </div>
                                                     <div
                                                         class="modal fade"
                                                         id="modalDocumento"
@@ -279,7 +279,7 @@
                                                                                 >
                                                                                     <td>{{ item.documento }}</td>
                                                                                     <td>{{ item.valor | currency : 'USD' }}</td>
-                                                                                    
+
                                                                                     <td>
                                                                                         <a
                                                                                             style="cursor: pointer"
@@ -298,7 +298,7 @@
                                                                                         </button>
                                                                                     </td>
                                                                                 </tr>
-                                                                                
+
                                                                             </tbody>
                                                                             <tbody *ngIf="load_documento">
                                                                                 <tr>
@@ -309,11 +309,11 @@
                                                                                     </td>
                                                                                 </tr>
                                                                             </tbody>
-                                                                            
+
                                                                         </table>
                                                                     </div>
-                                                                
-                                                                    
+
+
                                                                 </div>
                                                                 <div class="modal-footer">
                                                                     <ngb-pagination
@@ -325,7 +325,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>                
+                                                    </div>
                                                     <div
                                                         class="modal fade"
                                                         id="modalNuevoDocumento"
@@ -349,7 +349,7 @@
                                                                                 <!-- Title -->
                                                                                 <h4 class="card-header-title">Registro de un nuevo documento</h4>
                                                                             </div>
-                
+
                                                                             <div class="card-body">
                                                                                 <div class="row">
                                                                                     <div class="col-lg-8">
@@ -368,7 +368,7 @@
                                                                                                     />
                                                                                                 </div>
                                                                                             </div>
-                
+
                                                                                             <div class="col-12 form-group">
                                                                                                 <tinymce
                                                                                                     name="contenido"
@@ -406,7 +406,7 @@
                                                                                                 />
                                                                                             </div>
                                                                                         </div>
-                
+
                                                                                         <label class="form-label"><b>Cuenta (*)</b></label> <br />
                                                                                         <select
                                                                                             class="form-control"
@@ -432,7 +432,7 @@
                                                                                 <button *ngIf="!load_btn" class="btn btn-primary btn-shadow" type="submit">
                                                                                     Crear
                                                                                 </button>
-                
+
                                                                                 <button
                                                                                     disabled
                                                                                     *ngIf="load_btn"
@@ -466,7 +466,7 @@
                                                                 [(ngModel)]="tipo"
                                                             >
                                                                 <option value="-1" selected disabled>Seleccionar</option>
-                                                                
+
                                                                 <ng-container *ngFor="let rubros of arr_rubro; let val = index">
                                                                     <option value="{{ rubros.idrubro }}" >
                                                                         <b
@@ -474,7 +474,7 @@
                                                                         </b>
                                                                     </option>
                                                                 </ng-container>
-            
+
                                                                 <option value="0" *ngIf="matricula_pago == 0">Matricula</option>
                                                                 <ng-container *ngFor="let fecha of fecha; let val = index">
                                                                     <ng-container *ngIf="val>=0 && val<11">
@@ -485,9 +485,9 @@
                                                                             </b>
                                                                         </option>
                                                                     </ng-container>
-                                                                    
+
                                                                 </ng-container>
-                                                                
+
                                                             </select>
                                                             <button id="btnAgregar" class="btn btn-primary" (click)="addDocumento()">
                                                                 Agregar
@@ -496,7 +496,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                
+
                                             <div class="card-body">
                                                 <div class="row form-group">
                                                     <div class="col-lg-12 form-group">
@@ -528,7 +528,7 @@
                                                                             <b>{{ item.estado }}</b>
                                                                         </td>
                                                                         <td>{{ item.valor | currency : 'USD' }}</td>
-                
+
                                                                         <td>
                                                                             <a
                                                                                 style="cursor: pointer"
@@ -546,7 +546,7 @@
                                                                     </tr>
                                                                 </tfoot>
                                                             </table>
-                
+
                                                             <table class="table table-striped table-hover" id="detalle" style="display: none">
                                                                 <thead>
                                                                     <tr>
@@ -605,7 +605,7 @@
                                             >
                                                 Crear
                                             </button>
-                
+
                                             <button disabled *ngIf="load_btn" type="button" class="btn btn-primary btn-shadow">
                                                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                                 Creando...
@@ -615,18 +615,18 @@
                                 </div>
                                 <div class="col-2" >
                                     <div class="alert alert-primary" role="alert" style="text-align: center;">
-                                        Matricula <b>{{ valor_matricula | currency : 'USD' }}</b> 
+                                        Matricula <b>{{ valor_matricula | currency : 'USD' }}</b>
                                     </div>
                                     <div class="alert alert-info" role="alert" style="text-align: center;">
-                                    Pensión <b>{{ aux_valor_pension | currency : 'USD' }}</b> 
+                                    Pensión <b>{{ aux_valor_pension | currency : 'USD' }}</b>
                                     </div>
                                     <div class="alert alert-info" role="alert" *ngIf="aux_valor_pension!=valores_pensiones" style="text-align: center;">
                                     Beca <b>{{ valores_pensiones | currency : 'USD' }}</b>
                                     </div>
-                                    <hr /> 
+                                    <hr />
 
                                     <div class="alert alert-primary" role="alert" *ngIf="auxvalordeposito>0" style="text-align: center;">
-                                        Documento <b>{{ auxvalordeposito | currency : 'USD' }}</b> 
+                                        Documento <b>{{ auxvalordeposito | currency : 'USD' }}</b>
                                     </div>
 
                                     <div class="alert alert-info" role="alert" *ngIf="auxvalordeposito>0 && auxvalordeposito - valorigualdocumento>1" style="text-align: center;">
@@ -648,12 +648,12 @@
                             </div>
                         </div>
 
-                       
+
                     </div>
                 </div>
                 <!-- / .row -->
             </div>
-        </ng-container>        
+        </ng-container>
         <ng-container *ngIf="rol != undefined && rol != 'secrt' && rol != 'admin' && yo == 0">
             <div class="card">
                 <div class="card-body">
@@ -662,13 +662,13 @@
                             <div class="text-center">
                                 <!-- Preheading -->
                                 <h6 class="text-uppercase text-muted mb-4">404 error</h6>
-        
+
                                 <!-- Heading -->
                                 <h1 class="display-4 mb-3">Está página no se cuentra habilitada 😭</h1>
-        
+
                                 <!-- Subheading -->
                                 <p class="text-muted mb-4">¿Parece que llegaste aquí por accidente?</p>
-        
+
                                 <!-- Button -->
                                 <a [routerLink]="['/estudiantes']" class="btn btn-lg btn-primary"> Regresar a pagos </a>
                             </div>
@@ -676,6 +676,6 @@
                     </div>
                 </div>
             </div>
-        </ng-container>        
+        </ng-container>
     </div>
 </div>

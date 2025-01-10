@@ -2,7 +2,7 @@
 	<div class="sidebar">
 		<app-sidebar></app-sidebar>
 	</div>
-	
+
 	<div class="content" >
 		<div class="container-fluid" >
 			<div class="row" >
@@ -14,18 +14,18 @@
 								<div class="col">
 									<!-- Pretitle -->
 									<h6 class="header-pretitle">Módulo</h6>
-	
+
 									<!-- Title -->
 									<h1 class="header-title">Estudiantes</h1>
-									
+
 								</div>
 							</div>
 							<!-- / .row -->
 						</div>
 					</div>
-	
+
 					<!-- Alert -->
-	
+
 					<!-- Card -->
 					<ng-container *ngIf="load_data_est">
 						<div class="card-body">
@@ -43,8 +43,8 @@
 							<div class="card-header">
 								<!-- Title -->
 								<h4 class="card-header-title">Mostrando todos tus estudiantes {{ estudiantes.length }}</h4>
-								
-								
+
+
 							</div>
 							<div class="card-body">
 								<div class="row">
@@ -84,8 +84,8 @@
 														>Nuevo Estudiante</a
 													>
 												</ng-container>
-	
-												
+
+
 											</div>
 										</div>
 									</div>
@@ -104,7 +104,7 @@
 										<!-- Title -->
 										<h4 class="card-header-title">Adjunto tu archivo CSV</h4>
 										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-           
+
 										</div>
 										<div class="modal-body">
 										<input
@@ -136,7 +136,7 @@
 														>
 														<h2>Arrastra y suelta un archivo aquí</h2>
 														</div>
-						
+
 														<div
 														class="row align-items-center"
 														style="text-align: center"
@@ -189,7 +189,7 @@
 									<!-- Title -->
 									<h4 class="card-header-title">Datos Errados</h4>
 									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-           
+
 									</div>
 									<div class="modal-body">
 										<div class="container-fluid">
@@ -219,15 +219,15 @@
 														  </td>
 														</tr>
 													  </tbody>
-												  </table>											  
+												  </table>
 											</div>
 										</div>
-										
+
 									</div>
 									<div class="modal-footer">
 										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cerrar</button>
 										<button type="button" class="btn btn-primary" (click)="cerrar_ventana()">Guardar</button>
-										
+
 									  </div>
 								</div>
 								</div>
@@ -265,11 +265,11 @@
 									</div>
 									</div>
 								</div>
-								
-									
-	
+
+
+
 									<div class="col-md-6 text-right" *ngIf="rol == 'admin'">
-										<!-- 
+										<!--
 	<flatfile-button
 											*ngIf="rol == 'admin'"
 											[settings]="settings"
@@ -305,13 +305,13 @@
 												>
 													Activar
 												</button>
-												
+
 											</ng-container>
 											<button class="btn btn-success" style="display: none;" (click)="importdatos()">Subida masiva</button>
 										</div>
-										
-										
-										
+
+
+
 									</div>
 								</div>
 							</div>
@@ -367,9 +367,9 @@
 														<span *ngIf="item.element.dni">{{ item.element.dni }}</span>
 														<span *ngIf="!item.element.dni">No registrado</span>
 														<span *ngIf="item.element.estado == 'Desactivado'">(Retirado)</span>
-														
+
 													</td>
-		
+
 													<td>
 														<span *ngIf="item.element.genero">
 															<ng-container *ngIf="item.element.genero=='Femenino'"> F </ng-container>
@@ -377,11 +377,11 @@
 															<ng-container *ngIf="item.element.genero=='No definido'"> n/a </ng-container></span>
 														<span *ngIf="!item.element.genero">No registrado</span>
 													</td>
-													
+
 													<td>
 														{{ item.element.email }}
 													</td>
-													<td>{{ item.element.curso }}{{ item.element.paralelo }}</td>
+													<td>{{ item.element.curso }}{{ item.element.paralelo }}{{ item.element.especialidad }}</td>
 													<td>
 														<span *ngIf="item.element.telefono">{{ item.element.telefono }}</span>
 														<span *ngIf="!item.element.telefono">No registrado</span>
@@ -389,7 +389,7 @@
 													<td>
 														<span>{{item.element.createdAt|date:'YYYY'}}-{{item.element.createdAt|date:'MM'}}-{{item.element.createdAt|date:'dd'}}</span>
 													</td>
-		
+
 													<td>
 														<div class="dropdown">
 															<button
@@ -403,7 +403,7 @@
 																Opciones
 																<i class="bi bi-caret-down-fill"></i>
 															</button>
-		
+
 															<ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAlias">
 																<li>
 																	<a
@@ -420,7 +420,7 @@
 																		>Detalle</a
 																	>
 																</li>
-		
+
 																<li>
 																	<a class="dropdown-item"
 																		style="cursor: pointer"
@@ -431,7 +431,7 @@
 																	[attr.data-bs-target]="'#suspend-' + item.element._id" -->
 																	<a class="dropdown-item"
 																		style="cursor: pointer"
-																		
+
 																		(click)="Googlefind(item.element.email,item.element._id)">Google Account</a>
 																</li>
 															</ul>
@@ -522,16 +522,16 @@
 														<a class="text-primary">{{ item.element.nombres }} {{ item.element.apellidos }}</a>
 														<a>(Eliminado)</a>
 													</td>
-		
+
 													<td>
 														<span *ngIf="item.element.dni">{{ item.element.dni }}</span>
 														<span *ngIf="!item.element.dni">No registrado</span>
 													</td>
-		
+
 													<td>
 														{{ item.element.email }}
 													</td>
-													<td>{{ item.element.curso }}{{ item.element.paralelo }}</td>
+													<td>{{ item.element.curso }}{{ item.element.paralelo }} {{ item.element.especialidad }}</td>
 													<td>
 														<span *ngIf="item.element.telefono">{{ item.element.telefono }}</span>
 														<span *ngIf="!item.element.telefono">No registrado</span>
@@ -552,12 +552,12 @@
 																Opciones
 																<i class="bi bi-caret-down-fill"></i>
 															</button>
-		
+
 															<ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAlias">
 																<li>
 																	<a
 																		class="dropdown-item"
-																		
+
 																		[routerLink]="['/estudiantes/detalle', item.element._id]"
 																		>Detalle</a
 																	>
@@ -625,8 +625,8 @@
 							[collectionSize]="estudiantes.length"
 						></ngb-pagination>
 						</div>
-						
-	
+
+
 						<br />
 						<div class="modal fade" id="delete-todo" tabindex="-1" style="display: none" aria-hidden="true">
 							<div class="modal-dialog modal-dialog-centered" role="document">
@@ -651,7 +651,7 @@
 								</div>
 							</div>
 						</div>
-	
+
 						<div class="modal fade" id="activar-todo" tabindex="-1" style="display: none" aria-hidden="true">
 							<div class="modal-dialog modal-dialog-centered" role="document">
 								<div class="modal-content">
@@ -680,7 +680,7 @@
 			</div>
 			<!-- / .row -->
 		</div>
-		
+
 	</div>
 </div>
 
