@@ -62,7 +62,7 @@ export class IndexDocumentComponent implements OnInit {
 		this.load = true;
 		this.load_data_doc = true;
 		this._adminService.listar_documentos_admin(this.token).subscribe((response) => {
-      console.log(response.data.map((element:any)=>element._id));
+      //console.log(response.data.map((element:any)=>element._id));
 			this.documentos_const = response.data;
 
 			this.documentos_const.forEach((element) => {

@@ -2,7 +2,7 @@
 	<div class="sidebar">
 		<app-sidebar></app-sidebar>
 	</div>
-	
+
 	<div class="content">
         <div class="container-fluid">
             <div class="row justify-content-center">
@@ -14,7 +14,7 @@
                                 <div class="col">
                                     <!-- Pretitle -->
                                     <h6 class="header-pretitle">Módulo</h6>
-    
+
                                     <!-- Title -->
                                     <h1 class="header-title">Detalle de Estudiante</h1>
                                 </div>
@@ -22,9 +22,9 @@
                             <!-- / .row -->
                         </div>
                     </div>
-    
+
                     <!-- Alert -->
-    
+
                     <ng-container *ngIf="!load_data">
                         <ng-container *ngIf="pago != undefined">
                             <!-- Card -->
@@ -32,7 +32,7 @@
                                 <div class="card-header">
                                     <!-- Title -->
                                     <h4 class="card-header-title">Estudiante #{{ estudiante._id }}</h4>
-    
+
                                     <a [routerLink]="['/estudiantes']">Regresar</a>
                                 </div>
                                 <div class="card"  id="titulo" style="display: none;">
@@ -53,15 +53,15 @@
                                                     <tr>
                                                         <th scope="col">Email:</th>
                                                         <td>{{ estudiante.email }}</td>
-                                                        
+
                                                         <th scope="col">Teléfono:</th>
                                                         <td>{{ estudiante.telefono }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th>Dirección</th>
                                                         <td>{{ estudiante.direccion }}</td>
-                                                        <th> Curso y paralelo:</th>
-                                                        <td>{{pensionesestudiante[idexpension].curso}}-{{pensionesestudiante[idexpension].paralelo}}</td>
+                                                        <th> Curso, paralelo y especialidad:</th>
+                                                        <td>{{pensionesestudiante[idexpension].curso}}-{{pensionesestudiante[idexpension].paralelo}}-{{pensionesestudiante[idexpension].especialidad}}</td>
                                                     </tr>
                                                     <tr>
                                                         <th>Representante:</th>
@@ -79,13 +79,13 @@
                                                         <th>Cedula:</th>
                                                         <td>{{ estudiante.dni_factura }}</td>
                                                     </tr>
-                                                    
+
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="card-body" >
                                     <div class="row">
                                         <div class="col-lg-6">
@@ -132,7 +132,8 @@
                                                 (click)="detalle_data(val)"
                                                 value="val"
                                             >
-                                                {{ pen.anio_lectivo | date : 'YYYY' }} {{ pen.curso }}{{ pen.paralelo }}
+                                                {{ pen.anio_lectivo | date : 'YYYY' }} {{ pen.curso }}{{ pen.paralelo }} -
+                                                {{ pen.especialidad }}
                                             </button>
                                         </ng-container>
                                     </div>
@@ -152,14 +153,14 @@
                                     </div>
                                 </div>
                             </ng-container>
-    
+
                             <div class="card" id="impresion">
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table mb-0 table-hover">
                                             <tbody *ngIf="load_pension == true">
                                                 <tr *ngFor="let item of pagopension; let idx = index">
-                                                   
+
                                                     <td style="margin-left: 1rem">
                                                     <div [ngClass]="{
                                                         'alert': true,
@@ -211,7 +212,7 @@
                                                                         </li>
                                                                     </ng-container>
                                                                     <ng-container *ngIf="item.date != 'Matricula'">
-                                                                        <li class="mb-0">                                                                           
+                                                                        <li class="mb-0">
                                                                             <div [ngClass]="{
                                                                                 'alert': true,
                                                                                 'alert-warning': (item.estado === 'Pago atrasado' || item.estado === 'Pago atrasado Abono') || item.porpagar>=0.01 ,
@@ -220,9 +221,9 @@
                                                                                 'alert-light': item.estado === 'Sin Pago' && item.porpagar<0.01
                                                                               }" role="alert"
                                                                                 >Faltante:
-                                                                                {{ item.porpagar | currency : 'USD' }}</div 
+                                                                                {{ item.porpagar | currency : 'USD' }}</div
                                                                             >
-                                                                        
+
                                                                         </li>
                                                                     </ng-container>
                                                                 </ul>
@@ -259,8 +260,8 @@
                                                             </div>
                                                         </div>
                                                     </td>
-    
-    
+
+
                                                     <td class="border-top-0">
                                                         <div class="py-2">
                                                             <div class="font-size-xs text-muted mb-1">Factura:</div>
@@ -279,7 +280,7 @@
                                                             </ng-container>
                                                         </div>
                                                     </td>
-    
+
                                                     <td class="border-top-0">
                                                         <div class="py-2 pr-3 text-right">
                                                             <div class="font-size-xs text-muted mb-1">
@@ -291,7 +292,7 @@
                                                         </div>
                                                     </td>
                                                 </tr>
-    
+
                                                 <tr>
                                                     <td style="padding-left: 1.3rem !important" colspan="2">
                                                         <b>Total por pagar</b>
@@ -319,7 +320,7 @@
                                 </div>
                             </div>
                         </ng-container>
-    
+
                         <ng-container *ngIf="estudiante == undefined">
                             <div class="card">
                                 <div class="card-body">
@@ -328,13 +329,13 @@
                                             <div class="text-center">
                                                 <!-- Preheading -->
                                                 <h6 class="text-uppercase text-muted mb-4">404 error</h6>
-    
+
                                                 <!-- Heading -->
                                                 <h1 class="display-4 mb-3">There’s no page here 😭</h1>
-    
+
                                                 <!-- Subheading -->
                                                 <p class="text-muted mb-4">Looks like you ended up here by accident?</p>
-    
+
                                                 <!-- Button -->
                                                 <a [routerLink]="['/pagos']" class="btn btn-lg btn-primary"> Regresar a pagos </a>
                                             </div>

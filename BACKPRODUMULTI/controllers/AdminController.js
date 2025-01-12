@@ -2150,7 +2150,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
 
     // Confirmar transacción
     await session.commitTransaction();
-
+    console.log("Transacción confirmada");
     res.status(200).send({
       pago: pago[0],
       message: "Registrado correctamente",
@@ -2389,8 +2389,6 @@ async function procesarPagoPension(element, config, pago, conn, session) {
         },
         { session }
       );
-
-      return true;
     }
 
     return false;
@@ -2488,7 +2486,6 @@ async function actualizarStockDocumento(element, conn, session) {
     // Calcular el total de pagos previos para este documento
     const pagosPrevios = await Dpago.find({
       documento: element.documento,
-      estudiante: element.estudiante,
     });
 
     // Sumar todos los valores de pagos previos más el valor actual

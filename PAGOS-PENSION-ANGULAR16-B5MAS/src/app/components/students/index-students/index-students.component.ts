@@ -27,6 +27,7 @@ export interface Estudiante {
   nombres_factura: string;
   nombres_padre: string;
   paralelo: string;
+  especialidad: string;
   telefono: string;
 }
 @Component({
@@ -821,6 +822,8 @@ export class IndexStudentsComponent implements OnInit {
   private matchTerm(element: any, term: RegExp): boolean {
     return (
       term.test(`${element.curso}-${element.paralelo}`) || // Curso y paralelo combinados
+      term.test(`${element.especialidad}`) || // Curso y paralelo combinados
+      term.test(`${element.curso}-${element.paralelo}-${element.especialidad}`) || // Curso y paralelo combinados
       term.test(element.nombres) ||
       term.test(element.apellidos) ||
       term.test(element.genero) ||
