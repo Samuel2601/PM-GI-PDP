@@ -69,6 +69,8 @@ app.use("/api", google_routes);
 app.use("/api", apiexport);
 app.use("/api", router);
 
+app.use("/api", require("./contificoModule/contificoModule"));
+
 actualizarNumpensionEnTodasLasBases();
 
 module.exports = app;

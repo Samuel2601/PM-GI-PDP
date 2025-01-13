@@ -1,7 +1,13 @@
 // config/apiConfig.js
-const API_CONFIG = {
+let API_CONFIG = {
   BASE_URL: "https://api.contifico.com/sistema/api/v1",
-  API_KEY: process.env.CONTIFICO_API_KEY, // Asegúrate de definir esta variable de entorno
+  API_KEY: process.env.CONTIFICO_API_KEY, // Valor por defecto
 };
 
-module.exports = API_CONFIG;
+// Permite actualizar la configuración dinámicamente
+const setAPIConfig = (newConfig) => {
+  API_CONFIG = { ...API_CONFIG, ...newConfig };
+};
+
+// Exporta la configuración y el método para modificarla
+module.exports = { API_CONFIG, setAPIConfig };

@@ -1,248 +1,510 @@
 <ng-container>
-	<div class="container-fluid">
-		<div class="row justify-content-center">
-			<div class="col-auto">
-				<!-- Header -->
-				<div class="header mt-md-5">
-					<div class="header-body">
-						<div class="row align-items-center">
-							<div class="col">
-								<!-- Pretitle -->
-								<h6 class="header-pretitle">Módulo</h6>
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-auto">
+        <!-- Header -->
+        <div class="header mt-md-5">
+          <div class="header-body">
+            <div class="row align-items-center">
+              <div class="col">
+                <!-- Pretitle -->
+                <h6 class="header-pretitle">Módulo</h6>
 
-								<!-- Title -->
-								<h1 class="header-title">Control administrativo</h1>
-							</div>
-						</div>
-						<!-- / .row -->
-					</div>
-				</div>
+                <!-- Title -->
+                <h1 class="header-title">Control administrativo</h1>
+              </div>
+            </div>
+            <!-- / .row -->
+          </div>
+        </div>
 
-				<!-- Alert -->
-				
-				<!-- Card -->
-				<div class="card">
-					<div class="card-header">
-						<!-- Title -->
-						<h4 class="card-header-title">Mostrando todos los usuarios</h4>
-					</div>
-					<div class="card-body">
-						<div class="input-group input-group-merge">
-							<input
-								type="text"
-								class="form-control form-control-appended"
-								title="Buscar por: Nombres,Apellidos,Email,Dni,Telefono o ID"
-								placeholder="Buscar"
-								name="filtro"
-								[(ngModel)]="filtro"
-							/>
-							<div class="input-group-append">
-								<button class="btn btn-primary" (click)="filtrar_estudiante()">Buscar</button>
-							</div>
-							<div class="col">
-								<a
-									class="btn btn-primary"
-									[routerLink]="['/administrativo/create']"
-									routerLinkActive="router-link-active"
-									style="cursor: pointer"
-									>Nuevo Usuario</a
-								>
-							</div>
-						</div>
-					</div>
+        <!-- Alert -->
 
-					<div class="table-responsive">
-						<table class="table table-sm table-nowrap card-table table-hover">
-							<thead>
-								<tr>
-									<th>Institución</th>
-									<th>Administrador</th>
-									<th>Opción</th>
-								</tr>
-							</thead>
-							<tbody
-								class="font-size-base"
-								*ngFor="
-									let item of admin | slice : (page - 1) * pageSize : (page - 1) * pageSize + pageSize
-								"
-							>
-								<tr>
-									<td>
-										<button
-										class="btn btn-link"
-										type="button"
-										[attr.data-bs-toggle]="'collapse'"
-										[attr.data-bs-target]="'#collapseExample-' + item._id"
-										[attr.aria-expanded]="isExpanded ? 'true' : 'false'"
-										[attr.aria-controls]="'collapseExample'"
-										(click)="toggleExpansion()"
-									>
+        <!-- Card -->
+        <div class="card">
+          <div class="card-header">
+            <!-- Title -->
+            <h4 class="card-header-title">Mostrando todos las Instituciones</h4>
+          </div>
+          <div class="card-body">
+            <div class="input-group input-group-merge">
+              <input
+                type="text"
+                class="form-control form-control-appended"
+                title="Buscar por: Nombres,Apellidos,Email,Dni,Telefono o ID"
+                placeholder="Buscar"
+                name="filtro"
+                [(ngModel)]="filtro"
+              />
+              <div class="input-group-append">
+                <button class="btn btn-primary" (click)="filtrar_estudiante()">
+                  Buscar
+                </button>
+              </div>
+              <div class="col">
+                <a
+                  class="btn btn-primary"
+                  [routerLink]="['/administrativo/create']"
+                  routerLinkActive="router-link-active"
+                  style="cursor: pointer"
+                  >Nuevo Usuario</a
+                >
+              </div>
+            </div>
+          </div>
 
-										
-											<div class="avatar mr-3">
-												<img
-													class="avatar-img rounded me-3 mr-3"
-													[src]="url + 'obtener_portada/' + item.portada"
-													alt="..."
-												/>
-											</div>
-											<a class="text-primary">{{ item.titulo }}</a>
-										</button>
-										<div class="collapse" id="collapseExample-{{ item._id }}">
-											<div class="card card-body">
-												<div class="row">
-													<div class="input-group-merge">
-														<div class="col-lg-8">
-															<label for="">Teléfono:</label>
-															<span *ngIf="item.telefonoinsti">
-																<a
-																	href="https://api.whatsapp.com/send?phone= {{
-																		item.telefonoinsti
-																	}}&text='Hola'"
-																	target="_blank"
-																>
-																	{{ item.telefonoinsti }}</a
-																></span
-															>
-															<span *ngIf="!item.telefonoinsti">No registrado</span>
-														</div>
-														<div class="col-lg-8">
-															<label for="">Teléfono Convencional:</label>
-															<span *ngIf="item.telefonocon"> {{ item.telefonocon }}</span>
-															<span *ngIf="!item.telefonocon">No registrado</span>
-														</div>
-													</div>
+          <div class="table-responsive">
+            <table class="table table-sm table-nowrap card-table table-hover">
+              <thead>
+                <tr>
+                  <th>Institución</th>
+                  <th>Administrador</th>
+                  <th>Opción</th>
+                </tr>
+              </thead>
+              <tbody
+                class="font-size-base"
+                *ngFor="
+                  let item of admin
+                    | slice
+                      : (page - 1) * pageSize
+                      : (page - 1) * pageSize + pageSize
+                "
+              >
+                <tr>
+                  <td>
+                    <button
+                      class="btn btn-link"
+                      type="button"
+                      [attr.data-bs-toggle]="'collapse'"
+                      [attr.data-bs-target]="'#collapseExample-' + item._id"
+                      [attr.aria-expanded]="isExpanded ? 'true' : 'false'"
+                      [attr.aria-controls]="'collapseExample'"
+                      (click)="toggleExpansion()"
+                    >
+                      <div class="avatar mr-3">
+                        <img
+                          class="avatar-img rounded me-3 mr-3"
+                          [src]="url + 'obtener_portada/' + item.portada"
+                          alt="..."
+                        />
+                      </div>
+                      <a class="text-primary">{{ item.titulo }}</a>
+                    </button>
+                    <div class="collapse" id="collapseExample-{{ item._id }}">
+                      <div class="card card-body">
+                        <div class="row">
+                          <div class="input-group-merge">
+                            <div class="col-lg-8">
+                              <label for="">Teléfono:</label>
+                              <span *ngIf="item.telefonoinsti">
+                                <a
+                                  href="https://api.whatsapp.com/send?phone= {{
+                                    item.telefonoinsti
+                                  }}&text='Hola'"
+                                  target="_blank"
+                                >
+                                  {{ item.telefonoinsti }}</a
+                                ></span
+                              >
+                              <span *ngIf="!item.telefonoinsti"
+                                >No registrado</span
+                              >
+                            </div>
+                            <div class="col-lg-8">
+                              <label for="">Teléfono Convencional:</label>
+                              <span *ngIf="item.telefonocon">
+                                {{ item.telefonocon }}</span
+                              >
+                              <span *ngIf="!item.telefonocon"
+                                >No registrado</span
+                              >
+                            </div>
+                          </div>
 
-													<div class="input-group">
-														<div class="col-lg">
-															<label for="">Pais:</label>
-															<span>{{ item.pais }}</span>
-														</div>
-														<div class="col-lg">
-															<label for="">provincia:</label>
-															<span>{{ item.provincia }}</span>
-														</div>
-														<div class="col-lg">
-															<label for="">canton:</label>
-															<span>{{ item.canton }}</span>
-														</div>
-														<div class="col-lg">
-															<label for="">codigopostal:</label>
-															<span>{{ item.codigopostal }}</span>
-														</div>
-													</div>
+                          <div class="input-group">
+                            <div class="col-lg">
+                              <label for="">Pais:</label>
+                              <span>{{ item.pais }}</span>
+                            </div>
+                            <div class="col-lg">
+                              <label for="">provincia:</label>
+                              <span>{{ item.provincia }}</span>
+                            </div>
+                            <div class="col-lg">
+                              <label for="">canton:</label>
+                              <span>{{ item.canton }}</span>
+                            </div>
+                            <div class="col-lg">
+                              <label for="">codigopostal:</label>
+                              <span>{{ item.codigopostal }}</span>
+                            </div>
+                          </div>
 
-													<div class="input-group-merge">
-														<div class="col-lg">
-															<label for="">Calle Principal:</label>
-															<span>{{ item.calle1 }}</span>
-														</div>
-														<div class="col-lg">
-															<label for="">Calle Secundaria:</label>
-															<span>{{ item.calle2 }}</span>
-														</div>
-														<div class="col-lg">
-															<label for="">Referencia:</label>
-															<span>{{ item.referencia }}</span>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-									</td>
-									<td>
-										<button
-										class="btn btn-link"
-										type="button"
-										[attr.data-bs-toggle]="'collapse'"
-										[attr.data-bs-target]="'#collapseExample-' + item.idadmin._id"
-										[attr.aria-expanded]="isExpanded ? 'true' : 'false'"
-										[attr.aria-controls]="'collapseExample'"
-										(click)="toggleExpansion()"
-										>
-											<span *ngIf="item.idadmin.estado == 'deshabilitado'">
-												(<i class="bi bi-x">)</i>
-											</span>
-											<span *ngIf="item.idadmin.estado == 'habilitado'"
-												>(<i class="bi bi-check-lg"></i>)
-											</span>
-											<a class="text-primary">{{ item.idadmin.nombres }} {{ item.idadmin.apellidos }}</a>
-										</button>
-										<div class="collapse" id="collapseExample-{{ item.idadmin._id }}">
-											<div class="card card-body">
-												<div class="row">
-													<div class="col-lg">
-														<label for="">Corre:</label>
-														<small class="text-muted"
-															><a href="mailto:{{ item.idadmin.email }}">
-																{{ item.idadmin.email }}</a
-															></small
-														>
-													</div>
-													<div class="col-lg">
-														<label for="">Teléfono:</label>
-														<span *ngIf="item.idadmin.telefono">
-															<a
-																href="https://api.whatsapp.com/send?phone= {{
-																	item.idadmin.telefono
-																}}&text='Hola'"
-																target="_blank"
-															>
-																{{ item.idadmin.telefono }}</a
-															></span
-														>
-														<span *ngIf="!item.idadmin.telefono">No registrado</span>
-													</div>
-													<div class="col-lg">
-														<label for="">Cédula:</label>
-														<span *ngIf="item.idadmin.telefono">{{ item.idadmin.dni }}</span>
-													</div>
-												</div>
-											</div>
-										</div>
-									</td>
-									<td>
-										<div class="input-group">
-											<button
-												type="button"
-												class="btn btn-outline-success"
-												*ngIf="item.idadmin.estado == 'deshabilitado'"
-												(click)="actualizar(item.idadmin._id)"
-											>
-												Activar
-											</button>
-											<button
-												type="button"
-												class="btn btn-outline-danger"
-												*ngIf="item.idadmin.estado == 'habilitado'"
-												(click)="actualizar(item.idadmin._id)"
-											>
-												Desactivar
-											</button>
+                          <div class="input-group-merge">
+                            <div class="col-lg">
+                              <label for="">Calle Principal:</label>
+                              <span>{{ item.calle1 }}</span>
+                            </div>
+                            <div class="col-lg">
+                              <label for="">Calle Secundaria:</label>
+                              <span>{{ item.calle2 }}</span>
+                            </div>
+                            <div class="col-lg">
+                              <label for="">Referencia:</label>
+                              <span>{{ item.referencia }}</span>
+                            </div>
+                          </div>
+                          <div class="col-lg">
+                            <label for="">Teléfono Institucional:</label>
+                            <span>{{ item.telefonoinsti }}</span>
+                          </div>
+                          <div class="col-lg">
+                            <label for="">Tipo de Institución:</label>
+                            <span>{{ item.type_school }}</span>
+                          </div>
+                          <div class="col-lg">
+                            <label for="">API Key:</label>
+                            <span>{{ item.apiKey }}</span>
+                          </div>
+                          <div class="col-lg">
+                            <label for="">Base:</label>
+                            <span>{{ item.base }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-link"
+                      type="button"
+                      [attr.data-bs-toggle]="'collapse'"
+                      [attr.data-bs-target]="
+                        '#collapseExample-' + item.idadmin._id
+                      "
+                      [attr.aria-expanded]="isExpanded ? 'true' : 'false'"
+                      [attr.aria-controls]="'collapseExample'"
+                      (click)="toggleExpansion()"
+                    >
+                      <span *ngIf="item.idadmin.estado == 'deshabilitado'">
+                        (<i class="bi bi-x">)</i>
+                      </span>
+                      <span *ngIf="item.idadmin.estado == 'habilitado'"
+                        >(<i class="bi bi-check-lg"></i>)
+                      </span>
+                      <a class="text-primary"
+                        >{{ item.idadmin.nombres }}
+                        {{ item.idadmin.apellidos }}</a
+                      >
+                    </button>
+                    <div
+                      class="collapse"
+                      id="collapseExample-{{ item.idadmin._id }}"
+                    >
+                      <div class="card card-body">
+                        <div class="row">
+                          <div class="col-lg">
+                            <label for="">Corre:</label>
+                            <small class="text-muted"
+                              ><a href="mailto:{{ item.idadmin.email }}">
+                                {{ item.idadmin.email }}</a
+                              ></small
+                            >
+                          </div>
+                          <div class="col-lg">
+                            <label for="">Teléfono:</label>
+                            <span *ngIf="item.idadmin.telefono">
+                              <a
+                                href="https://api.whatsapp.com/send?phone= {{
+                                  item.idadmin.telefono
+                                }}&text='Hola'"
+                                target="_blank"
+                              >
+                                {{ item.idadmin.telefono }}</a
+                              ></span
+                            >
+                            <span *ngIf="!item.idadmin.telefono"
+                              >No registrado</span
+                            >
+                          </div>
+                          <div class="col-lg">
+                            <label for="">Cédula:</label>
+                            <span *ngIf="item.idadmin.telefono">{{
+                              item.idadmin.dni
+                            }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="input-group">
+                      <button
+                        type="button"
+                        class="btn btn-outline-success"
+                        *ngIf="item.idadmin.estado == 'deshabilitado'"
+                        (click)="actualizar(item.idadmin._id)"
+                      >
+                        Activar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-outline-danger"
+                        *ngIf="item.idadmin.estado == 'habilitado'"
+                        (click)="actualizar(item.idadmin._id)"
+                      >
+                        Desactivar
+                      </button>
 
-											<button type="button" class="btn btn-outline-info" (click)="cambiar_b(item.idadmin.base)">Ver</button>
-										</div>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-				<ngb-pagination
-					*ngIf="admin.length >= 1"
-					[(page)]="page"
-					[pageSize]="pageSize"
-					[maxSize]="10"
-					[rotate]="true"
-					[boundaryLinks]="true"
-					[collectionSize]="admin.length"
-				></ngb-pagination>
+                      <button
+                        class="btn btn-outline-warning"
+                        style="cursor: pointer"
+                        data-bs-toggle="modal"
+                        [attr.data-bs-target]="'#edit-' + item._id"
+                        (click)="dataInstitucion(item)"
+                      >
+                        Editar
+                      </button>
+                      <div
+                        class="modal fade"
+                        id="edit-{{ item._id }}"
+                        tabindex="-1"
+                        aria-labelledby="editModalLabel"
+                        aria-hidden="true"
+                      >
+                        <div class="modal-dialog modal-dialog-centered">
+                          <div class="modal-content">
+                            <form
+                              [formGroup]="institucionForm"
+                              (ngSubmit)="actualizarInstitucion(item._id)"
+                            >
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel">
+                                  Editar Institución
+                                </h5>
+                                <button
+                                  type="button"
+                                  class="btn-close"
+                                  data-bs-dismiss="modal"
+                                  aria-label="Close"
+                                ></button>
+                              </div>
+                              <div class="modal-body">
+                                <div class="mb-3">
+                                  <label for="titulo" class="form-label"
+                                    >Título</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="titulo"
+                                    class="form-control"
+                                    formControlName="titulo"
+                                  />
+                                </div>
 
-				<br />
-			</div>
-		</div>
-		<!-- / .row -->
-	</div>
+                                <div class="mb-3">
+                                  <label for="pais" class="form-label"
+                                    >País</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="pais"
+                                    class="form-control"
+                                    formControlName="pais"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="provincia" class="form-label"
+                                    >Provincia</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="provincia"
+                                    class="form-control"
+                                    formControlName="provincia"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="canton" class="form-label"
+                                    >Cantón</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="canton"
+                                    class="form-control"
+                                    formControlName="canton"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="parroquia" class="form-label"
+                                    >Parroquia</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="parroquia"
+                                    class="form-control"
+                                    formControlName="parroquia"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="calle1" class="form-label"
+                                    >Calle Principal</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="calle1"
+                                    class="form-control"
+                                    formControlName="calle1"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="calle2" class="form-label"
+                                    >Calle Secundaria</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="calle2"
+                                    class="form-control"
+                                    formControlName="calle2"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="codigopostal" class="form-label"
+                                    >Código Postal</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="codigopostal"
+                                    class="form-control"
+                                    formControlName="codigopostal"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="referencia" class="form-label"
+                                    >Referencia</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="referencia"
+                                    class="form-control"
+                                    formControlName="referencia"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="telefonocon" class="form-label"
+                                    >Teléfono de Contacto</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="telefonocon"
+                                    class="form-control"
+                                    formControlName="telefonocon"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="telefonoinsti" class="form-label"
+                                    >Teléfono Institucional</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="telefonoinsti"
+                                    class="form-control"
+                                    formControlName="telefonoinsti"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="type_school" class="form-label"
+                                    >Tipo de Institución</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="type_school"
+                                    class="form-control"
+                                    formControlName="type_school"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="apiKey" class="form-label"
+                                    >API Key</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="apiKey"
+                                    class="form-control"
+                                    formControlName="apiKey"
+                                  />
+                                </div>
+
+                                <div class="mb-3">
+                                  <label for="base" class="form-label"
+                                    >Base</label
+                                  >
+                                  <input
+                                    type="text"
+                                    id="base"
+                                    class="form-control"
+                                    formControlName="base"
+                                  />
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button
+                                  type="button"
+                                  class="btn btn-secondary"
+                                  data-bs-dismiss="modal"
+                                >
+                                  Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                  Guardar cambios
+                                </button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="btn btn-outline-info"
+                        (click)="cambiar_b(item.idadmin.base)"
+                      >
+                        Ver
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <ngb-pagination
+          *ngIf="admin.length >= 1"
+          [(page)]="page"
+          [pageSize]="pageSize"
+          [maxSize]="10"
+          [rotate]="true"
+          [boundaryLinks]="true"
+          [collectionSize]="admin.length"
+        ></ngb-pagination>
+
+        <br />
+      </div>
+    </div>
+    <!-- / .row -->
+  </div>
 </ng-container>
 
 <!--
@@ -251,31 +513,31 @@
       <div class="card-body">
         <div class="row justify-content-center">
           <div class="col-12 col-md-5 col-xl-4 my-5">
-            
+
             <div class="text-center">
-            
-             Preheading 
+
+             Preheading
               <h6 class="text-uppercase text-muted mb-4">
                 404 error
               </h6>
-  
-              Heading 
+
+              Heading
               <h1 class="display-4 mb-3">
                 Está página no se cuentra habilitada 😭
               </h1>
-  
+
               <!-- Subheading
               <p class="text-muted mb-4">
                 ¿Parece que llegaste aquí por accidente?
               </p>
-  
-              <!-- Button 
+
+              <!-- Button
               <a [routerLink]="['/admin']"  class="btn btn-lg btn-primary">
                 Regresar a pagos
               </a>
-            
+
             </div>
-  
+
           </div>
         </div>
       </div>

@@ -677,6 +677,38 @@ const actualizar_admininstitucion = async function (req, res) {
     res.status(500).send({ message: "NoAccess" });
   }
 };
+
+// Actualizar una institución por ID
+const actualizarInstitucion = async (req, res) => {
+  let conn = mongoose.connection.useDb("Instituciones"); //req.user.base
+
+  Institucion = conn.model("instituto", InstitucionSchema);
+  const { id } = req.params;
+  const actualizaciones = req.body;
+
+  try {
+    const institucionActualizada = await Institucion.findByIdAndUpdate(
+      id,
+      actualizaciones,
+      { new: true, runValidators: true }
+    );
+
+    if (!institucionActualizada) {
+      return res.status(404).json({ message: "Institución no encontrada" });
+    }
+
+    res.status(200).json({
+      message: "Institución actualizada exitosamente",
+      data: institucionActualizada,
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Error al actualizar la institución", error });
+  }
+};
+
 const registro_admin = async function (req, res) {
   if (req.user) {
     try {
@@ -1097,7 +1129,7 @@ const reactivar_estudiante_admin = async function (req, res) {
         pension.matricula = 0;
         pension.curso = data.curso;
         pension.paralelo = data.paralelo;
-        pension.especialidad = data.especialidad||'EGB';
+        pension.especialidad = data.especialidad || "EGB";
         var reg2 = await Pension.create(pension);
         res.status(200).send({ message: "Reactivado" });
       } else {
@@ -1333,7 +1365,7 @@ const actualizar_config_admin = async (req, res) => {
           condicion_beca: "No",
           curso: estudiante.curso.toString(),
           paralelo: estudiante.paralelo,
-          especialidad: estudiante.especialidad||'EGB',
+          especialidad: estudiante.especialidad || "EGB",
         });
         await pension.save();
       }
@@ -2921,6 +2953,7 @@ const actualizar_firma_electronica = async function (req, res) {
 module.exports = {
   cambiar_base,
   actualizar_admininstitucion,
+  actualizarInstitucion,
   listar_admininstitucion,
   obtener_portada,
   newpassword,

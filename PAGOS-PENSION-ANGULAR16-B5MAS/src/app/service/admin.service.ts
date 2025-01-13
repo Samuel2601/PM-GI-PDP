@@ -227,6 +227,16 @@ export class AdminService {
 			headers: headers,
 		});
 	}
+  actualizar_institucion(id: any, data: any, token: any): Observable<any> {
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: token,
+    });
+    return this._http.put(this.url + 'instituciones/' + id, data, {
+      headers: headers,
+    });
+  }
+
 	eliminar_admin(id: any, token: any): Observable<any> {
 		let headers = new HttpHeaders({
 			'Content-Type': 'application/json',

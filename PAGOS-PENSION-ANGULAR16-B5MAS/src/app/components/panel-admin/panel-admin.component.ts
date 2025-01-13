@@ -7,6 +7,7 @@ import { GLOBAL } from 'src/app/service/GLOBAL';
 
 declare var $: any;
 import iziToast from 'izitoast';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-panel-admin',
@@ -24,7 +25,26 @@ export class PanelAdminComponent implements OnInit {
 	public pageSize = 10;
 	public url = GLOBAL.url;
 
-	constructor(private _adminService: AdminService, private _router: Router) {}
+  institucionForm: FormGroup;
+
+	constructor(private _adminService: AdminService, private _router: Router,private fb: FormBuilder,) {
+    this.institucionForm = this.fb.group({
+      titulo: ['', Validators.required],
+      pais: ['', Validators.required],
+      provincia: ['', Validators.required],
+      canton: ['', Validators.required],
+      parroquia: ['', Validators.required],
+      calle1: ['', Validators.required],
+      calle2: ['', Validators.required],
+      codigopostal: ['', Validators.required],
+      referencia: ['', Validators.required],
+      telefonocon: ['', Validators.required],
+      telefonoinsti: ['', Validators.required],
+      type_school: ['', Validators.required],
+      apiKey: ['', Validators.required],
+      base: ['', Validators.required],
+    });
+  }
 
 	ngOnInit(): void {
     let aux=localStorage.getItem('user_data');
@@ -77,7 +97,7 @@ export class PanelAdminComponent implements OnInit {
 		this._adminService.actualizar_admininstitucion(idadmin, this.token).subscribe((response) => {
 			if (response.message) {
 				iziToast.success({
-					title: 'ÉXITOSO',	
+					title: 'ÉXITOSO',
 					position: 'topRight',
 					message: response.message,
 				});
@@ -87,11 +107,40 @@ export class PanelAdminComponent implements OnInit {
 			}
 		});
 	}
+
+  dataInstitucion(data: any) {
+    console.log(data);
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        const element = data[key];
+        if (element) {
+          this.institucionForm?.get(key)?.setValue(element);
+        }
+      }
+    }
+  }
+
+  actualizarInstitucion(id: any) {
+    this._adminService.actualizar_institucion(id, this.institucionForm.value, this.token).subscribe((response) => {
+      if (response.message) {
+        iziToast.success({
+          title: 'ÉXITOSO',
+          position: 'topRight',
+          message: response.message,
+        });
+        setTimeout(function () {
+          location.reload();
+        }, 1000);
+      }
+    });
+  }
+
+
 	cambiar_b(base:any){
 		let b: any = {};
 		b.base = base;
 		this._adminService.cambiar_base(b, this.token).subscribe((response)=>{
-			
+
 			if(response.data){
 				localStorage.removeItem('token');
 				localStorage.removeItem('user_data');

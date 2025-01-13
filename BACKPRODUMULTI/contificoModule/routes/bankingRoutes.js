@@ -1,0 +1,44 @@
+// routes/bankingRoutes.js
+const express = require("express");
+const router = express.Router();
+const bankingService = require("../services/bankingService");
+
+// Middleware for handling async errors
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Get all bank accounts
+router.get(
+  "/cuenta",
+  asyncHandler(async (req, res) => {
+    const bankAccounts = await bankingService.getBankAccounts();
+    res.json(bankAccounts);
+  })
+);
+
+// Get all bank movements
+router.get(
+  "/movimiento",
+  asyncHandler(async (req, res) => {
+    const movements = await bankingService.getBankMovements();
+    res.json(movements);
+  })
+);
+
+// Error handling middleware
+router.use((error, req, res, next) => {
+  console.error("Error in banking routes:", error);
+  res.status(500).json({
+    message: "Internal server error",
+    error: error.message,
+  });
+});
+
+module.exports = router;
+
+// In your main app.js or index.js:
+/*
+const bankingRoutes = require('./routes/bankingRoutes');
+app.use('/banco', bankingRoutes);
+*/

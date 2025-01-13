@@ -20,7 +20,8 @@ var InstitucionSchema = Schema({
     telefonocon: {type: String, required: true},
     telefonoinsti: {type: String, required: true},
     type_school: {type: String, required: true, default: 'EGB'},
-
+    apiKey: { type: String, required: false }, // Clave API de Contífico
+    base:{type: String, required: true},
     createdAt: {type:Date, default: Date.now, require: true}
 });
 

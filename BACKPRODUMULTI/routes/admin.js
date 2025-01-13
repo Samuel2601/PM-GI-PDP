@@ -21,6 +21,14 @@ api.get(
   auth.auth,
   AdminController.actualizar_admininstitucion
 );
+
+// Ruta para actualizar una institución
+api.put(
+  "/instituciones/:id",
+  auth.auth,
+  AdminController.actualizarInstitucion
+);
+
 api.get("/obtener_portada/:img", AdminController.obtener_portada);
 
 api.post(
