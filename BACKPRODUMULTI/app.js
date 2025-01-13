@@ -34,7 +34,12 @@ const apiexport = require("./controllers/consulta_externa");
 const router = require("./routes/instituciones");
 mongoose.connect(
   "mongodb://127.0.0.1:27017/Instituciones?retryWrites=false",
-  { useUnifiedTopology: true, useNewUrlParser: true },
+  {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    serverSelectionTimeoutMS: 30000, // 30 segundos
+    socketTimeoutMS: 45000, // 45 segundos
+  },
   (err, res) => {
     if (err) {
       console.log(err);
