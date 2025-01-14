@@ -1,7 +1,9 @@
+"use strict";
+
 const express = require("express");
-const router = express.Router();
-const loadInstitutionConfig = require("../middlewares/institutionConfig");
+let router = express.Router();
 const { auth } = require("../middlewares/authenticate");
+const { loadInstitutionConfig } = require("../middlewares/institutionConfig");
 const inventoryRoutes = require("./routes/inventoryRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const personRoutes = require("./routes/personRoutes");
@@ -9,7 +11,9 @@ const accountingRoutes = require("./routes/accountingRoutes");
 const bankingRoutes = require("./routes/bankingRoutes");
 
 // Aplica el middleware de autenticación y configuración dinámica antes de las rutas
-router.use(auth, loadInstitutionConfig);
+
+//router.use(auth);
+//router.use([auth, loadInstitutionConfig]);
 
 // Rutas de Inventario
 

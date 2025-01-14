@@ -1,0 +1,115 @@
+<div class="container mx-auto p-4">
+  <h1 class="text-2xl font-bold mb-4">
+    {{ isEditing ? "Editar" : "Crear" }} Persona
+  </h1>
+
+  <form [formGroup]="personForm" (ngSubmit)="onSubmit()" class="max-w-2xl">
+    <div class="grid grid-cols-2 gap-4">
+      <div class="mb-4">
+        <label class="block mb-1">Tipo</label>
+        <select formControlName="tipo" class="w-full border rounded px-3 py-2">
+          <option value="N">Natural</option>
+          <option value="J">Jurídica</option>
+          <option value="I">Sin ID</option>
+          <option value="P">Placa</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="block mb-1">Razón Social</label>
+        <input
+          type="text"
+          formControlName="razon_social"
+          class="w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      <div class="mb-4">
+        <label class="block mb-1">Nombre Comercial</label>
+        <input
+          type="text"
+          formControlName="nombre_comercial"
+          class="w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      <div class="mb-4">
+        <label class="block mb-1">Cédula</label>
+        <input
+          type="text"
+          formControlName="cedula"
+          class="w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      <div class="mb-4">
+        <label class="block mb-1">Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          class="w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      <div class="mb-4">
+        <label class="block mb-1">Teléfonos</label>
+        <input
+          type="text"
+          formControlName="telefonos"
+          class="w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      <div class="mb-4">
+        <label class="block mb-1">Dirección</label>
+        <input
+          type="text"
+          formControlName="direccion"
+          class="w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      <div class="col-span-2">
+        <div class="flex gap-4">
+          <label class="flex items-center">
+            <input type="checkbox" formControlName="es_cliente" class="mr-2" />
+            Es Cliente
+          </label>
+          <label class="flex items-center">
+            <input
+              type="checkbox"
+              formControlName="es_proveedor"
+              class="mr-2"
+            />
+            Es Proveedor
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" formControlName="es_vendedor" class="mr-2" />
+            Es Vendedor
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" formControlName="es_empleado" class="mr-2" />
+            Es Empleado
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <button
+        type="submit"
+        class="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+        [disabled]="!personForm.valid"
+      >
+        {{ isEditing ? "Actualizar" : "Crear" }}
+      </button>
+      <button
+        type="button"
+        (click)="goBack()"
+        class="bg-gray-500 text-white px-4 py-2 rounded"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>

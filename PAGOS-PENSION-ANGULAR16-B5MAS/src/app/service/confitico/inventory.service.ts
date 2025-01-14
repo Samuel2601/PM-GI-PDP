@@ -11,11 +11,16 @@ export class InventoryService {
 
   constructor(private http: HttpClient) {}
 
-  // Obtener encabezados con token
-  private getHeaders(): HttpHeaders {
+  // Corrección en getHeaders
+  getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
+    if (!token) {
+      localStorage.clear();
+      throw new Error('No token found');
+    }
     return new HttpHeaders({
-      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Authorization: `${token}`, // Aseguramos que el token se envíe en el formato correcto
     });
   }
 

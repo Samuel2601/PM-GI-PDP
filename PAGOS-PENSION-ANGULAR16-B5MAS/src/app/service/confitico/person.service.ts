@@ -7,23 +7,26 @@ import { GLOBAL } from '../GLOBAL';
   providedIn: 'root',
 })
 export class PersonService {
-  private readonly baseUrl = GLOBAL.url + '/personas'; // Base URL para las rutas de personas
+  private readonly baseUrl = GLOBAL.url + 'persona'; // Base URL para las rutas de personas
 
   constructor(private http: HttpClient) {}
 
-  // Obtener encabezados con token
-  private getHeaders(): HttpHeaders {
+  // Corrección en getHeaders
+  getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
+    if (!token) {
+      localStorage.clear();
+      throw new Error('No token found');
+    }
     return new HttpHeaders({
-      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Authorization: `${token}`, // Aseguramos que el token se envíe en el formato correcto
     });
   }
 
   // Obtener todas las personas
   getPersons(): Observable<any> {
-    return this.http.get(this.baseUrl, {
-      headers: this.getHeaders(),
-    });
+    return this.http.get(this.baseUrl, { headers: this.getHeaders() });
   }
 
   // Obtener una persona por ID

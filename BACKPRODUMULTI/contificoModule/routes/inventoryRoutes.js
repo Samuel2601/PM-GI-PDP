@@ -2,6 +2,10 @@
 const express = require("express");
 const router = express.Router();
 const inventoryService = require("../services/inventoryService");
+const { auth } = require("../../middlewares/authenticate");
+const {
+  loadInstitutionConfig,
+} = require("../../middlewares/institutionConfig");
 
 // Middleware for handling async errors
 const asyncHandler = (fn) => (req, res, next) => {
@@ -11,6 +15,8 @@ const asyncHandler = (fn) => (req, res, next) => {
 // Category routes
 router.get(
   "/categoria",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const categories = await inventoryService.getCategories();
     res.json(categories);
@@ -19,6 +25,8 @@ router.get(
 
 router.get(
   "/categoria/:id",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const category = await inventoryService.getCategoryById(req.params.id);
     if (!category) {
@@ -31,6 +39,8 @@ router.get(
 // Warehouse (Bodega) routes
 router.get(
   "/bodega",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const warehouses = await inventoryService.getWarehouses();
     res.json(warehouses);
@@ -39,6 +49,8 @@ router.get(
 
 router.get(
   "/bodega/:id",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const warehouse = await inventoryService.getWarehouseById(req.params.id);
     if (!warehouse) {
@@ -51,6 +63,8 @@ router.get(
 // Variant routes
 router.get(
   "/variante",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const variants = await inventoryService.getVariants();
     res.json(variants);
@@ -59,6 +73,8 @@ router.get(
 
 router.get(
   "/variante/:id",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const variant = await inventoryService.getVariantById(req.params.id);
     if (!variant) {
@@ -71,6 +87,8 @@ router.get(
 // Product routes
 router.get(
   "/producto",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const products = await inventoryService.getProducts();
     res.json(products);
@@ -79,6 +97,8 @@ router.get(
 
 router.get(
   "/producto/:id",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const product = await inventoryService.getProductById(req.params.id);
     if (!product) {
@@ -90,6 +110,8 @@ router.get(
 
 router.post(
   "/producto",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const product = await inventoryService.createProduct(req.body);
     res.status(201).json(product);
@@ -98,6 +120,8 @@ router.post(
 
 router.patch(
   "/producto/:id",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const product = await inventoryService.updateProduct(
       req.params.id,
@@ -112,6 +136,8 @@ router.patch(
 
 router.get(
   "/producto/:id/stock",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const stock = await inventoryService.getProductStock(req.params.id);
     if (!stock) {
@@ -124,6 +150,8 @@ router.get(
 // Inventory Movement routes
 router.get(
   "/movimiento-inventario",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const movements = await inventoryService.getInventoryMovements();
     res.json(movements);
@@ -132,6 +160,8 @@ router.get(
 
 router.get(
   "/movimiento-inventario/:id",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const movement = await inventoryService.getInventoryMovementById(
       req.params.id
@@ -145,6 +175,8 @@ router.get(
 
 router.post(
   "/movimiento-inventario",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const movement = await inventoryService.createInventoryMovement(req.body);
     res.status(201).json(movement);
@@ -154,6 +186,8 @@ router.post(
 // Shipping Guide routes
 router.get(
   "/inventario/guia",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const guides = await inventoryService.getShippingGuides();
     res.json(guides);
@@ -162,6 +196,8 @@ router.get(
 
 router.post(
   "/inventario/guia",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const guide = await inventoryService.createShippingGuide(req.body);
     res.status(201).json(guide);
@@ -171,6 +207,8 @@ router.post(
 // Brand routes
 router.get(
   "/marca",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const brands = await inventoryService.getBrands();
     res.json(brands);

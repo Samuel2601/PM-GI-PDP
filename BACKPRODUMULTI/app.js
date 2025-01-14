@@ -32,6 +32,7 @@ const {
 } = require("./controllers/scheduler");
 const apiexport = require("./controllers/consulta_externa");
 const router = require("./routes/instituciones");
+const contificoModule = require("./contificoModule/contificoModule");
 mongoose.connect(
   "mongodb://127.0.0.1:27017/Instituciones?retryWrites=false",
   {
@@ -74,7 +75,7 @@ app.use("/api", google_routes);
 app.use("/api", apiexport);
 app.use("/api", router);
 
-app.use("/api", require("./contificoModule/contificoModule"));
+app.use("/api", contificoModule);
 
 actualizarNumpensionEnTodasLasBases();
 

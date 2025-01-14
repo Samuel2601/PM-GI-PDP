@@ -2,6 +2,10 @@
 const express = require("express");
 const router = express.Router();
 const bankingService = require("../services/bankingService");
+const { auth } = require("../../middlewares/authenticate");
+const {
+  loadInstitutionConfig,
+} = require("../../middlewares/institutionConfig");
 
 // Middleware for handling async errors
 const asyncHandler = (fn) => (req, res, next) => {
@@ -11,6 +15,8 @@ const asyncHandler = (fn) => (req, res, next) => {
 // Get all bank accounts
 router.get(
   "/cuenta",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const bankAccounts = await bankingService.getBankAccounts();
     res.json(bankAccounts);
@@ -20,6 +26,8 @@ router.get(
 // Get all bank movements
 router.get(
   "/movimiento",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const movements = await bankingService.getBankMovements();
     res.json(movements);

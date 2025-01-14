@@ -1,0 +1,67 @@
+<div class="container mx-auto p-4">
+  <h1 class="text-2xl font-bold mb-4">Detalles de la Persona</h1>
+
+  <div class="bg-white shadow rounded-lg p-6" *ngIf="person">
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <h3 class="font-bold">Razón Social</h3>
+        <p>{{ person.razon_social }}</p>
+      </div>
+
+      <div>
+        <h3 class="font-bold">Nombre Comercial</h3>
+        <p>{{ person.nombre_comercial || "N/A" }}</p>
+      </div>
+
+      <div>
+        <h3 class="font-bold">Tipo</h3>
+        <p>{{ getTipoLabel(person.tipo) }}</p>
+      </div>
+
+      <div>
+        <h3 class="font-bold">Identificación</h3>
+        <p>{{ person.cedula || person.ruc || person.placa }}</p>
+      </div>
+
+      <div>
+        <h3 class="font-bold">Email</h3>
+        <p>{{ person.email || "N/A" }}</p>
+      </div>
+
+      <div>
+        <h3 class="font-bold">Teléfonos</h3>
+        <p>{{ person.telefonos || "N/A" }}</p>
+      </div>
+
+      <div>
+        <h3 class="font-bold">Dirección</h3>
+        <p>{{ person.direccion || "N/A" }}</p>
+      </div>
+
+      <div>
+        <h3 class="font-bold">Roles</h3>
+        <p>
+          <span *ngIf="person.es_cliente" class="mr-2">Cliente</span>
+          <span *ngIf="person.es_proveedor" class="mr-2">Proveedor</span>
+          <span *ngIf="person.es_vendedor" class="mr-2">Vendedor</span>
+          <span *ngIf="person.es_empleado">Empleado</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <button
+        (click)="navigateToEdit()"
+        class="bg-yellow-500 text-white px-4 py-2 rounded mr-2"
+      >
+        Editar
+      </button>
+      <button
+        (click)="goBack()"
+        class="bg-gray-500 text-white px-4 py-2 rounded"
+      >
+        Volver
+      </button>
+    </div>
+  </div>
+</div>

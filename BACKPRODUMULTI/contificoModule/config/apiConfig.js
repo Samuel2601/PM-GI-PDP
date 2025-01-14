@@ -1,6 +1,7 @@
 // config/apiConfig.js
 let API_CONFIG = {
-  BASE_URL: "https://api.contifico.com/sistema/api/v1",
+  BASE_URL:
+    process.env.CONTIFICO_API_URL || "https://api.contifico.com/sistema/api/v1",
   API_KEY: process.env.CONTIFICO_API_KEY, // Valor por defecto
 };
 

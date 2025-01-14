@@ -1,7 +1,6 @@
-import { LOCALE_ID, NgModule,NO_ERRORS_SCHEMA} from '@angular/core';
+import { LOCALE_ID, NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { BrowserModule } from '@angular/platform-browser';
-
 
 import { IndexStudentsComponent } from './components/students/index-students/index-students.component';
 import { CreateStudentsComponent } from './components/students/create-students/create-students.component';
@@ -32,11 +31,14 @@ import { LinkHeaderComponent } from './components/helpers/link-header/link-heade
 import { IndexDocumentComponent } from './components/document/index-document/index-document.component';
 import { DetailStudentsComponent } from './components/students/detail-students/detail-students.component';
 
-import { routing } from './app.routing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { NgbModule, NgbPaginationModule,NgbDropdown  } from '@ng-bootstrap/ng-bootstrap';
-import { NgxTinymceModule  } from 'ngx-tinymce';
+import {
+  NgbModule,
+  NgbPaginationModule,
+  NgbDropdown,
+} from '@ng-bootstrap/ng-bootstrap';
+import { NgxTinymceModule } from 'ngx-tinymce';
 
 import { CommonModule } from '@angular/common';
 
@@ -55,6 +57,7 @@ import { GraficSpComponent } from './components/dashboard/stundes-payments/grafi
 import { ReporPensionComponent } from './components/dashboard/stundes-payments/repor-pension/repor-pension.component';
 
 import { EditorModule } from '@tinymce/tinymce-angular';
+import { PersonsModule } from './components/contifico/persons/persons.module';
 
 @NgModule({
   declarations: [
@@ -90,30 +93,31 @@ import { EditorModule } from '@tinymce/tinymce-angular';
     MenuDashboardComponent,
     DashboardComponent,
     GraficSpComponent,
-    ReporPensionComponent
+    ReporPensionComponent,
   ],
-  imports: [  
-    EditorModule,  
+  imports: [
+    EditorModule,
     NgxFileDropModule,
     BrowserModule,
     AppRoutingModule,
-    routing,
-    FormsModule, ReactiveFormsModule,
+    FormsModule,
+    ReactiveFormsModule,
     HttpClientModule,
-    NgbModule, NgbPaginationModule,
+    NgbModule,
+    NgbPaginationModule,
     NgxTinymceModule.forRoot({
       //baseURL: './assets/tinymce/',
       // or cdn
-      baseURL: '//cdnjs.cloudflare.com/ajax/libs/tinymce/5.7.1/'
+      baseURL: '//cdnjs.cloudflare.com/ajax/libs/tinymce/5.7.1/',
     }),
     CommonModule,
-    NgbDropdown
+    NgbDropdown,
+    PersonsModule,
+    ReactiveFormsModule,
   ],
-  exports:[
-    
-  ],
+  exports: [],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [{ provide: LOCALE_ID, useValue: 'es' }],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

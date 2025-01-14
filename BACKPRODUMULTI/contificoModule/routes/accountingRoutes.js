@@ -2,6 +2,10 @@
 const express = require("express");
 const router = express.Router();
 const accountingService = require("../services/accountingService");
+const { auth } = require("../../middlewares/authenticate");
+const {
+  loadInstitutionConfig,
+} = require("../../middlewares/institutionConfig");
 
 // Middleware for handling async errors
 const asyncHandler = (fn) => (req, res, next) => {
@@ -11,6 +15,8 @@ const asyncHandler = (fn) => (req, res, next) => {
 // Get all cost centers
 router.get(
   "/centro-costo",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const costCenters = await accountingService.getCostCenters();
     res.json(costCenters);
@@ -20,6 +26,8 @@ router.get(
 // Get all accounting accounts
 router.get(
   "/cuenta-contable",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const accounts = await accountingService.getAccountingAccounts();
     res.json(accounts);
@@ -29,6 +37,8 @@ router.get(
 // Create a new journal entry
 router.post(
   "/asiento",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const journalEntry = await accountingService.createJournalEntry(req.body);
     res.status(201).json(journalEntry);
@@ -38,6 +48,8 @@ router.post(
 // Get journal entry by ID
 router.get(
   "/asiento/:id",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const journalEntry = await accountingService.getJournalEntryById(
       req.params.id

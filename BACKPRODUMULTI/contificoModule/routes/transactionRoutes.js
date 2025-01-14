@@ -2,6 +2,10 @@
 const express = require("express");
 const router = express.Router();
 const transactionService = require("../services/transactionService");
+const { auth } = require("../../middlewares/authenticate");
+const {
+  loadInstitutionConfig,
+} = require("../../middlewares/institutionConfig");
 
 // Middleware para manejar errores asíncronos
 const asyncHandler = (fn) => (req, res, next) => {
@@ -12,6 +16,8 @@ const asyncHandler = (fn) => (req, res, next) => {
 // Obtener todos los documentos
 router.get(
   "/documento",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const documents = await transactionService.getDocuments();
     res.json(documents);
@@ -21,6 +27,8 @@ router.get(
 // Obtener un documento por ID
 router.get(
   "/documento/:id",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const document = await transactionService.getDocumentById(id);
@@ -31,6 +39,8 @@ router.get(
 // Crear un nuevo documento
 router.post(
   "/documento",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const documentData = req.body;
     const newDocument = await transactionService.createDocument(documentData);
@@ -41,6 +51,8 @@ router.post(
 // Actualizar un documento existente
 router.put(
   "/documento",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const documentData = req.body;
     const updatedDocument = await transactionService.updateDocument(
@@ -53,6 +65,8 @@ router.put(
 // Enviar un documento al SRI
 router.put(
   "/documento/:id/sri",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const sriData = req.body;
@@ -65,6 +79,8 @@ router.put(
 // Obtener todas las colecciones de un documento
 router.get(
   "/documento/:id/cobro",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const collections = await transactionService.getDocumentCollections(id);
@@ -75,6 +91,8 @@ router.get(
 // Crear una colección para un documento
 router.post(
   "/documento/:id/cobro",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const collectionData = req.body;
@@ -89,6 +107,8 @@ router.post(
 // Eliminar una colección de un documento
 router.delete(
   "/documento/:id/cobro",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const response = await transactionService.deleteDocumentCollection(id);
@@ -100,6 +120,8 @@ router.delete(
 // Obtener retenciones de un documento
 router.get(
   "/documento/:id/retencion",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const retention = await transactionService.getDocumentRetention(id);
@@ -111,6 +133,8 @@ router.get(
 // Obtener todas las transacciones
 router.get(
   "/transaccion",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const transactions = await transactionService.getTransactions();
     res.json(transactions);
@@ -120,6 +144,8 @@ router.get(
 // Obtener una transacción por ID
 router.get(
   "/transaccion/:id",
+  auth,
+  loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const transaction = await transactionService.getTransactionById(id);
