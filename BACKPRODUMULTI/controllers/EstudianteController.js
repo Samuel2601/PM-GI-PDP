@@ -182,224 +182,239 @@ const registro_estudiante = async function (req, res) {
     res.status(200).send({ message: "No Access" });
   }
 };
-const registro_estudiante_masivo = async function (req, res) {
-  if (req.user) {
-    try {
-      var data = req.body;
-      let conn = mongoose.connection.useDb(req.user.base);
 
-      Config = conn.model("config", ConfigSchema);
-      Pension = conn.model("pension", PensionSchema);
-      Estudiante = conn.model("estudiante", EstudianteSchema);
-
-      let subidos = 0;
-      let resubidos = 0;
-      let resubidosc = 0;
-      let errorneos = 0;
-      let errorv = 0;
-      var cn = await Config.find().sort({ createdAt: -1 });
-      let config = cn[0];
-
-      if (data.length > 0) {
-        for (let element of data) {
-          var estudiantes_arr = [];
-          var pension = {};
-
-          estudiantes_arr = await Estudiante.find({
-            nombres: element.nombres,
-            apellidos: element.apellidos,
-          });
-          var a = await Estudiante.find({ dni: element.dni });
-
-          if (estudiantes_arr.length == 0 && a.length == 0) {
-            if (!element.password) {
-              element.password = element.dni;
-            }
-            if (element.genero != "Masculino" || element.genero != "Femenino") {
-              element.genero = "No definido";
-            }
-            bcrypt.hash(
-              element.password,
-              null,
-              null,
-              async function (err, hash) {
-                if (hash) {
-                  element.password = hash;
-                  var pension = {};
-                  if (
-                    element.dni_factura == undefined &&
-                    element.dni_padre != undefined
-                  ) {
-                    element.dni_factura = element.dni_padre;
-                    element.nombres_factura = element.nombres_padre;
-                  }
-                  if (
-                    element.dni_padre == undefined &&
-                    element.dni_factura != undefined
-                  ) {
-                    element.dni_padre = element.dni_factura;
-                    element.nombres_padre = element.nombres_factura;
-                  }
-                  var reg = await Estudiante.create(element);
-                  pension.paga_mat = element.paga_mat;
-                  pension.idestudiante = reg.id;
-                  pension.anio_lectivo = config.anio_lectivo;
-                  pension.idanio_lectivo = config._id;
-                  pension.condicion_beca = element.condicion_beca;
-                  pension.val_beca = element.val_beca;
-                  pension.num_mes_beca = element.num_mes_beca;
-                  pension.num_mes_res = element.num_mes_beca;
-                  pension.desc_beca = element.desc_beca;
-                  pension.matricula = element.matricula;
-                  pension.curso = element.curso;
-                  pension.paralelo = element.paralelo;
-                  pension.especialidad = element.especialidad || "EGB";
-
-                  var reg2 = await Pension.create(pension);
-
-                  ////console.log(res);
-                }
-              }
-            );
-            subidos = subidos + 1;
-            // ////console.log("1",subidos);
-            //  res.status(200).send({message:'Estudiante agregado con exito'});
-          } else if (
-            (estudiantes_arr[0] != undefined &&
-              estudiantes_arr[0].estado == "Desactivado") ||
-            (a[0] != undefined && a[0].estado == "Desactivado")
-          ) {
-            /*  if(!element.password){
-                                    element.password=element.dni
-                                }
-                                bcrypt.hash(element.password,null,null, async function(err,hash){
-                                    if(hash){
-                                        element.password=hash;*/
-            if (
-              element.dni_factura == undefined &&
-              element.dni_padre != undefined
-            ) {
-              element.dni_factura = element.dni_padre;
-              element.nombres_factura = element.nombres_padre;
-            }
-            if (
-              element.dni_padre == undefined &&
-              element.dni_factura != undefined
-            ) {
-              element.dni_padre = element.dni_factura;
-              element.nombres_padre = element.nombres_factura;
-            }
-
-            let reg = await Estudiante.updateOne(
-              { dni: element.dni },
-              {
-                estado: "Activo",
-                genero: element.genero,
-                nombres: element.nombres,
-                apellidos: element.apellidos,
-                email: element.email,
-                telefono: element.telefono,
-                password: element.password,
-                curso: element.curso,
-                paralelo: element.paralelo,
-                especialidad: element.especialidad || "EGB",
-                nombres_padre: element.nombres_padre,
-                dni_padre: element.dni_padre,
-                nombres_factura: element.nombres_factura,
-                dni_factura: element.dni_factura,
-              }
-            );
-            var est = await Estudiante.find({ dni: element.dni });
-            ////console.log(est);
-            ////console.log(est[0]._id);
-            ////console.log(est[0].estado);
-            //busca pension del año lectivo activo
-            let pen = await Pension.find({
-              idestudiante: est[0]._id,
-              anio_lectivo: config.anio_lectivo,
-            });
-
-            if (pen.length == 0) {
-              pension.paga_mat = element.paga_mat;
-              // pension.meses=meses;
-              pension.idestudiante = est[0]._id;
-              pension.anio_lectivo = config.anio_lectivo;
-              pension.idanio_lectivo = config._id;
-              pension.condicion_beca = element.condicion_beca;
-              pension.val_beca = element.val_beca;
-              pension.num_mes_beca = element.num_mes_beca;
-              pension.num_mes_res = element.num_mes_beca;
-              pension.desc_beca = element.desc_beca;
-              pension.matricula = element.matricula;
-              pension.curso = element.curso;
-              pension.paralelo = element.paralelo;
-              pension.especialidad = element.especialidad || "EGB";
-              //////console.log(pension);
-              var reg2 = await Pension.create(pension);
-              resubidos = resubidos + 1;
-              //  ////console.log("2",resubidos);
-              //  res.status(200).send({message:'Reactivado'});
-            } else {
-              await Pension.updateOne(
-                { idestudiante: est[0]._id, anio_lectivo: config.anio_lectivo },
-                {
-                  paga_mat: element.paga_mat,
-                  //meses:meses,
-                  curso: element.curso,
-                  paralelo: element.paralelo,
-				  especialidad: element.especialidad || "EGB",
-                }
-              );
-              resubidosc = resubidosc + 1;
-              // ////console.log("3",resubidosc);
-              // res.status(200).send({message:'Reactivado existing pension'});
-            }
-
-            // }});
-          } else {
-            errorneos = errorneos + 1;
-            // ////console.log("4",errorneos);
-            // res.status(200).send({message:'El numero de cédula ya existe en la base de datos'});
-          }
-        }
-
-        /*for (var i=0;i<data.length;i++){
-                    var element=data[i];
-                    //console.log(i);
-
-                   
-                }*/
-
-        ////console.log("1",subidos,"2",resubidos,"3",resubidosc,"4",errorneos,"5",errorv);
-
-        res.status(200).send({
-          s: subidos,
-          r: resubidos,
-          rc: resubidosc,
-          e: errorneos,
-          ev: errorv,
-        });
-      } else {
-        ////console.log("6",subidos);
-        ////console.log("7",resubidos);
-        ////console.log("8",resubidosc);
-        ////console.log("9",errorneos);
-        ////console.log("10",errorv);
-        res.status(200).send({
-          s: subidos,
-          r: resubidos,
-          rc: resubidosc,
-          e: errorneos,
-          ev: -999,
-        });
-      }
-    } catch (error) {
-      //console.log(error);
-      res.status(200).send({ message: "Algo salió mal" });
-    }
-  } else {
-    res.status(200).send({ message: "No Access" });
+const registro_estudiante_masivo = async (req, res) => {
+  if (!req.user) {
+    return res.status(403).send({ message: "No Access" });
   }
+
+  try {
+    const { body: estudiantes } = req;
+    if (!Array.isArray(estudiantes) || estudiantes.length === 0) {
+      return res.status(200).send({
+        s: 0,
+        r: 0,
+        rc: 0,
+        e: 0,
+        ev: -999,
+      });
+    }
+
+    const conn = mongoose.connection.useDb(req.user.base);
+    const Config = conn.model("config", ConfigSchema);
+    const Pension = conn.model("pension", PensionSchema);
+    const Estudiante = conn.model("estudiante", EstudianteSchema);
+
+    const config = await Config.findOne().sort({ createdAt: -1 });
+    if (!config) {
+      throw new Error("No se encontró configuración activa");
+    }
+
+    const stats = {
+      subidos: 0,
+      resubidos: 0,
+      resubidosc: 0,
+      errorneos: 0,
+      errorv: 0,
+    };
+
+    // Procesamos los estudiantes de forma secuencial para evitar problemas de concurrencia
+    for (const estudiante of estudiantes) {
+      await procesarEstudiante(estudiante, {
+        Estudiante,
+        Pension,
+        config,
+        stats,
+      });
+    }
+
+    return res.status(200).send({
+      s: stats.subidos,
+      r: stats.resubidos,
+      rc: stats.resubidosc,
+      e: stats.errorneos,
+      ev: stats.errorv,
+    });
+  } catch (error) {
+    console.error("Error en registro masivo:", error);
+    return res.status(500).send({
+      message: "Error en el procesamiento",
+      error: error.message,
+    });
+  }
+};
+
+async function procesarEstudiante(
+  datos,
+  { Estudiante, Pension, config, stats }
+) {
+  try {
+    // Normalizamos los datos del estudiante
+    const estudianteNormalizado = normalizarDatosEstudiante(datos);
+
+    // Verificamos si el estudiante existe
+    const [estudianteExistente] = await Promise.all([
+      Estudiante.findOne({ dni: datos.dni }),
+      Estudiante.findOne({
+        nombres: datos.nombres,
+        apellidos: datos.apellidos,
+      }),
+    ]);
+
+    if (!estudianteExistente) {
+      await crearNuevoEstudiante(estudianteNormalizado, {
+        Estudiante,
+        Pension,
+        config,
+        stats,
+      });
+    } else if (estudianteExistente.estado === "Desactivado") {
+      await reactivarEstudiante(estudianteExistente, estudianteNormalizado, {
+        Estudiante,
+        Pension,
+        config,
+        stats,
+      });
+    } else {
+      stats.errorneos++;
+    }
+  } catch (error) {
+    console.error("Error procesando estudiante:", datos.dni, error);
+    stats.errorv++;
+  }
+}
+
+function normalizarDatosEstudiante(datos) {
+  const normalizado = { ...datos };
+
+  // Normalizamos datos básicos
+  normalizado.password = datos.password || datos.dni;
+  normalizado.genero = ["Masculino", "Femenino"].includes(datos.genero)
+    ? datos.genero
+    : "No definido";
+  normalizado.especialidad = datos.especialidad || "EGB";
+
+  // Normalizamos datos de facturación
+  if (datos.dni_factura === undefined && datos.dni_padre) {
+    normalizado.dni_factura = datos.dni_padre;
+    normalizado.nombres_factura = datos.nombres_padre;
+  }
+  if (datos.dni_padre === undefined && datos.dni_factura) {
+    normalizado.dni_padre = datos.dni_factura;
+    normalizado.nombres_padre = datos.nombres_factura;
+  }
+
+  return normalizado;
+}
+
+function generateSalt(saltRounds) {
+  return new Promise((resolve, reject) => {
+    bcrypt.genSalt(saltRounds, (err, salt) => {
+      if (err) return reject(err);
+      resolve(salt);
+    });
+  });
+}
+
+function hashPassword(data, salt) {
+  return new Promise((resolve, reject) => {
+    bcrypt.hash(data, salt, null, (err, hashed) => {
+      if (err) return reject(err);
+      resolve(hashed);
+    });
+  });
+}
+
+async function crearNuevoEstudiante(
+  datos,
+  { Estudiante, Pension, config, stats }
+) {
+  // Encriptamos la contraseña
+  // Genera el salt y luego encripta la contraseña
+  const salt = await generateSalt(10);
+  const password = await hashPassword(datos.password, salt);
+
+  // Creamos el estudiante
+  const estudiante = await Estudiante.create({
+    ...datos,
+    password,
+  });
+
+  // Creamos la pensión asociada
+  await Pension.create({
+    idestudiante: estudiante._id,
+    anio_lectivo: config.anio_lectivo,
+    idanio_lectivo: config._id,
+    paga_mat: datos.paga_mat,
+    condicion_beca: datos.condicion_beca,
+    val_beca: datos.val_beca,
+    num_mes_beca: datos.num_mes_beca,
+    num_mes_res: datos.num_mes_beca,
+    desc_beca: datos.desc_beca,
+    matricula: datos.matricula,
+    curso: datos.curso,
+    paralelo: datos.paralelo,
+    especialidad: datos.especialidad,
+  });
+
+  stats.subidos++;
+}
+
+async function reactivarEstudiante(
+  estudianteExistente,
+  datosNuevos,
+  { Estudiante, Pension, config, stats }
+) {
+  // Actualizamos el estudiante
+  await Estudiante.updateOne(
+    { _id: estudianteExistente._id },
+    {
+      estado: "Activo",
+      ...datosNuevos,
+    }
+  );
+
+  // Buscamos si tiene pensión en el año lectivo actual
+  const pensionExistente = await Pension.findOne({
+    idestudiante: estudianteExistente._id,
+    anio_lectivo: config.anio_lectivo,
+  });
+
+  if (!pensionExistente) {
+    // Creamos nueva pensión
+    await Pension.create({
+      idestudiante: estudianteExistente._id,
+      anio_lectivo: config.anio_lectivo,
+      idanio_lectivo: config._id,
+      paga_mat: datosNuevos.paga_mat,
+      condicion_beca: datosNuevos.condicion_beca,
+      val_beca: datosNuevos.val_beca,
+      num_mes_beca: datosNuevos.num_mes_beca,
+      num_mes_res: datosNuevos.num_mes_beca,
+      desc_beca: datosNuevos.desc_beca,
+      matricula: datosNuevos.matricula,
+      curso: datosNuevos.curso,
+      paralelo: datosNuevos.paralelo,
+      especialidad: datosNuevos.especialidad,
+    });
+    stats.resubidos++;
+  } else {
+    // Actualizamos pensión existente
+    await Pension.updateOne(
+      { _id: pensionExistente._id },
+      {
+        paga_mat: datosNuevos.paga_mat,
+        curso: datosNuevos.curso,
+        paralelo: datosNuevos.paralelo,
+        especialidad: datosNuevos.especialidad,
+      }
+    );
+    stats.resubidosc++;
+  }
+}
+
+module.exports = {
+  registro_estudiante_masivo,
 };
 
 const login_estudiante = async function (req, res) {
@@ -509,7 +524,7 @@ const actualizar_estudiante_admin = async function (req, res) {
         dni: data.dni,
         curso: data.curso,
         paralelo: data.paralelo,
-		especialidad: data.especialidad||"EGB",
+        especialidad: data.especialidad || "EGB",
         nombres_padre: data.nombres_padre,
         email_padre: data.email_padre,
         dni_padre: data.dni_padre,
@@ -593,7 +608,7 @@ const actualizar_estudiante_admin = async function (req, res) {
                     (data.num_mes_beca - reg2[i].num_mes_beca),
                   curso: data.curso,
                   paralelo: data.paralelo,
-				  especialidad: data.especialidad || "EGB",
+                  especialidad: data.especialidad || "EGB",
                 }
               );
 
@@ -629,7 +644,7 @@ const actualizar_estudiante_admin = async function (req, res) {
                       (reg2[i].num_mes_beca - data.num_mes_beca),
                     curso: data.curso,
                     paralelo: data.paralelo,
-					especialidad: data.especialidad || "EGB",
+                    especialidad: data.especialidad || "EGB",
                   }
                 );
                 var el = await Pension_Beca.deleteMany({ idpension: data._id });
@@ -664,7 +679,7 @@ const actualizar_estudiante_admin = async function (req, res) {
                 num_mes_res: data.num_mes_beca,
                 curso: data.curso,
                 paralelo: data.paralelo,
-				especialidad: data.especialidad || "EGB",
+                especialidad: data.especialidad || "EGB",
               }
             );
 
@@ -690,7 +705,7 @@ const actualizar_estudiante_admin = async function (req, res) {
                                 num_mes_res:'',*/
               curso: data.curso,
               paralelo: data.paralelo,
-			  especialidad: data.especialidad || "EGB",
+              especialidad: data.especialidad || "EGB",
             }
           );
           //var el = await Pension_Beca.deleteMany({idpension:data._id});
