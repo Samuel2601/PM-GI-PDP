@@ -75,24 +75,43 @@
     <div class="card-body">
       <!-- Botones de nivel -->
       <div class="my-4">
-        <button
-          class="btn btn-primary me-2"
-          (click)="showLevel = 'especialidad'; updateChart()"
-        >
-          Especialidad
-        </button>
-        <button
-          class="btn btn-primary me-2"
-          (click)="showLevel = 'curso'; updateChart()"
-        >
-          Cursos
-        </button>
-        <button
-          class="btn btn-primary"
-          (click)="showLevel = 'paralelo'; updateChart()"
-        >
-          Paralelos
-        </button>
+        <h3 class="text-uppercase text-muted mb-2">
+          Mese transcurridos:
+          <span class="h3 mb-0">
+            {{ nmt }}
+          </span>
+        </h3>
+        <div style="display: flex; justify-content: space-between">
+          <div>
+            <button
+              class="btn btn-primary me-2"
+              (click)="showLevel = 'especialidad'; updateChart()"
+            >
+              Especialidad
+            </button>
+            <button
+              class="btn btn-primary me-2"
+              (click)="showLevel = 'curso'; updateChart()"
+            >
+              Cursos
+            </button>
+            <button
+              class="btn btn-primary me-2"
+              (click)="showLevel = 'paralelo'; updateChart()"
+            >
+              Paralelos
+            </button>
+          </div>
+          <div>
+            <button
+              class="btn btn-primary me-2"
+              style="cursor: pointer"
+              (click)="exportTabletotal('Total')"
+            >
+              PDF
+            </button>
+          </div>
+        </div>
       </div>
       <div class="row">
         <div class="col-12">
@@ -177,7 +196,7 @@
     <ng-container *ngIf="resumen.length > 0">
       <ng-container>
         <!-- TAGS DE REPORTE GENERAL -->
-        <div class="row">
+        <div class="row" style="display: none">
           <div class="col-12 col-md-12">
             <!-- Card -->
             <div class="card">
@@ -197,21 +216,6 @@
                         {{ pagado | number : "1.2" }}
                       </span>
                     </h3>
-                    <h3 class="text-uppercase text-muted mb-2">
-                      Mese transcurridos:
-                      <span class="h3 mb-0">
-                        {{ nmt }}
-                      </span>
-                    </h3>
-                    <!-- Heading -->
-
-                    <button
-                      class="btn btn-primary text-white mr-3"
-                      style="cursor: pointer"
-                      (click)="exportTabletotal('Total')"
-                    >
-                      Descargar en PDF
-                    </button>
                   </div>
                 </div>
                 <!-- / .row -->
@@ -676,8 +680,8 @@
           </div>
 
           <!-- student-payments.component.html -->
-          <ng-container *ngFor="let especialidad of resumen; let index = index">
-            <div class="card mb-3" *ngIf="especialidad.cursos.length > 0">
+          <ng-container *ngFor="let especialidad of resumen">
+            <div class="card mb-3" *ngIf="processedData[especialidad.nombre]">
               <!-- Encabezado de Especialidad -->
               <div class="card-header bg-light">
                 <h4
@@ -695,10 +699,10 @@
                       [class.fe-chevron-down]="!especialidad.isExpanded"
                       [class.fe-chevron-up]="especialidad.isExpanded"
                       class="fe me-2"
-                    ></i>
+                    >
+                    </i>
                     {{ especialidad.nombre }}
                   </button>
-
                   <button
                     class="btn btn-primary btn-sm"
                     (click)="
@@ -722,7 +726,9 @@
                 class="collapse show"
               >
                 <ng-container
-                  *ngFor="let curso of getCursosUniques(resumen[index].cursos)"
+                  *ngFor="
+                    let curso of sortCursos(processedData[especialidad.nombre])
+                  "
                 >
                   <div class="card m-3">
                     <!-- Encabezado de Curso -->
@@ -730,19 +736,19 @@
                       class="card-header d-flex justify-content-between align-items-center"
                     >
                       <h5 class="card-header-title mb-0">
-                        Curso: {{ curso }} {{ especialidad.nombre }}
+                        Curso: {{ curso.nombre }} {{ especialidad.nombre }}
                       </h5>
                       <button
                         class="btn btn-primary btn-sm"
                         (click)="
                           exportTable(
-                            curso + especialidad.nombre,
+                            curso.nombre + especialidad.nombre,
                             '',
                             especialidad.nombre,
-                            curso
+                            curso.nombre
                           )
                         "
-                        [id]="'btnCurso' + curso + especialidad.nombre"
+                        [id]="'btnCurso' + curso.nombre + especialidad.nombre"
                       >
                         <i class="fe fe-printer me-1"></i>
                         Imprimir
@@ -752,7 +758,7 @@
                     <!-- Tabla de Datos -->
                     <div class="table-responsive">
                       <table
-                        [id]="curso + especialidad.nombre"
+                        [id]="curso.nombre + especialidad.nombre"
                         class="table table-sm table-hover"
                       >
                         <thead>
@@ -770,129 +776,43 @@
                             <th>No Matriculados</th>
                           </tr>
                         </thead>
-                        <tbody *ngIf="curso">
-                          <ng-container
-                            *ngFor="let paralelo of resumen[index].cursos"
+                        <tbody>
+                          <tr
+                            *ngFor="
+                              let paralelo of curso.paralelos | keyvalue
+                            "
                           >
-                            <tr *ngIf="paralelo.curso == curso">
-                              <th>
-                                {{ curso }} {{ especialidad.nombre }}
-                                {{ paralelo.paralelo }}
-                              </th>
-                              <td>
-                                <ng-container
-                                  *ngIf="
-                                    isArray(
-                                      pagos_estudiante[especialidad.nombre][
-                                        curso
-                                      ][paralelo.paralelo]
-                                    )
-                                  "
-                                >
-                                  {{
-                                    isArryLength(
-                                      pagos_estudiante[especialidad.nombre][
-                                        curso
-                                      ][paralelo.paralelo]
-                                    )
-                                  }}
-                                </ng-container>
-                              </td>
-                              <td>
-                                {{
-                                  getParaleloSum(
-                                    pagos_estudiante[especialidad.nombre][
-                                      curso
-                                    ][paralelo.paralelo],
-                                    0
-                                  ) | number : "1.2-2"
-                                }}
-                              </td>
-                              <td>
-                                {{
-                                  getParaleloSum(
-                                    pagos_estudiante[especialidad.nombre][
-                                      curso
-                                    ][paralelo.paralelo],
-                                    1
-                                  ) | number : "1.2-2"
-                                }}
-                              </td>
-                              <td>
-                                {{
-                                  getTotalParalelo(
-                                    pagos_estudiante[especialidad.nombre][
-                                      curso
-                                    ][paralelo.paralelo]
-                                  ) | number : "1.2-2"
-                                }}
-                              </td>
-                              <td>
-                                {{
-                                  getMatriculados(
-                                    pagos_estudiante[especialidad.nombre][
-                                      curso
-                                    ][paralelo.paralelo]
-                                  )
-                                }}
-                              </td>
-                              <td>
-                                {{
-                                  getNoMatriculados(
-                                    pagos_estudiante[especialidad.nombre][
-                                      curso
-                                    ][paralelo.paralelo]
-                                  )
-                                }}
-                              </td>
-                            </tr>
-                          </ng-container>
+                            <th>
+                              {{ curso.nombre }} {{ especialidad.nombre }}
+                              {{ paralelo.key }}
+                            </th>
+                            <td>{{ paralelo.value.estudiantes }}</td>
+                            <td>
+                              {{ paralelo.value.recaudado | number : "1.2-2" }}
+                            </td>
+                            <td>
+                              {{ paralelo.value.porCobrar | number : "1.2-2" }}
+                            </td>
+                            <td>
+                              {{ paralelo.value.total | number : "1.2-2" }}
+                            </td>
+                            <td>{{ paralelo.value.matriculados }}</td>
+                            <td>{{ paralelo.value.noMatriculados }}</td>
+                          </tr>
                         </tbody>
                         <tfoot>
                           <tr class="bg-info text-white fw-bold">
                             <td>Total</td>
+                            <td>{{ curso.estudiantes }}</td>
                             <td>
-                              {{
-                                getTotalEstudiantes(
-                                  pagos_estudiante[especialidad.nombre][curso]
-                                )
-                              }}
+                              {{ curso.recaudado | number : "1.2-2" }}
                             </td>
                             <td>
-                              {{
-                                getTotalRecaudado(
-                                  pagos_estudiante[especialidad.nombre][curso]
-                                ) | number : "1.2-2"
-                              }}
+                              {{ curso.porCobrar | number : "1.2-2" }}
                             </td>
-                            <td>
-                              {{
-                                getTotalPorCobrar(
-                                  pagos_estudiante[especialidad.nombre][curso]
-                                ) | number : "1.2-2"
-                              }}
-                            </td>
-                            <td>
-                              {{
-                                getTotalGeneral(
-                                  pagos_estudiante[especialidad.nombre][curso]
-                                ) | number : "1.2-2"
-                              }}
-                            </td>
-                            <td>
-                              {{
-                                getTotalMatriculados(
-                                  pagos_estudiante[especialidad.nombre][curso]
-                                )
-                              }}
-                            </td>
-                            <td>
-                              {{
-                                getTotalNoMatriculados(
-                                  pagos_estudiante[especialidad.nombre][curso]
-                                )
-                              }}
-                            </td>
+                            <td>{{ curso.total | number : "1.2-2" }}</td>
+                            <td>{{ curso.matriculados }}</td>
+                            <td>{{ curso.noMatriculados }}</td>
                           </tr>
                         </tfoot>
                       </table>

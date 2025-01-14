@@ -14,6 +14,25 @@ import { map } from 'rxjs/operators';
 import { ChartConfiguration } from 'chart.js';
 import { Chart } from 'chart.js/auto';
 declare var $: any;
+interface ParaleloData {
+  estudiantes: number;
+  recaudado: number;
+  porCobrar: number;
+  total: number;
+  matriculados: number;
+  noMatriculados: number;
+}
+
+interface CursoSummary extends ParaleloData {
+  paralelos: { [key: string]: ParaleloData };
+  nombre: string;
+}
+
+interface EspecialidadSummary {
+  nombre: string;
+  isExpanded: boolean;
+  cursos: { [key: string]: CursoSummary };
+}
 
 @Component({
   selector: 'app-stundes-payments',
@@ -1448,52 +1467,110 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     return false;
   }
 
-  exportarcash(paralelo: any) {
+  exportarcash(is_paralelo: boolean) {
     const json: any = [];
     var j = 1;
-    //console.log(j,this.pagos_estudiante,);
-
-    this.pagos_estudiante.forEach((element: any) => {
-      for (const key in element) {
-        if (Object.prototype.hasOwnProperty.call(element, key)) {
-          const element3 = element[key];
-          element3.forEach((element2: any) => {
-            let con = this.sumarcash(element2.detalle);
-            if (con > 0 && element2.estado != 'Desactivado') {
-              con = parseFloat(con.toFixed(2)) * 100;
-              const studen: any = {
-                Item: j,
-                Ref: 'CO',
-                Cedula: element2.dni,
-                Modena: 'USD',
-                Valor: con,
-                Ref1: 'REC',
-                Ref2: '',
-                Ref3: '',
-                Concepto:
-                  'PENSION DE ' +
-                  this.meses[
-                    new Date(
-                      new Date(this.fbeca).setMonth(
-                        new Date(this.fbeca).getMonth() + this.mcash - 1
-                      )
-                    ).getMonth()
-                  ].toUpperCase(),
-                Ref4: 'C',
-                Cedula2: element2.dni,
-                Alumno: element2.nombres,
-              };
-              if (paralelo) {
-                studen.curso = element2.curso;
-                studen.paralelo = element2.paralelo;
+    //console.log(j, this.pagos_estudiante);
+    if (this.isArray(this.pagos_estudiante)) {
+      this.pagos_estudiante.forEach((element: any) => {
+        for (const key in element) {
+          if (Object.prototype.hasOwnProperty.call(element, key)) {
+            const element3 = element[key];
+            element3.forEach((element2: any) => {
+              let con = this.sumarcash(element2.detalle);
+              if (con > 0 && element2.estado != 'Desactivado') {
+                con = parseFloat(con.toFixed(2)) * 100;
+                const studen: any = {
+                  Item: j,
+                  Ref: 'CO',
+                  Cedula: element2.dni,
+                  Modena: 'USD',
+                  Valor: con,
+                  Ref1: 'REC',
+                  Ref2: '',
+                  Ref3: '',
+                  Concepto:
+                    'PENSION DE ' +
+                    this.meses[
+                      new Date(
+                        new Date(this.fbeca).setMonth(
+                          new Date(this.fbeca).getMonth() + this.mcash - 1
+                        )
+                      ).getMonth()
+                    ].toUpperCase(),
+                  Ref4: 'C',
+                  Cedula2: element2.dni,
+                  Alumno: element2.nombres,
+                };
+                if (is_paralelo) {
+                  studen.curso = element2.curso;
+                  studen.paralelo = element2.paralelo;
+                }
+                json.push(studen);
+                j++;
               }
-              json.push(studen);
-              j++;
-            }
-          });
+            });
+          }
+        }
+      });
+    } else {
+      // Iteramos sobre las especialidades
+      for (const especialidad in this.pagos_estudiante) {
+        // Iteramos sobre los cursos de cada especialidad
+        for (const curso in this.pagos_estudiante[especialidad]) {
+          // Iteramos sobre los paralelos de cada curso
+          for (const paralelo in this.pagos_estudiante[especialidad][curso]) {
+            // Obtenemos el array de estudiantes del paralelo
+            const estudiantes =
+              this.pagos_estudiante[especialidad][curso][paralelo];
+
+            // Procesamos cada estudiante
+            estudiantes.forEach((element2: any) => {
+              let con = this.sumarcash(element2.detalle);
+
+              if (con > 0 && element2.estado != 'Desactivado') {
+                con = parseFloat(con.toFixed(2)) * 100;
+
+                const studen: any = {
+                  Item: j,
+                  Ref: 'CO',
+                  Cedula: element2.dni,
+                  Modena: 'USD',
+                  Valor: con,
+                  Ref1: 'REC',
+                  Ref2: '',
+                  Ref3: '',
+                  Concepto:
+                    'PENSION DE ' +
+                    this.meses[
+                      new Date(
+                        new Date(this.fbeca).setMonth(
+                          new Date(this.fbeca).getMonth() + this.mcash - 1
+                        )
+                      ).getMonth()
+                    ].toUpperCase(),
+                  Ref4: 'C',
+                  Cedula2: element2.dni,
+                  Alumno: element2.nombres,
+                  //curso: curso,
+                  //paralelo: paralelo,
+                  //especialidad: especialidad,
+                };
+
+                if (is_paralelo) {
+                  studen.curso = curso;
+                  studen.paralelo = paralelo;
+                  studen.especialidad = especialidad;
+                }
+
+                json.push(studen);
+                j++;
+              }
+            });
+          }
         }
       }
-    });
+    }
 
     const worksheet = XLSX.utils.json_to_sheet(json);
     const workbook = { Sheets: { cash: worksheet }, SheetNames: ['cash'] };
@@ -2084,13 +2161,14 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     try {
       var aux = Object.assign(this.pagos_estudiante[name][name2][name3]);
 
-      return aux.filter((o: any) => o.detalle[0].porpagar == 0).length;
+      return aux.filter((o: any) => parseInt(o.detalle[0].porpagar) === 0)
+        .length;
     } catch (error) {}
   }
   getCountno(name: any, name2?: any, name3?: any) {
     try {
       var aux = Object.assign(this.pagos_estudiante[name][name2][name3]);
-      return aux.filter((o: any) => o.detalle[0].porpagar != 0).length;
+      return aux.filter((o: any) => parseInt(o.detalle[0].porpagar) > 0).length;
     } catch (error) {}
   }
   getCountTotal(name: any) {
@@ -2326,6 +2404,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
       this.resumen.push(especialidadResumen);
     }
     console.log(this.resumen);
+    this.processData();
     setTimeout(() => {
       this.updateChart();
     }, 1000);
@@ -2557,4 +2636,104 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
     });
   }
   load_info: boolean = true;
+
+  processedData: { [especialidad: string]: { [curso: string]: CursoSummary } } =
+    {};
+  private processData() {
+    this.resumen.forEach((especialidad) => {
+      this.processedData[especialidad.nombre] = {};
+
+      // Group by curso
+      const cursoGroups = this.groupByCurso(especialidad.cursos);
+
+      // Process each curso
+      Object.keys(cursoGroups).forEach((cursoName) => {
+        const cursoData = this.calculateCursoSummary(
+          cursoGroups[cursoName],
+          especialidad.nombre,
+          cursoName
+        );
+        this.processedData[especialidad.nombre][cursoName] = cursoData;
+      });
+    });
+  }
+
+  // Función para ordenar los cursos numéricamente
+  sortCursos(cursos: { [key: string]: CursoSummary }): CursoSummary[] {
+    return Object.values(cursos).sort((a: any, b: any) => a.orden - b.orden);
+  }
+
+  private calculateCursoSummary(
+    paralelos: any[],
+    especialidad: string,
+    curso: string
+  ): CursoSummary {
+    const summary: CursoSummary = {
+      nombre: curso,
+      estudiantes: 0,
+      recaudado: 0,
+      porCobrar: 0,
+      total: 0,
+      matriculados: 0,
+      noMatriculados: 0,
+      paralelos: {},
+    };
+    paralelos.forEach((paralelo) => {
+      const paraleloData = this.calculateParaleloData(
+        this.pagos_estudiante[especialidad][curso][paralelo.paralelo]
+      );
+
+      summary.paralelos[paralelo.paralelo] = paraleloData;
+      summary.estudiantes += paraleloData.estudiantes;
+      summary.recaudado += paraleloData.recaudado;
+      summary.porCobrar += paraleloData.porCobrar;
+      summary.total += paraleloData.total;
+      summary.matriculados += paraleloData.matriculados;
+      summary.noMatriculados += paraleloData.noMatriculados;
+    });
+
+    return summary;
+  }
+
+  private calculateParaleloData(data: any[]): ParaleloData {
+    return {
+      estudiantes: data?.length || 0,
+      recaudado: this.calculateSum(data, 0),
+      porCobrar: this.calculateSum(data, 1),
+      total: this.calculateSum(data, 0) + this.calculateSum(data, 1),
+      matriculados: this.countMatriculados(data),
+      noMatriculados: this.countNoMatriculados(data),
+    };
+  }
+
+  private calculateSum(data: any[], type: number): number {
+    return data.reduce(
+      (acc, item) =>
+        acc +
+        item.detalle.reduce(
+          (acc1: any, item1: any) => acc1 + item1[type ? 'porpagar' : 'valor'],
+          0
+        ),
+      0
+    );
+  }
+
+  private countMatriculados(data: any[]): number {
+    return data?.filter((item) => item.detalle[0].porpagar === 0).length || 0;
+  }
+
+  private countNoMatriculados(data: any[]): number {
+    return data?.filter((item) => item.detalle[0].porpagar > 0).length || 0;
+  }
+
+  private groupByCurso(cursos: any[]): { [key: string]: any[] } {
+    return cursos.reduce((groups, item) => {
+      const curso = item.curso;
+      if (!groups[curso]) {
+        groups[curso] = [];
+      }
+      groups[curso].push(item);
+      return groups;
+    }, {});
+  }
 }
