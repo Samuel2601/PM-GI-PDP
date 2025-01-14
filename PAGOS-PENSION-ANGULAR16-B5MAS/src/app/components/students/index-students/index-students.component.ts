@@ -126,7 +126,7 @@ export class IndexStudentsComponent implements OnInit {
     this._adminService
       .listar_estudiantes_tienda(this.token)
       .subscribe((response) => {
-        //console.log(response);
+        console.log(response);
         this.estudiantes_const = response.data;
         this.estudiantes = [];
         this.progressBarService.setProgress(
