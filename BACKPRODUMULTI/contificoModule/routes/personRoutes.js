@@ -18,10 +18,25 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    console.log("Entrando en getPersons",req.institutionConfig);
-    const persons = await personService.getPersons();
-    console.log("Persons",persons);
-    res.json(persons);
+    try {
+      // Obtener personas desde el servicio
+      const persons = await personService.getPersons(req);
+
+      // Eliminar referencias circulares antes de enviar la respuesta
+      const sanitizedPersons = JSON.parse(JSON.stringify(persons, (key, value) => {
+        // Excluir propiedades que puedan causar referencias circulares
+        if (key === 'req' || key === 'res' || key === '_req' || key === '_res') {
+          return undefined;
+        }
+        return value;
+      }));
+
+      // Responder con los datos sanitizados
+      res.json(sanitizedPersons);
+    } catch (error) {
+      console.error("Error en getPersons:", error);
+      res.status(500).json({ message: "Error al obtener las personas." });
+    }
   })
 );
 
