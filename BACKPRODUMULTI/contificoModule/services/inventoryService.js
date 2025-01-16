@@ -1,11 +1,14 @@
 // services/inventoryService.js
-const httpClient = require("./httpClient");
+
+const { makeRequest } = require("../helpers/requests.helper");
 
 // Category endpoints
-const getCategories = async () => {
+const getCategories = async (req) => {
   try {
-    const response = await httpClient.get("/categoria/");
-    return response.data;
+    return await makeRequest(req, {
+      path: "/categoria/",
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching categories: ${error.response?.data || error.message}`
@@ -13,10 +16,12 @@ const getCategories = async () => {
   }
 };
 
-const getCategoryById = async (id) => {
+const getCategoryById = async (req, id) => {
   try {
-    const response = await httpClient.get(`/categoria/${id}/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/categoria/${id}/`,
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching category with ID ${id}: ${
@@ -27,10 +32,12 @@ const getCategoryById = async (id) => {
 };
 
 // Warehouse (Bodega) endpoints
-const getWarehouses = async () => {
+const getWarehouses = async (req) => {
   try {
-    const response = await httpClient.get("/bodega/");
-    return response.data;
+    return await makeRequest(req, {
+      path: "/bodega/",
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching warehouses: ${error.response?.data || error.message}`
@@ -38,10 +45,12 @@ const getWarehouses = async () => {
   }
 };
 
-const getWarehouseById = async (id) => {
+const getWarehouseById = async (req, id) => {
   try {
-    const response = await httpClient.get(`/bodega/${id}/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/bodega/${id}/`,
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching warehouse with ID ${id}: ${
@@ -52,10 +61,12 @@ const getWarehouseById = async (id) => {
 };
 
 // Variant endpoints
-const getVariants = async () => {
+const getVariants = async (req) => {
   try {
-    const response = await httpClient.get("/variante/");
-    return response.data;
+    return await makeRequest(req, {
+      path: "/variante/",
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching variants: ${error.response?.data || error.message}`
@@ -63,10 +74,12 @@ const getVariants = async () => {
   }
 };
 
-const getVariantById = async (id) => {
+const getVariantById = async (req, id) => {
   try {
-    const response = await httpClient.get(`/variante/${id}/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/variante/${id}/`,
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching variant with ID ${id}: ${
@@ -77,10 +90,12 @@ const getVariantById = async (id) => {
 };
 
 // Product endpoints
-const getProducts = async () => {
+const getProducts = async (req) => {
   try {
-    const response = await httpClient.get("/producto/");
-    return response.data;
+    return await makeRequest(req, {
+      path: "/producto/",
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching products: ${error.response?.data || error.message}`
@@ -88,10 +103,12 @@ const getProducts = async () => {
   }
 };
 
-const getProductById = async (id) => {
+const getProductById = async (req, id) => {
   try {
-    const response = await httpClient.get(`/producto/${id}/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/producto/${id}/`,
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching product with ID ${id}: ${
@@ -101,10 +118,13 @@ const getProductById = async (id) => {
   }
 };
 
-const createProduct = async (productData) => {
+const createProduct = async (req, productData) => {
   try {
-    const response = await httpClient.post("/producto/", productData);
-    return response.data;
+    return await makeRequest(req, {
+      path: "/producto/",
+      method: "post",
+      data: productData,
+    });
   } catch (error) {
     throw new Error(
       `Error creating product: ${error.response?.data || error.message}`
@@ -112,10 +132,13 @@ const createProduct = async (productData) => {
   }
 };
 
-const updateProduct = async (id, productData) => {
+const updateProduct = async (req, id, productData) => {
   try {
-    const response = await httpClient.patch(`/producto/${id}/`, productData);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/producto/${id}/`,
+      method: "patch",
+      data: productData,
+    });
   } catch (error) {
     throw new Error(
       `Error updating product with ID ${id}: ${
@@ -125,10 +148,12 @@ const updateProduct = async (id, productData) => {
   }
 };
 
-const getProductStock = async (id) => {
+const getProductStock = async (req, id) => {
   try {
-    const response = await httpClient.get(`/producto/${id}/stock/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/producto/${id}/stock/`,
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching stock for product ID ${id}: ${
@@ -139,10 +164,12 @@ const getProductStock = async (id) => {
 };
 
 // Inventory Movement endpoints
-const getInventoryMovements = async () => {
+const getInventoryMovements = async (req) => {
   try {
-    const response = await httpClient.get("/movimiento-inventario/");
-    return response.data;
+    return await makeRequest(req, {
+      path: "/movimiento-inventario/",
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching inventory movements: ${
@@ -152,10 +179,12 @@ const getInventoryMovements = async () => {
   }
 };
 
-const getInventoryMovementById = async (id) => {
+const getInventoryMovementById = async (req, id) => {
   try {
-    const response = await httpClient.get(`/movimiento-inventario/${id}/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/movimiento-inventario/${id}/`,
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching inventory movement with ID ${id}: ${
@@ -165,13 +194,13 @@ const getInventoryMovementById = async (id) => {
   }
 };
 
-const createInventoryMovement = async (movementData) => {
+const createInventoryMovement = async (req, movementData) => {
   try {
-    const response = await httpClient.post(
-      "/movimiento-inventario/",
-      movementData
-    );
-    return response.data;
+    return await makeRequest(req, {
+      path: "/movimiento-inventario/",
+      method: "post",
+      data: movementData,
+    });
   } catch (error) {
     throw new Error(
       `Error creating inventory movement: ${
@@ -182,10 +211,12 @@ const createInventoryMovement = async (movementData) => {
 };
 
 // Shipping Guide endpoints
-const getShippingGuides = async () => {
+const getShippingGuides = async (req) => {
   try {
-    const response = await httpClient.get("/inventario/guia/");
-    return response.data;
+    return await makeRequest(req, {
+      path: "/inventario/guia/",
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching shipping guides: ${error.response?.data || error.message}`
@@ -193,10 +224,13 @@ const getShippingGuides = async () => {
   }
 };
 
-const createShippingGuide = async (guideData) => {
+const createShippingGuide = async (req, guideData) => {
   try {
-    const response = await httpClient.post("/inventario/guia/", guideData);
-    return response.data;
+    return await makeRequest(req, {
+      path: "/inventario/guia/",
+      method: "post",
+      data: guideData,
+    });
   } catch (error) {
     throw new Error(
       `Error creating shipping guide: ${error.response?.data || error.message}`
@@ -205,10 +239,12 @@ const createShippingGuide = async (guideData) => {
 };
 
 // Brand endpoints
-const getBrands = async () => {
+const getBrands = async (req) => {
   try {
-    const response = await httpClient.get("/marca/");
-    return response.data;
+    return await makeRequest(req, {
+      path: "/marca/",
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching brands: ${error.response?.data || error.message}`

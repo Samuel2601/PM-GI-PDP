@@ -4,7 +4,6 @@ const { setAPIConfig } = require("../contificoModule/config/apiConfig");
 
 // Middleware para configurar dinámicamente la institución
 exports.loadInstitutionConfig = async function (req, res, next) {
-  console.log("Entrando en loadInstitutionConfig", req.user);
   try {
     // Elimina este console.log ya que puede causar problemas de memoria
     // console.log("loadInstitutionConfig", req);

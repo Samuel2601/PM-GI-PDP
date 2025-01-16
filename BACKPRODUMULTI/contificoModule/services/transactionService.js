@@ -1,126 +1,206 @@
 // services/transactionService.js
-const httpClient = require('./httpClient');
+const { makeRequest } = require("../helpers/requests.helper");
 
 // Document endpoints
-const getDocuments = async () => {
+const getDocuments = async (req) => {
   try {
-    const response = await httpClient.get('/documento/');
-    return response.data;
+    return await makeRequest(req, {
+      path: "/documento/",
+      method: "get",
+    });
   } catch (error) {
-    throw new Error(`Error fetching documents: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error fetching documents: ${error.response?.data || error.message}`
+    );
   }
 };
 
-const getDocumentById = async (id) => {
+const getDocumentById = async (req, id) => {
   try {
-    const response = await httpClient.get(`/documento/${id}/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/documento/${id}/`,
+      method: "get",
+    });
   } catch (error) {
-    throw new Error(`Error fetching document with ID ${id}: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error fetching document with ID ${id}: ${
+        error.response?.data || error.message
+      }`
+    );
   }
 };
 
-const createDocument = async (documentData) => {
+const createDocument = async (req, documentData) => {
   try {
-    const response = await httpClient.post('/documento/', documentData);
-    return response.data;
+    return await makeRequest(req, {
+      path: "/documento/",
+      method: "post",
+      data: documentData,
+    });
   } catch (error) {
-    throw new Error(`Error creating document: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error creating document: ${error.response?.data || error.message}`
+    );
   }
 };
 
-const updateDocument = async (documentData) => {
+const updateDocument = async (req, documentData) => {
   try {
-    const response = await httpClient.put('/documento/', documentData);
-    return response.data;
+    return await makeRequest(req, {
+      path: "/documento/",
+      method: "put",
+      data: documentData,
+    });
   } catch (error) {
-    throw new Error(`Error updating document: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error updating document: ${error.response?.data || error.message}`
+    );
   }
 };
 
 // SRI Document Submission endpoint
-const submitDocumentToSRI = async (id, sriData) => {
+const submitDocumentToSRI = async (req, id, sriData) => {
   try {
-    const response = await httpClient.put(`/documento/${id}/sri/`, sriData);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/documento/${id}/sri/`,
+      method: "put",
+      data: sriData,
+    });
   } catch (error) {
-    throw new Error(`Error submitting document ${id} to SRI: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error submitting document ${id} to SRI: ${
+        error.response?.data || error.message
+      }`
+    );
   }
 };
 
 // Document Collection endpoints
-const getDocumentCollections = async (id) => {
+const getDocumentCollections = async (req, id) => {
   try {
-    const response = await httpClient.get(`/documento/${id}/cobro/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/documento/${id}/cobro/`,
+      method: "get",
+    });
   } catch (error) {
-    throw new Error(`Error fetching collections for document ${id}: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error fetching collections for document ${id}: ${
+        error.response?.data || error.message
+      }`
+    );
   }
 };
 
-const createDocumentCollection = async (id, collectionData) => {
+const createDocumentCollection = async (req, id, collectionData) => {
   try {
-    const response = await httpClient.post(`/documento/${id}/cobro/`, collectionData);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/documento/${id}/cobro/`,
+      method: "post",
+      data: collectionData,
+    });
   } catch (error) {
-    throw new Error(`Error creating collection for document ${id}: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error creating collection for document ${id}: ${
+        error.response?.data || error.message
+      }`
+    );
   }
 };
 
-const deleteDocumentCollection = async (id) => {
+const deleteDocumentCollection = async (req, id) => {
   try {
-    const response = await httpClient.delete(`/documento/${id}/cobro/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/documento/${id}/cobro/`,
+      method: "delete",
+    });
   } catch (error) {
-    throw new Error(`Error deleting collection for document ${id}: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error deleting collection for document ${id}: ${
+        error.response?.data || error.message
+      }`
+    );
   }
 };
 
 // Document Cross-reference endpoints
-const createDocumentCrossReference = async (id, crossRefData) => {
+const createDocumentCrossReference = async (req, id, crossRefData) => {
   try {
-    const response = await httpClient.post(`/documento/${id}/cruce/`, crossRefData);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/documento/${id}/cruce/`,
+      method: "post",
+      data: crossRefData,
+    });
   } catch (error) {
-    throw new Error(`Error creating cross-reference for document ${id}: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error creating cross-reference for document ${id}: ${
+        error.response?.data || error.message
+      }`
+    );
   }
 };
 
-const createDocumentAccountCrossReference = async (id, accountCrossRefData) => {
+const createDocumentAccountCrossReference = async (
+  req,
+  id,
+  accountCrossRefData
+) => {
   try {
-    const response = await httpClient.post(`/documento/${id}/cruce_cuenta/`, accountCrossRefData);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/documento/${id}/cruce_cuenta/`,
+      method: "post",
+      data: accountCrossRefData,
+    });
   } catch (error) {
-    throw new Error(`Error creating account cross-reference for document ${id}: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error creating account cross-reference for document ${id}: ${
+        error.response?.data || error.message
+      }`
+    );
   }
 };
 
 // Retention endpoint
-const getDocumentRetention = async (id) => {
+const getDocumentRetention = async (req, id) => {
   try {
-    const response = await httpClient.get(`/documento/${id}/retencion/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/documento/${id}/retencion/`,
+      method: "get",
+    });
   } catch (error) {
-    throw new Error(`Error fetching retention for document ${id}: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error fetching retention for document ${id}: ${
+        error.response?.data || error.message
+      }`
+    );
   }
 };
 
 // Transaction endpoints
-const getTransactions = async () => {
+const getTransactions = async (req) => {
   try {
-    const response = await httpClient.get('/registro/transaccion/');
-    return response.data;
+    return await makeRequest(req, {
+      path: "/registro/transaccion/",
+      method: "get",
+    });
   } catch (error) {
-    throw new Error(`Error fetching transactions: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error fetching transactions: ${error.response?.data || error.message}`
+    );
   }
 };
 
-const getTransactionById = async (id) => {
+const getTransactionById = async (req, id) => {
   try {
-    const response = await httpClient.get(`/registro/transaccion/${id}/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/registro/transaccion/${id}/`,
+      method: "get",
+    });
   } catch (error) {
-    throw new Error(`Error fetching transaction with ID ${id}: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error fetching transaction with ID ${id}: ${
+        error.response?.data || error.message
+      }`
+    );
   }
 };
 
@@ -130,22 +210,22 @@ module.exports = {
   getDocumentById,
   createDocument,
   updateDocument,
-  
+
   // SRI Submission
   submitDocumentToSRI,
-  
+
   // Collections
   getDocumentCollections,
   createDocumentCollection,
   deleteDocumentCollection,
-  
+
   // Cross-references
   createDocumentCrossReference,
   createDocumentAccountCrossReference,
-  
+
   // Retention
   getDocumentRetention,
-  
+
   // Transactions
   getTransactions,
   getTransactionById,

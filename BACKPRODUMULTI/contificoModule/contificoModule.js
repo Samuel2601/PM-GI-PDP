@@ -35,5 +35,14 @@ router.use("/contabilidad", accountingRoutes);
 
 router.use("/banco", bankingRoutes);
 
+// Middleware para manejar errores
+router.use((error, req, res, next) => {
+  console.error("Error en las rutas de transacciones:", error);
+  res.status(500).json({
+    message: "Error interno del servidor",
+    error: error.message,
+  });
+});
+
 // Exportar las rutas del módulo de Contifico
 module.exports = router;

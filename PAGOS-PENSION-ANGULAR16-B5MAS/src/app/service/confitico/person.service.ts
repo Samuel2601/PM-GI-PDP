@@ -29,6 +29,13 @@ export class PersonService {
     return this.http.get(this.baseUrl, { headers: this.getHeaders() });
   }
 
+  // Obtener una persona por nombre
+  getPersonByCedula(cedula: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/cedula/${cedula}`, {
+      headers: this.getHeaders(),
+    });
+  }
+
   // Obtener una persona por ID
   getPersonById(id: string): Observable<any> {
     return this.http.get(`${this.baseUrl}/${id}`, {

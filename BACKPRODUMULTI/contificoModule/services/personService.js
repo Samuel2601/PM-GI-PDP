@@ -1,65 +1,45 @@
 // services/personService.js
-const { API_CONFIG } = require("../config/apiConfig");
-const httpClient = require("./httpClient");
 
+const { makeRequest } = require("../helpers/requests.helper");
+
+// Funciones principales simplificadas
 const getPersons = async (req) => {
-  // Iniciar el cronómetro
-  const startTime = process.hrtime();
-
   try {
-    // Preparar configuración de la solicitud
-    const config = {
-      url: `${req.institutionConfig.base}/persona/`,
+    return await makeRequest(req, {
+      path: "/persona/",
       method: "get",
-      headers: {
-        Authorization: req.institutionConfig.apiKey,
-      },
-    };
-
-    // Imprimir la URL y los headers
-    console.log("URL completa:", config.url);
-    console.log("Headers de la solicitud:", config.headers);
-
-    // Realizar la solicitud
-    const response = await httpClient.request(config);
-
-    // Calcular el tiempo transcurrido
-    const endTime = process.hrtime(startTime);
-    const timeInMs = endTime[0] * 1000 + endTime[1] / 1000000;
-    const timeInSeconds = timeInMs / 1000;
-    const timeInMinutes = timeInSeconds / 60;
-
-    console.log(`Tiempo de respuesta:`);
-    console.log(`  - Milisegundos: ${timeInMs.toFixed(2)}ms`);
-    console.log(`  - Segundos: ${timeInSeconds.toFixed(2)}s`);
-    console.log(`  - Minutos: ${timeInMinutes.toFixed(2)}min`);
-
-    return response.data;
+    });
   } catch (error) {
-    // También medimos el tiempo en caso de error
-    const endTime = process.hrtime(startTime);
-    const timeInMs = endTime[0] * 1000 + endTime[1] / 1000000;
-    const timeInSeconds = timeInMs / 1000;
-    const timeInMinutes = timeInSeconds / 60;
-
-    console.log(`Tiempo hasta el error:`);
-    console.log(`  - Milisegundos: ${timeInMs.toFixed(2)}ms`);
-    console.log(`  - Segundos: ${timeInSeconds.toFixed(2)}s`);
-    console.log(`  - Minutos: ${timeInMinutes.toFixed(2)}min`);
-
-    console.error(
-      `Error fetching persons: ${error.response?.data || error.message}`
-    );
     throw new Error(
       `Error fetching persons: ${error.response?.data || error.message}`
     );
   }
 };
 
-const getPersonById = async (id) => {
+const getPersonsCedula = async (req, cedula) => {
   try {
-    const response = await httpClient.get(`/${id}/`);
-    return response.data;
+    const personas = await makeRequest(req, {
+      path: "/persona/",
+      method: "get",
+    });
+    return (
+      personas.filter(
+        (persona) => persona.cedula === cedula || persona.ruc === cedula
+      )[0] || {}
+    );
+  } catch (error) {
+    throw new Error(
+      `Error fetching persons: ${error.response?.data || error.message}`
+    );
+  }
+};
+
+const getPersonById = async (req, id) => {
+  try {
+    return await makeRequest(req, {
+      path: `/persona/${id}/`,
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching person with ID ${id}: ${
@@ -69,10 +49,13 @@ const getPersonById = async (id) => {
   }
 };
 
-const createPerson = async (personData) => {
+const createPerson = async (req, personData) => {
   try {
-    const response = await httpClient.post("/persona/", personData);
-    return response.data;
+    return await makeRequest(req, {
+      path: "/persona/",
+      method: "post",
+      data: personData,
+    });
   } catch (error) {
     throw new Error(
       `Error creating person: ${error.response?.data || error.message}`
@@ -80,10 +63,13 @@ const createPerson = async (personData) => {
   }
 };
 
-const updatePerson = async (personData) => {
+const updatePerson = async (req, personData) => {
   try {
-    const response = await httpClient.put("/persona/", personData);
-    return response.data;
+    return await makeRequest(req, {
+      path: "/persona/",
+      method: "put",
+      data: personData,
+    });
   } catch (error) {
     throw new Error(
       `Error updating person: ${error.response?.data || error.message}`
@@ -96,4 +82,5 @@ module.exports = {
   getPersonById,
   createPerson,
   updatePerson,
+  getPersonsCedula,
 };

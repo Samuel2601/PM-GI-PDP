@@ -7,6 +7,8 @@ import { TableUtil, TableUtil2 } from '../show-payments/tableUtil';
 //import {createClient} from 'soap';
 import iziToast from 'izitoast';
 import { lastValueFrom } from 'rxjs';
+import { InstitucionServiceService } from 'src/app/service/institucion.service.service';
+import { PersonService } from 'src/app/service/confitico/person.service';
 declare var $: any;
 
 @Component({
@@ -71,7 +73,9 @@ export class ShowPaymentsComponent implements OnInit {
     private _adminService: AdminService,
 
     private _estudianteService: EstudianteService,
-    private _router: Router
+    private _router: Router,
+    private _institucionService: InstitucionServiceService,
+    private _personService: PersonService
   ) {
     this.token = localStorage.getItem('token');
     this.url = GLOBAL.url;
@@ -81,7 +85,20 @@ export class ShowPaymentsComponent implements OnInit {
   public yo = 0;
   public info: any;
   public base: any;
+  public apikey: any = undefined;
+  consultar_apikey() {
+    const user_data = JSON.parse(localStorage.getItem('user_data') || '');
+    this._institucionService
+      .getInstitucionKey(user_data.base)
+      .subscribe((response: any) => {
+        if (response) {
+          this.apikey = response.apiKey;
+          console.log(this.apikey);
+        }
+      });
+  }
   ngOnInit(): void {
+    this.consultar_apikey();
     this._adminService.obtener_info_admin(this.token).subscribe((responese) => {
       if (responese.data) {
         this.info = responese.data;
@@ -99,7 +116,88 @@ export class ShowPaymentsComponent implements OnInit {
       }
     });
   }
+  public create_person: boolean = false;
+  async consultar_Cedula(cedula: any): Promise<boolean> {
+    try {
+      console.log('Consultando cedula', cedula);
+      const response: any = await this._personService
+        .getPersonByCedula(cedula)
+        .toPromise();
+      console.log(response);
+      if (response.id) {
+        const response2: any = await this._estudianteService
+          .actualizar_estudiante_admin(
+            this.pago.estudiante._id,
+            { id_contifico_persona: response.id },
+            this.token
+          )
+          .toPromise();
 
+        if (response2.message === 'Actualizado con exito') {
+          this.create_person = false;
+          return true;
+        }
+        return false;
+      } else {
+        this.create_person = true;
+        return false;
+      }
+    } catch (error) {
+      console.error('Error al consultar:', error);
+      this.create_person = false;
+      return false;
+    }
+  }
+  async verificar_persona() {
+    try {
+      if (
+        !this.pago.estudiante.id_contifico_persona &&
+        this.pago.estudiante.dni_factura &&
+        this.apikey
+      ) {
+        if (
+          !(await this.consultar_Cedula(this.pago.estudiante.dni_factura)) &&
+          this.create_person
+        ) {
+          console.log('Creando persona');
+          const new_person: any = {
+            nombre_comercial: this.pago.estudiante.nombres_factura,
+            razon_social: this.pago.estudiante.nombres_factura,
+            email: this.pago.estudiante.email_padre,
+            direccion: this.pago.estudiante.direccion,
+            telefonos: this.pago.estudiante.telefono,
+            tipo: 'N',
+            es_cliente: true,
+            //origen: 'www.goldenincorp.com',
+          };
+
+          if (this.pago.estudiante.dni_factura.length > 10) {
+            new_person.ruc = this.pago.estudiante.dni_factura;
+          } else {
+            new_person.cedula = this.pago.estudiante.dni_factura.substr(0, 9);
+          }
+          console.log('Nueva Persona', new_person);
+          const response2: any = await this._personService
+            .createPerson(new_person)
+            .toPromise();
+          console.log(response2);
+          if (!response2.id) {
+            return;
+          }
+          const response3: any = await this._estudianteService
+            .actualizar_estudiante_admin(
+              this.pago.estudiante._id,
+              { ...this.pago.estudiante, id_contifico_persona: response2.id },
+              this.token
+            )
+            .toPromise();
+          console.log(response3);
+        }
+      }
+    } catch (error) {
+      console.error('Error al consultar:', error);
+    }
+  }
   async init_data() {
     try {
       const response = await lastValueFrom(
@@ -110,8 +208,9 @@ export class ShowPaymentsComponent implements OnInit {
       );
 
       if (response.data != undefined) {
-        this.pago = response.data;
         console.log(response);
+        this.pago = response.data;
+        await this.verificar_persona();
         this.detalles = response.detalles;
 
         this.detalles.forEach((element: any) => {

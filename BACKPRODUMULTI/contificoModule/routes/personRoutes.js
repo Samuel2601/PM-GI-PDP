@@ -5,7 +5,7 @@ const personService = require("../services/personService");
 const { auth } = require("../../middlewares/authenticate");
 const {
   loadInstitutionConfig,
-} = require("../../middlewares/institutionConfig");
+} = require("../../middlewares/institutionConfig.js");
 
 // Middleware para manejar errores asíncronos
 const asyncHandler = (fn) => (req, res, next) => {
@@ -18,25 +18,21 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    try {
-      // Obtener personas desde el servicio
-      const persons = await personService.getPersons(req);
+    // Obtener personas desde el servicio
+    const persons = await personService.getPersons(req);
+    // Responder con los datos sanitizados
+    res.json(persons);
+  })
+);
 
-      // Eliminar referencias circulares antes de enviar la respuesta
-      const sanitizedPersons = JSON.parse(JSON.stringify(persons, (key, value) => {
-        // Excluir propiedades que puedan causar referencias circulares
-        if (key === 'req' || key === 'res' || key === '_req' || key === '_res') {
-          return undefined;
-        }
-        return value;
-      }));
-
-      // Responder con los datos sanitizados
-      res.json(sanitizedPersons);
-    } catch (error) {
-      console.error("Error en getPersons:", error);
-      res.status(500).json({ message: "Error al obtener las personas." });
-    }
+router.get(
+  "/cedula/:cedula",
+  auth,
+  loadInstitutionConfig,
+  asyncHandler(async (req, res) => {
+    const { cedula } = req.params;
+    const persons = await personService.getPersonsCedula(req, cedula);
+    res.json(persons);
   })
 );
 
@@ -48,6 +44,11 @@ router.get(
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const person = await personService.getPersonById(id);
+
+    if (!person) {
+      return res.status(404).json({ message: "Persona no encontrada." });
+    }
+
     res.json(person);
   })
 );
@@ -66,23 +67,21 @@ router.post(
 
 // Actualizar una persona existente
 router.put(
-  "/",
+  "/:id",
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
+    const { id } = req.params;
     const personData = req.body;
-    const updatedPerson = await personService.updatePerson(personData);
+
+    const updatedPerson = await personService.updatePerson(id, personData);
+
+    if (!updatedPerson) {
+      return res.status(404).json({ message: "Persona no encontrada." });
+    }
+
     res.json(updatedPerson);
   })
 );
-
-// Middleware para manejo de errores
-router.use((error, req, res, next) => {
-  console.error("Error en las rutas de personas:", error);
-  res.status(500).json({
-    message: "Error interno del servidor",
-    error: error.message,
-  });
-});
 
 module.exports = router;

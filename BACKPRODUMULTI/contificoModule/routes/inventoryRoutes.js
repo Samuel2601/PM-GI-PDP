@@ -215,15 +215,6 @@ router.get(
   })
 );
 
-// Error handling middleware
-router.use((error, req, res, next) => {
-  console.error("Error in inventory routes:", error);
-  res.status(500).json({
-    message: "Internal server error",
-    error: error.message,
-  });
-});
-
 module.exports = router;
 
 // In your main app.js or index.js:

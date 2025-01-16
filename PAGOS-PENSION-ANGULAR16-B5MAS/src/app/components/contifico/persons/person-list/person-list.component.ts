@@ -22,7 +22,7 @@ export class PersonListComponent {
     this.personService.getPersons().subscribe({
       next: (data) => {
         this.persons = data;
-        console.log('Persons loaded:', this.persons.length);
+        console.log('Persons loaded:', this.persons);
       },
       error: (error) => console.error('Error loading persons:', error),
     });

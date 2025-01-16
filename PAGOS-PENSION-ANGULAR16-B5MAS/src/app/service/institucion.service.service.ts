@@ -19,4 +19,10 @@ export class InstitucionServiceService {
       { headers: headers }
     );
   }
+  getInstitucionKey(name: any) {
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this._http.get(this.url + 'instituciones/api-key?base=' + name, {
+      headers: headers,
+    });
+  }
 }

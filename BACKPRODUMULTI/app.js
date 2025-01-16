@@ -33,6 +33,7 @@ const {
 const apiexport = require("./controllers/consulta_externa");
 const router = require("./routes/instituciones");
 const contificoModule = require("./contificoModule/contificoModule");
+const { crossData } = require("./contificoModule/migration/dataCrossService");
 mongoose.connect(
   "mongodb://127.0.0.1:27017/Instituciones?retryWrites=false",
   {
@@ -78,5 +79,7 @@ app.use("/api", router);
 app.use("/api", contificoModule);
 
 actualizarNumpensionEnTodasLasBases();
+
+crossData();
 
 module.exports = app;

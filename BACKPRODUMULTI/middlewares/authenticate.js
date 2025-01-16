@@ -6,10 +6,6 @@ var secret = "CristoRey202211";
 
 exports.auth = function (req, res, next) {
   try {
-    console.log("Entrando en el middleware de autenticación");
-    console.log(`Método: ${req.method}, Endpoint: ${req.originalUrl}`);
-    console.log("Encabezados:", req.headers);
-    
     if (!req.headers.authorization) {
       console.log("No hay token");
       return res.status(403).send({ message: "NoHeadersError" });
@@ -33,7 +29,6 @@ exports.auth = function (req, res, next) {
           return res.status(403).send({ message: "InvalidToken" });
         }
       }
-      console.log(payload);
       req.user = payload;
     } else {
       req.user = "";

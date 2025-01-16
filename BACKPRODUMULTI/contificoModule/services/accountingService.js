@@ -1,11 +1,14 @@
 // services/accountingService.js
-const httpClient = require("./httpClient");
+
+const { makeRequest } = require("../helpers/requests.helper");
 
 // Cost Centers endpoints
-const getCostCenters = async () => {
+const getCostCenters = async (req) => {
   try {
-    const response = await httpClient.get("/contabilidad/centro-costo/");
-    return response.data;
+    return await makeRequest(req, {
+      path: "/contabilidad/centro-costo/",
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching cost centers: ${error.response?.data || error.message}`
@@ -14,10 +17,12 @@ const getCostCenters = async () => {
 };
 
 // Accounting Account endpoints
-const getAccountingAccounts = async () => {
+const getAccountingAccounts = async (req) => {
   try {
-    const response = await httpClient.get("/contabilidad/cuenta-contable/");
-    return response.data;
+    return await makeRequest(req, {
+      path: "/contabilidad/cuenta-contable/",
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching accounting accounts: ${
@@ -28,10 +33,13 @@ const getAccountingAccounts = async () => {
 };
 
 // Journal Entry endpoints
-const createJournalEntry = async (entryData) => {
+const createJournalEntry = async (req, entryData) => {
   try {
-    const response = await httpClient.post("/contabilidad/asiento/", entryData);
-    return response.data;
+    return await makeRequest(req, {
+      path: "/contabilidad/asiento/",
+      method: "post",
+      data: entryData,
+    });
   } catch (error) {
     throw new Error(
       `Error creating journal entry: ${error.response?.data || error.message}`
@@ -39,10 +47,12 @@ const createJournalEntry = async (entryData) => {
   }
 };
 
-const getJournalEntryById = async (id) => {
+const getJournalEntryById = async (req, id) => {
   try {
-    const response = await httpClient.get(`/contabilidad/asiento/${id}/`);
-    return response.data;
+    return await makeRequest(req, {
+      path: `/contabilidad/asiento/${id}/`,
+      method: "get",
+    });
   } catch (error) {
     throw new Error(
       `Error fetching journal entry with ID ${id}: ${

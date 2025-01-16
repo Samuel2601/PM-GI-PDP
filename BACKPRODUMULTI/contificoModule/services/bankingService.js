@@ -1,23 +1,32 @@
 // services/bankingService.js
-const httpClient = require('./httpClient');
+
+const { makeRequest } = require("../helpers/requests.helper");
 
 // Bank Accounts endpoints
-const getBankAccounts = async () => {
+const getBankAccounts = async (req) => {
   try {
-    const response = await httpClient.get('/banco/cuenta/');
-    return response.data;
+    return await makeRequest(req, {
+      path: "/banco/cuenta/",
+      method: "get",
+    });
   } catch (error) {
-    throw new Error(`Error fetching bank accounts: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error fetching bank accounts: ${error.response?.data || error.message}`
+    );
   }
 };
 
 // Bank Movements endpoints
-const getBankMovements = async () => {
+const getBankMovements = async (req) => {
   try {
-    const response = await httpClient.get('/banco/movimiento/');
-    return response.data;
+    return await makeRequest(req, {
+      path: "/banco/movimiento/",
+      method: "get",
+    });
   } catch (error) {
-    throw new Error(`Error fetching bank movements: ${error.response?.data || error.message}`);
+    throw new Error(
+      `Error fetching bank movements: ${error.response?.data || error.message}`
+    );
   }
 };
 
