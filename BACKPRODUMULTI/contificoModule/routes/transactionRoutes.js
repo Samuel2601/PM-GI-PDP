@@ -19,7 +19,8 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const documents = await transactionService.getDocuments();
+    console.log("Documentos");
+    const documents = await transactionService.getDocuments(req);
     res.json(documents);
   })
 );
@@ -31,7 +32,7 @@ router.get(
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const document = await transactionService.getDocumentById(id);
+    const document = await transactionService.getDocumentById(req, id);
     res.json(document);
   })
 );
@@ -43,7 +44,10 @@ router.post(
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const documentData = req.body;
-    const newDocument = await transactionService.createDocument(documentData);
+    const newDocument = await transactionService.createDocument(
+      req,
+      documentData
+    );
     res.status(201).json(newDocument);
   })
 );
@@ -56,6 +60,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const documentData = req.body;
     const updatedDocument = await transactionService.updateDocument(
+      req,
       documentData
     );
     res.json(updatedDocument);
@@ -70,7 +75,11 @@ router.put(
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     const sriData = req.body;
-    const response = await transactionService.submitDocumentToSRI(id, sriData);
+    const response = await transactionService.submitDocumentToSRI(
+      req,
+      id,
+      sriData
+    );
     res.json(response);
   })
 );
@@ -83,7 +92,10 @@ router.get(
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const collections = await transactionService.getDocumentCollections(id);
+    const collections = await transactionService.getDocumentCollections(
+      req,
+      id
+    );
     res.json(collections);
   })
 );
@@ -97,6 +109,7 @@ router.post(
     const { id } = req.params;
     const collectionData = req.body;
     const response = await transactionService.createDocumentCollection(
+      req,
       id,
       collectionData
     );
@@ -111,7 +124,7 @@ router.delete(
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const response = await transactionService.deleteDocumentCollection(id);
+    const response = await transactionService.deleteDocumentCollection(req, id);
     res.json(response);
   })
 );
@@ -124,7 +137,7 @@ router.get(
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const retention = await transactionService.getDocumentRetention(id);
+    const retention = await transactionService.getDocumentRetention(req, id);
     res.json(retention);
   })
 );
@@ -136,7 +149,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const transactions = await transactionService.getTransactions();
+    const transactions = await transactionService.getTransactions(req);
     res.json(transactions);
   })
 );
@@ -148,7 +161,7 @@ router.get(
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const transaction = await transactionService.getTransactionById(id);
+    const transaction = await transactionService.getTransactionById(req, id);
     res.json(transaction);
   })
 );

@@ -7,7 +7,7 @@ import { GLOBAL } from '../GLOBAL';
   providedIn: 'root',
 })
 export class TransactionService {
-  private readonly baseUrl = GLOBAL.url + '/transacciones'; // Base URL para las rutas de transacciones
+  private readonly baseUrl = GLOBAL.url + 'transaccion'; // Base URL para las rutas de transacciones
 
   constructor(private http: HttpClient) {}
 

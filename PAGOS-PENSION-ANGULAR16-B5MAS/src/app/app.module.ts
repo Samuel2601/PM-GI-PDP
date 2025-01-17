@@ -40,7 +40,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import { NgxTinymceModule } from 'ngx-tinymce';
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -117,7 +117,7 @@ import { PersonsModule } from './components/contifico/persons/persons.module';
   ],
   exports: [],
   schemas: [NO_ERRORS_SCHEMA],
-  providers: [{ provide: LOCALE_ID, useValue: 'es' }],
+  providers: [{ provide: LOCALE_ID, useValue: 'es' }, DatePipe],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

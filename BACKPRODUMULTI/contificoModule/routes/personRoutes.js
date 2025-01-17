@@ -43,7 +43,7 @@ router.get(
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const person = await personService.getPersonById(id);
+    const person = await personService.getPersonById(req, id);
 
     if (!person) {
       return res.status(404).json({ message: "Persona no encontrada." });
@@ -59,8 +59,9 @@ router.post(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
+    console.log("CREANDO PERSONA", req.institutionConfig);
     const personData = req.body;
-    const newPerson = await personService.createPerson(personData);
+    const newPerson = await personService.createPerson(req, personData);
     res.status(201).json(newPerson);
   })
 );
@@ -74,7 +75,7 @@ router.put(
     const { id } = req.params;
     const personData = req.body;
 
-    const updatedPerson = await personService.updatePerson(id, personData);
+    const updatedPerson = await personService.updatePerson(req, id, personData);
 
     if (!updatedPerson) {
       return res.status(404).json({ message: "Persona no encontrada." });

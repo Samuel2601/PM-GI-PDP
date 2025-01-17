@@ -42,6 +42,7 @@ export class PanelAdminComponent implements OnInit {
       telefonoinsti: ['', Validators.required],
       type_school: ['', Validators.required],
       apiKey: ['', Validators.required],
+      apitoken: ['', Validators.required],
       base: ['', Validators.required],
     });
   }

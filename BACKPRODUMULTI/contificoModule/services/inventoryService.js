@@ -11,7 +11,7 @@ const getCategories = async (req) => {
     });
   } catch (error) {
     throw new Error(
-      `Error fetching categories: ${error.response?.data || error.message}`
+      `Error fetching categories: ${error.response?.data || error.mensaje}`
     );
   }
 };
@@ -25,7 +25,7 @@ const getCategoryById = async (req, id) => {
   } catch (error) {
     throw new Error(
       `Error fetching category with ID ${id}: ${
-        error.response?.data || error.message
+        error.response?.data || error.mensaje
       }`
     );
   }
@@ -40,7 +40,7 @@ const getWarehouses = async (req) => {
     });
   } catch (error) {
     throw new Error(
-      `Error fetching warehouses: ${error.response?.data || error.message}`
+      `Error fetching warehouses: ${error.response?.data || error.mensaje}`
     );
   }
 };
@@ -54,7 +54,7 @@ const getWarehouseById = async (req, id) => {
   } catch (error) {
     throw new Error(
       `Error fetching warehouse with ID ${id}: ${
-        error.response?.data || error.message
+        error.response?.data || error.mensaje
       }`
     );
   }
@@ -69,7 +69,7 @@ const getVariants = async (req) => {
     });
   } catch (error) {
     throw new Error(
-      `Error fetching variants: ${error.response?.data || error.message}`
+      `Error fetching variants: ${error.response?.data || error.mensaje}`
     );
   }
 };
@@ -83,7 +83,7 @@ const getVariantById = async (req, id) => {
   } catch (error) {
     throw new Error(
       `Error fetching variant with ID ${id}: ${
-        error.response?.data || error.message
+        error.response?.data || error.mensaje
       }`
     );
   }
@@ -98,7 +98,26 @@ const getProducts = async (req) => {
     });
   } catch (error) {
     throw new Error(
-      `Error fetching products: ${error.response?.data || error.message}`
+      `Error fetching products: ${error.response?.data || error.mensaje}`
+    );
+  }
+};
+
+const getProductsTipo = async (req, tipo) => {
+  try {
+    const productos = await makeRequest(req, {
+      path: "/producto/",
+      method: "get",
+    });
+
+    return (
+      productos.filter(
+        (producto) => parseInt(producto.codigo) === parseInt(tipo)
+      )[0] || {}
+    );
+  } catch (error) {
+    throw new Error(
+      `Error fetching products: ${error.response?.data || error.mensaje}`
     );
   }
 };
@@ -112,7 +131,7 @@ const getProductById = async (req, id) => {
   } catch (error) {
     throw new Error(
       `Error fetching product with ID ${id}: ${
-        error.response?.data || error.message
+        error.response?.data || error.mensaje
       }`
     );
   }
@@ -127,7 +146,7 @@ const createProduct = async (req, productData) => {
     });
   } catch (error) {
     throw new Error(
-      `Error creating product: ${error.response?.data || error.message}`
+      `Error creating product: ${error.response?.data || error.mensaje}`
     );
   }
 };
@@ -142,7 +161,7 @@ const updateProduct = async (req, id, productData) => {
   } catch (error) {
     throw new Error(
       `Error updating product with ID ${id}: ${
-        error.response?.data || error.message
+        error.response?.data || error.mensaje
       }`
     );
   }
@@ -157,7 +176,7 @@ const getProductStock = async (req, id) => {
   } catch (error) {
     throw new Error(
       `Error fetching stock for product ID ${id}: ${
-        error.response?.data || error.message
+        error.response?.data || error.mensaje
       }`
     );
   }
@@ -173,7 +192,7 @@ const getInventoryMovements = async (req) => {
   } catch (error) {
     throw new Error(
       `Error fetching inventory movements: ${
-        error.response?.data || error.message
+        error.response?.data || error.mensaje
       }`
     );
   }
@@ -188,7 +207,7 @@ const getInventoryMovementById = async (req, id) => {
   } catch (error) {
     throw new Error(
       `Error fetching inventory movement with ID ${id}: ${
-        error.response?.data || error.message
+        error.response?.data || error.mensaje
       }`
     );
   }
@@ -204,7 +223,7 @@ const createInventoryMovement = async (req, movementData) => {
   } catch (error) {
     throw new Error(
       `Error creating inventory movement: ${
-        error.response?.data || error.message
+        error.response?.data || error.mensaje
       }`
     );
   }
@@ -219,7 +238,7 @@ const getShippingGuides = async (req) => {
     });
   } catch (error) {
     throw new Error(
-      `Error fetching shipping guides: ${error.response?.data || error.message}`
+      `Error fetching shipping guides: ${error.response?.data || error.mensaje}`
     );
   }
 };
@@ -233,7 +252,7 @@ const createShippingGuide = async (req, guideData) => {
     });
   } catch (error) {
     throw new Error(
-      `Error creating shipping guide: ${error.response?.data || error.message}`
+      `Error creating shipping guide: ${error.response?.data || error.mensaje}`
     );
   }
 };
@@ -247,7 +266,7 @@ const getBrands = async (req) => {
     });
   } catch (error) {
     throw new Error(
-      `Error fetching brands: ${error.response?.data || error.message}`
+      `Error fetching brands: ${error.response?.data || error.mensaje}`
     );
   }
 };
@@ -267,6 +286,7 @@ module.exports = {
 
   // Products
   getProducts,
+  getProductsTipo,
   getProductById,
   createProduct,
   updateProduct,

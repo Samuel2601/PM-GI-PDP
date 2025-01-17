@@ -543,45 +543,7 @@
                               <div class="font-size-xs text-muted mb-1">
                                 Descripción:
                               </div>
-                              <p *ngIf="item.tipo == 0">
-                                <b
-                                  >Matricula
-                                  <br />
-                                  <b *ngIf="!item.descripcion">
-                                    {{ item.idpension.curso
-                                    }}{{ item.idpension.paralelo }}
-                                    {{ item.especialidad || "EGB" }}
-                                    {{
-                                      item.idpension.anio_lectivo
-                                        | date : "YYYY"
-                                    }}-
-                                    {{ item.aniosup }}
-                                  </b>
 
-                                  <b *ngIf="item.descripcion">
-                                    {{ item.descripcion }}
-                                  </b>
-                                </b>
-                              </p>
-                              <p *ngFor="let fecha of fecha; let val = index">
-                                <b *ngIf="val + 1 == item.tipo">
-                                  Pensión {{ item.tipo }}
-                                  {{ fecha.date | date : "MMMM" }}
-                                  <b *ngIf="!item.descripcion">
-                                    {{ item.idpension.curso
-                                    }}{{ item.idpension.paralelo }}
-                                    {{ item.especialidad || "EGB" }}
-                                    {{
-                                      item.idpension.anio_lectivo
-                                        | date : "YYYY"
-                                    }}-
-                                    {{ item.aniosup }}
-                                  </b>
-                                  <b *ngIf="item.descripcion">
-                                    {{ item.descripcion }}
-                                  </b>
-                                </b>
-                              </p>
                               <p>
                                 <b *ngIf="item.descripcion">
                                   {{ item.descripcion }}
@@ -728,45 +690,6 @@
                               <div class="font-size-xs text-muted mb-1">
                                 Descripción:
                               </div>
-                              <p *ngIf="item.tipo == 0">
-                                <b
-                                  >Matricula
-                                  <br />
-                                  <b *ngIf="!item.descripcion">
-                                    {{ item.idpension.curso
-                                    }}{{ item.idpension.paralelo }}
-                                    {{ item.especialidad || "EGB" }}
-                                    {{
-                                      item.idpension.anio_lectivo
-                                        | date : "YYYY"
-                                    }}-
-                                    {{ item.aniosup }}
-                                  </b>
-
-                                  <b *ngIf="item.descripcion">
-                                    {{ item.descripcion }}
-                                  </b>
-                                </b>
-                              </p>
-                              <p *ngFor="let fecha of fecha; let val = index">
-                                <b *ngIf="val + 1 == item.tipo">
-                                  Pensión {{ item.tipo }}
-                                  {{ fecha.date | date : "MMMM" }}
-                                  <b *ngIf="!item.descripcion">
-                                    {{ item.idpension.curso
-                                    }}{{ item.idpension.paralelo }}
-                                    {{ item.especialidad || "EGB" }}
-                                    {{
-                                      item.idpension.anio_lectivo
-                                        | date : "YYYY"
-                                    }}-
-                                    {{ item.aniosup }}
-                                  </b>
-                                  <b *ngIf="item.descripcion">
-                                    {{ item.descripcion }}
-                                  </b>
-                                </b>
-                              </p>
                               <p>
                                 <b *ngIf="item.descripcion">
                                   {{ item.descripcion }}
@@ -900,45 +823,6 @@
                               <div class="font-size-xs text-muted mb-1">
                                 Descripción:
                               </div>
-                              <p *ngIf="item.tipo == 0">
-                                <b
-                                  >Matricula
-                                  <br />
-                                  <b *ngIf="!item.descripcion">
-                                    {{ item.idpension.curso
-                                    }}{{ item.idpension.paralelo }}
-                                    {{ item.especialidad || "EGB" }}
-                                    {{
-                                      item.idpension.anio_lectivo
-                                        | date : "YYYY"
-                                    }}-
-                                    {{ item.aniosup }}
-                                  </b>
-
-                                  <b *ngIf="item.descripcion">
-                                    {{ item.descripcion }}
-                                  </b>
-                                </b>
-                              </p>
-                              <p *ngFor="let fecha of fecha; let val = index">
-                                <b *ngIf="val + 1 == item.tipo">
-                                  Pensión {{ item.tipo }}
-                                  {{ fecha.date | date : "MMMM" }}
-                                  <b *ngIf="!item.descripcion">
-                                    {{ item.idpension.curso
-                                    }}{{ item.idpension.paralelo }}
-                                    {{ item.especialidad || "EGB" }}
-                                    {{
-                                      item.idpension.anio_lectivo
-                                        | date : "YYYY"
-                                    }}-
-                                    {{ item.aniosup }}
-                                  </b>
-                                  <b *ngIf="item.descripcion">
-                                    {{ item.descripcion }}
-                                  </b>
-                                </b>
-                              </p>
                               <p>
                                 <b *ngIf="item.descripcion">
                                   {{ item.descripcion }}

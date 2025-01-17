@@ -39,7 +39,8 @@ exports.loadInstitutionConfig = async function (req, res, next) {
 
     req.institutionConfig = {
       apiKey: institution.apiKey || process.env.CONTIFICO_API_KEY,
-      base: "https://api.contifico.com/sistema/api/v1",
+      baseURL: "https://api.contifico.com/sistema/api/v1",
+      apitoken: institution.apitoken || process.env.CONTIFICO_API_TOKEN,
     };
 
     console.log("Configuración cargada exitosamente");

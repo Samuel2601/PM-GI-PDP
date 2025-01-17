@@ -7,7 +7,7 @@ import { GLOBAL } from '../GLOBAL';
   providedIn: 'root',
 })
 export class InventoryService {
-  private readonly baseUrl = GLOBAL.url + 'http://localhost:3000'; // Cambia la URL base según tu configuración
+  private readonly baseUrl = GLOBAL.url + 'inventario'; // Cambia la URL base según tu configuración
 
   constructor(private http: HttpClient) {}
 
@@ -66,6 +66,12 @@ export class InventoryService {
   // Productos
   getProducts(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/producto`, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  getProductsTipo(tipo: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/producto/${tipo}`, {
       headers: this.getHeaders(),
     });
   }

@@ -9,6 +9,11 @@ import iziToast from 'izitoast';
 import { lastValueFrom } from 'rxjs';
 import { InstitucionServiceService } from 'src/app/service/institucion.service.service';
 import { PersonService } from 'src/app/service/confitico/person.service';
+import { InventoryService } from 'src/app/service/confitico/inventory.service';
+import { CreateProduct } from './producto.interface';
+import { DatePipe } from '@angular/common';
+import { PRODUCTOS_BASE } from './seedproductos';
+import { TransactionService } from 'src/app/service/confitico/transaction.service';
 declare var $: any;
 
 @Component({
@@ -75,7 +80,10 @@ export class ShowPaymentsComponent implements OnInit {
     private _estudianteService: EstudianteService,
     private _router: Router,
     private _institucionService: InstitucionServiceService,
-    private _personService: PersonService
+    private _personService: PersonService,
+    private _invetarioService: InventoryService,
+    private _transactionService: TransactionService,
+    private datePipe: DatePipe
   ) {
     this.token = localStorage.getItem('token');
     this.url = GLOBAL.url;
@@ -86,6 +94,15 @@ export class ShowPaymentsComponent implements OnInit {
   public info: any;
   public base: any;
   public apikey: any = undefined;
+
+  consultarDocumento() {
+    this._transactionService.getDocuments().subscribe((response: any) => {
+      if (response) {
+        console.log(response);
+      }
+    });
+  }
+
   consultar_apikey() {
     const user_data = JSON.parse(localStorage.getItem('user_data') || '');
     this._institucionService
@@ -97,8 +114,110 @@ export class ShowPaymentsComponent implements OnInit {
         }
       });
   }
+  async consultaTodosProducto() {
+    this._invetarioService.getProducts().subscribe({
+      next: (response: any) => {
+        if (response) {
+          console.log(response);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al consultar:', error);
+      },
+    });
+  }
+  async consultaProducto() {
+    for (const element of this.detalles) {
+      if (element.tipo > 11) {
+        continue;
+      }
+      try {
+        //Descripción del producto
+        element.descripcion =
+          (element.tipo === 0 ? 'Matricula' : 'Pensión') +
+          ' ' +
+          (element.tipo >= 1 && element.tipo <= 10
+            ? element.tipo +
+              ' ' +
+              this.datePipe.transform(this.fecha[element.tipo - 1].date, 'MMMM')
+            : '') +
+          ' ' +
+          element.idpension.curso +
+          ' ' +
+          element.idpension.paralelo +
+          ' ' +
+          element.idpension.especialidad +
+          ' ' +
+          this.datePipe.transform(element.idpension.anio_lectivo, 'YYYY') +
+          '-' +
+          element.aniosup;
+
+        console.log('Consultando producto', element.tipo);
+        if (element.tipo === 0) {
+          element.tipo = 11;
+        }
+        const response: any = await this._invetarioService
+          .getProductsTipo(element.tipo)
+          .toPromise();
+        if (response) {
+          console.log(response);
+          element.id_contifico_producto = response.id;
+        } else {
+          console.log('No se encontró el producto', 'Creando producto');
+          // Llamar a la función para crear el producto
+          const productoseed = PRODUCTOS_BASE.find(
+            (element: any) =>
+              parseInt(element.codigo) === parseInt(element.codigo)
+          );
+          const newresponse = await this.crear_producto(productoseed);
+          element.id_contifico_producto = newresponse.id_contifico_producto;
+          iziToast.error({
+            title: 'ERROR',
+            position: 'topRight',
+            message: 'No se encontró el producto: ' + element.descripcion,
+          });
+        }
+      } catch (error) {
+        console.error('Error al consultar el producto:', error);
+      }
+    }
+  }
+
+  async crear_producto(producto: any) {
+    try {
+      const response: any = await this._invetarioService.createProduct(
+        producto
+      );
+
+      if (response.message) {
+        iziToast.error({
+          title: 'ERROR',
+          position: 'topRight',
+          message: response.message,
+        });
+      } else {
+        iziToast.success({
+          title: 'ÉXITOSO',
+          position: 'topRight',
+          message: 'Producto creado con exito',
+        });
+        return response;
+      }
+    } catch (error) {
+      console.error('Error al crear producto:', error);
+      iziToast.error({
+        title: 'ERROR',
+        position: 'topRight',
+        message:
+          'Ocurrió un error inesperado. Por favor, revisa los datos e intenta de nuevo.',
+      });
+    }
+  }
+
   ngOnInit(): void {
     this.consultar_apikey();
+    //this.consultaTodosProducto();
+    this.consultarDocumento();
     this._adminService.obtener_info_admin(this.token).subscribe((responese) => {
       if (responese.data) {
         this.info = responese.data;
@@ -125,10 +244,11 @@ export class ShowPaymentsComponent implements OnInit {
         .toPromise();
       console.log(response);
       if (response.id) {
+        this.id_facturacion = response.id;
         const response2: any = await this._estudianteService
           .actualizar_estudiante_admin(
             this.pago.estudiante._id,
-            { id_contifico_persona: response.id },
+            { ...this.pago.estudiante, id_contifico_persona: response.id },
             this.token
           )
           .toPromise();
@@ -148,8 +268,15 @@ export class ShowPaymentsComponent implements OnInit {
       return false;
     }
   }
+  public id_facturacion: any;
+
   async verificar_persona() {
+    let mensajeError = '';
     try {
+      if (this.pago.estudiante.id_contifico_persona) {
+        this.id_facturacion = this.pago.estudiante.id_contifico_persona;
+        return;
+      }
       if (
         !this.pago.estudiante.id_contifico_persona &&
         this.pago.estudiante.dni_factura &&
@@ -174,30 +301,64 @@ export class ShowPaymentsComponent implements OnInit {
           if (this.pago.estudiante.dni_factura.length > 10) {
             new_person.ruc = this.pago.estudiante.dni_factura;
           } else {
-            new_person.cedula = this.pago.estudiante.dni_factura.substr(0, 9);
+            new_person.cedula = this.pago.estudiante.dni_factura.substr(0, 10);
           }
           console.log('Nueva Persona', new_person);
-          const response2: any = await this._personService
-            .createPerson(new_person)
-            .toPromise();
-          console.log(response2);
-          if (!response2.id) {
-            return;
+
+          try {
+            const response2: any = await this._personService
+              .createPerson(new_person)
+              .toPromise();
+
+            console.log(response2);
+
+            // Manejo explícito del caso donde no hay un `id` en la respuesta
+            if (!response2.id) {
+              this.id_facturacion = response2.id;
+              mensajeError =
+                response2?.error?.error?.mensaje ||
+                response2?.message ||
+                'Error desconocido al crear la persona';
+
+              iziToast.error({
+                title: 'ERROR',
+                position: 'topRight',
+                message: 'Error en la creación de la persona: ' + mensajeError,
+              });
+              return;
+            }
+
+            const response3: any = await this._estudianteService
+              .actualizar_estudiante_admin(
+                this.pago.estudiante._id,
+                { ...this.pago.estudiante, id_contifico_persona: response2.id },
+                this.token
+              )
+              .toPromise();
+            console.log(response3);
+          } catch (error) {
+            console.error('Error al crear la persona:', error);
+            iziToast.error({
+              title: 'ERROR',
+              position: 'topRight',
+              message:
+                'Ocurrió un error inesperado al intentar crear la persona.' +
+                mensajeError,
+            });
           }
-          const response3: any = await this._estudianteService
-            .actualizar_estudiante_admin(
-              this.pago.estudiante._id,
-              { ...this.pago.estudiante, id_contifico_persona: response2.id },
-              this.token
-            )
-            .toPromise();
-          console.log(response3);
         }
       }
     } catch (error) {
       console.error('Error al consultar:', error);
+      iziToast.error({
+        title: 'ERROR',
+        position: 'topRight',
+        message:
+          'Ocurrió un error inesperado. Por favor, revisa los datos e intenta de nuevo.',
+      });
     }
   }
+
   async init_data() {
     try {
       const response = await lastValueFrom(
@@ -221,12 +382,13 @@ export class ShowPaymentsComponent implements OnInit {
           ).getFullYear();
         });
 
+        console.log(this.detalles);
         this.load_data = false;
 
         await this.detalle_data(); // Espera que termine
 
         await this.armado2();
-
+        await this.consultaProducto();
         //await this.armado(); // Luego espera este
       } else {
         this.pago = undefined;

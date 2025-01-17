@@ -530,6 +530,7 @@ const actualizar_estudiante_admin = async function (req, res) {
         dni_padre: data.dni_padre,
         nombres_factura: data.nombres_factura,
         dni_factura: data.dni_factura,
+        id_contifico_persona: data.id_contifico_persona,
         direccion: data.direccion,
       }
     );

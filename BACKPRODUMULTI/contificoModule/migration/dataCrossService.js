@@ -45,7 +45,7 @@ const crossData = async () => {
           const persons = await makeRequest(
             {
               institutionConfig: {
-                base: "https://api.contifico.com/sistema/api/v1",
+                baseURL: "https://api.contifico.com/sistema/api/v1",
                 apiKey: apiKey,
               },
             },
@@ -65,6 +65,12 @@ const crossData = async () => {
           // 6. Cruzar datos y actualizar estudiantes
           await Promise.all(
             estudiantes.map(async (estudiante) => {
+              if (estudiante.id_contifico_persona) {
+                console.log(
+                  `Estudiante ya actualizado: ${estudiante.nombres} ${estudiante.apellidos} en la base ${base}`
+                );
+                return;
+              }
               const match = persons.find(
                 (person) =>
                   person.cedula === estudiante.dni_factura ||

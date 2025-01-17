@@ -18,7 +18,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const categories = await inventoryService.getCategories();
+    const categories = await inventoryService.getCategories(req);
     res.json(categories);
   })
 );
@@ -28,7 +28,8 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const category = await inventoryService.getCategoryById(req.params.id);
+    const { id } = req.params;
+    const category = await inventoryService.getCategoryById(req, id);
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
@@ -42,7 +43,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const warehouses = await inventoryService.getWarehouses();
+    const warehouses = await inventoryService.getWarehouses(req);
     res.json(warehouses);
   })
 );
@@ -52,7 +53,8 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const warehouse = await inventoryService.getWarehouseById(req.params.id);
+    const { id } = req.params;
+    const warehouse = await inventoryService.getWarehouseById(req, id);
     if (!warehouse) {
       return res.status(404).json({ message: "Warehouse not found" });
     }
@@ -66,7 +68,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const variants = await inventoryService.getVariants();
+    const variants = await inventoryService.getVariants(req);
     res.json(variants);
   })
 );
@@ -76,7 +78,8 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const variant = await inventoryService.getVariantById(req.params.id);
+    const { id } = req.params;
+    const variant = await inventoryService.getVariantById(req, id);
     if (!variant) {
       return res.status(404).json({ message: "Variant not found" });
     }
@@ -90,8 +93,22 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const products = await inventoryService.getProducts();
+    const products = await inventoryService.getProducts(req);
     res.json(products);
+  })
+);
+
+router.get(
+  "/producto/:tipo",
+  auth,
+  loadInstitutionConfig,
+  asyncHandler(async (req, res) => {
+    const { tipo } = req.params;
+    const product = await inventoryService.getProductsTipo(req, tipo);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json(product);
   })
 );
 
@@ -100,7 +117,8 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const product = await inventoryService.getProductById(req.params.id);
+    const { id } = req.params;
+    const product = await inventoryService.getProductById(req, id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -113,7 +131,7 @@ router.post(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const product = await inventoryService.createProduct(req.body);
+    const product = await inventoryService.createProduct(req, req.body);
     res.status(201).json(product);
   })
 );
@@ -123,10 +141,8 @@ router.patch(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const product = await inventoryService.updateProduct(
-      req.params.id,
-      req.body
-    );
+    const { id } = req.params;
+    const product = await inventoryService.updateProduct(req, id, req.body);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -139,7 +155,8 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const stock = await inventoryService.getProductStock(req.params.id);
+    const { id } = req.params;
+    const stock = await inventoryService.getProductStock(req, id);
     if (!stock) {
       return res.status(404).json({ message: "Product stock not found" });
     }
@@ -153,7 +170,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const movements = await inventoryService.getInventoryMovements();
+    const movements = await inventoryService.getInventoryMovements(req);
     res.json(movements);
   })
 );
@@ -164,6 +181,7 @@ router.get(
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
     const movement = await inventoryService.getInventoryMovementById(
+      req,
       req.params.id
     );
     if (!movement) {
@@ -178,7 +196,10 @@ router.post(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const movement = await inventoryService.createInventoryMovement(req.body);
+    const movement = await inventoryService.createInventoryMovement(
+      req,
+      req.body
+    );
     res.status(201).json(movement);
   })
 );
@@ -189,7 +210,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const guides = await inventoryService.getShippingGuides();
+    const guides = await inventoryService.getShippingGuides(req);
     res.json(guides);
   })
 );
@@ -199,7 +220,7 @@ router.post(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const guide = await inventoryService.createShippingGuide(req.body);
+    const guide = await inventoryService.createShippingGuide(req, req.body);
     res.status(201).json(guide);
   })
 );
@@ -210,7 +231,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const brands = await inventoryService.getBrands();
+    const brands = await inventoryService.getBrands(req);
     res.json(brands);
   })
 );
