@@ -37,7 +37,7 @@ router.use("/banco", bankingRoutes);
 
 // Middleware para manejar errores
 router.use((error, req, res, next) => {
-  console.error("Error en las rutas de transacciones:", error);
+  console.error("Error en las rutas del módulo de Contifico:", error);
   res.status(500).json({
     message: "Error interno del servidor",
     error: error,

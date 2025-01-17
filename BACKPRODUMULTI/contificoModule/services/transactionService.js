@@ -39,19 +39,23 @@ const getDocumentById = async (req, id) => {
 };
 
 const generate_num_documento = async (req, session) => {
-  if (!req.user) {
+  if (!req.institutionConfig.id_institucion) {
     throw new Error("No autorizado");
   }
 
   const conn = mongoose.connection.useDb("Instituciones");
-  const Institucion = conn.model("institucion", InstitucionSchema);
+  const Institucion = conn.model("instituto", InstitucionSchema);
 
-  let institucion = await Institucion.findOne({ base: req.user.base }, null, {
-    session,
-  });
+  let institucion = await Institucion.findById(
+    req.institutionConfig.id_institucion,
+    null,
+    {
+      session,
+    }
+  );
 
   if (!institucion) {
-    throw new Error("Institución no encontrada");
+    throw new Error("Institución no encontrada: " + req.institutionConfig.id_institucion);
   }
 
   const prefijo =
@@ -79,8 +83,8 @@ const createDocument = async (req, documentData) => {
 
   try {
     documentData.pos = req.institutionConfig.apitoken;
-    documentData.documento = await generate_num_documento(req, session);
-
+    documentData.documento = await generate_num_documento(req, session);   
+    
     const response = await makeRequest(req, {
       path: "/documento/",
       method: "post",

@@ -345,9 +345,12 @@ export class ShowPaymentsComponent implements OnInit {
           this.idp = aux._id;
           await this.init_data();
           if (this.apikey && !this.pago.id_contifico) {
-            this.crear_documento(
-              this.armado_Documento_envio_Contifico(this.pago, this.detalles)
+            const pre_factura = this.armado_Documento_envio_Contifico(
+              this.pago,
+              this.detalles
             );
+            console.log(pre_factura);
+            this.crear_documento(pre_factura);
           }
         });
       }

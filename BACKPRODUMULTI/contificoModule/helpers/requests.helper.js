@@ -32,6 +32,10 @@ const makeRequest = async (req, { path, method, data = null }, id) => {
     return sanitizer(response.data);
   } catch (error) {
     logTimeElapsed(startTime, "hasta el error");
+    if (data) {
+      console.log("DATA ERRONEA:", JSON.stringify(data));
+    }
+
     console.error(
       `Error en la operación: ${error.response?.data || error.message}`
     );
