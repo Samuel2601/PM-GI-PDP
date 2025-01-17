@@ -10,9 +10,13 @@ const getPersons = async (req) => {
       method: "get",
     });
   } catch (error) {
-    throw new Error(
-      `Error fetching persons: ${error.response?.data || error.mensaje}`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -28,9 +32,13 @@ const getPersonsCedula = async (req, cedula) => {
       )[0] || {}
     );
   } catch (error) {
-    throw new Error(
-      `Error fetching persons: ${error.response?.data || error.mensaje}`
-    );
+     // Reenviar el mensaje de error tal como lo envía la API
+     if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -41,11 +49,13 @@ const getPersonById = async (req, id) => {
       method: "get",
     });
   } catch (error) {
-    throw new Error(
-      `Error fetching person with ID ${id}: ${
-        error.response?.data || error.mensaje
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -79,9 +89,13 @@ const updatePerson = async (req, id, personData) => {
       id
     );
   } catch (error) {
-    throw new Error(
-      `Error updating person: ${error.response?.data || error.mensaje}`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 

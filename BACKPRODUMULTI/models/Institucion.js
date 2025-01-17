@@ -22,6 +22,7 @@ var InstitucionSchema = Schema({
   type_school: { type: String, required: true, default: "EGB" },
   apiKey: { type: String, required: false }, // Clave API de Contífico
   apitoken: { type: String, required: false }, // Clave API de ContíficoapiKey: { type: String, required: false }, // Clave API de Contífico
+  generacion_numero_comprobante: { type: String, required: false }, // Clave API de Contífico
   base: { type: String, required: true },
   createdAt: { type: Date, default: Date.now, require: true },
 });

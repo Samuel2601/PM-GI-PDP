@@ -2074,6 +2074,28 @@ const eliminar_orden_pm = async function (req, res) {
     res.status(500).send({ message: "NoAccess" });
   }
 };
+
+const actualizar_pago_id_contifico = async function (req, res) {
+  if (!req.user) {
+    return res.status(401).send({ message: "No autorizado" });
+  }
+  const conn = mongoose.connection.useDb(req.user.base);
+  const Pago = conn.model("pago", VentaSchema);
+
+  try {
+    const { id, id_contifico } = req.body;
+    const pago = await Pago.findById(id);
+    if (!pago) {
+      return res.status(404).send({ message: "No existe el pago" });
+    }
+    pago.id_contifico = id_contifico;
+    await pago.save();
+    res.status(200).send({ message: "Actualizado con exito" });
+  } catch (error) {
+    res.status(200).send({ message: "Algo salió mal" + error });
+  }
+};
+
 const registro_compra_manual_estudiante = async function (req, res) {
   //console.log(req.body);
   if (!req.user) {
@@ -2998,4 +3020,6 @@ module.exports = {
   actualizar_config_plana,
   crear_config_plana,
   actualizarStockDocumentos,
+  //CONTIFICO
+  actualizar_pago_id_contifico,
 };

@@ -861,5 +861,17 @@ export class AdminService {
 		return this._http.get(this.url + 'listar_estudiantes_pago', { headers: headers });
 	}
 
+  //Registro PAGO
+  actualizar_pago_id_contifico(data: any, token: any): Observable<any> {
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: token,
+    });
+    return this._http.put(this.url + 'actualizar_pago_id_contifico', data, {
+      headers: headers,
+    });
+  }
+
+
 
 }

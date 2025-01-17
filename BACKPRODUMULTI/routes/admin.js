@@ -23,11 +23,7 @@ api.get(
 );
 
 // Ruta para actualizar una institución
-api.put(
-  "/instituciones/:id",
-  auth.auth,
-  AdminController.actualizarInstitucion
-);
+api.put("/instituciones/:id", auth.auth, AdminController.actualizarInstitucion);
 
 api.get("/obtener_portada/:img", AdminController.obtener_portada);
 
@@ -198,5 +194,12 @@ api.post(
   "/actualizarStockDocumentos",
   AdminController.actualizarStockDocumentos
 );
+
+api.put(
+  "/actualizar_pago_id_contifico",
+  auth.auth,
+  AdminController.actualizar_pago_id_contifico
+);
+
 
 module.exports = api;

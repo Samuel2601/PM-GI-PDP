@@ -78,8 +78,8 @@ app.use("/api", router);
 
 app.use("/api", contificoModule);
 
-actualizarNumpensionEnTodasLasBases();
+//actualizarNumpensionEnTodasLasBases();
 
-crossData();
+//crossData();
 
 module.exports = app;

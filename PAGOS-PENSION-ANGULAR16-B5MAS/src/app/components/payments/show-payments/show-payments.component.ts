@@ -14,6 +14,7 @@ import { CreateProduct } from './producto.interface';
 import { DatePipe } from '@angular/common';
 import { PRODUCTOS_BASE } from './seedproductos';
 import { TransactionService } from 'src/app/service/confitico/transaction.service';
+import { Cliente, Cobro, Documento, Vendedor } from './document.interface';
 declare var $: any;
 
 @Component({
@@ -214,10 +215,122 @@ export class ShowPaymentsComponent implements OnInit {
     }
   }
 
+  getEcuadorDate = (date?: Date) => {
+    const ecuadorOffset = -5; // Zona horaria de Ecuador (GMT-5)
+    const localDate = new Date(date || new Date());
+    const utcDate = new Date(
+      localDate.getTime() + localDate.getTimezoneOffset() * 60000
+    );
+    const ecuadorDate = new Date(utcDate.getTime() + ecuadorOffset * 3600000);
+
+    const day = String(ecuadorDate.getDate()).padStart(2, '0');
+    const month = String(ecuadorDate.getMonth() + 1).padStart(2, '0'); // Meses empiezan desde 0
+    const year = ecuadorDate.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
+  armado_Documento_envio_Contifico(pago: any, detalles: any[]): Documento {
+    const cliente: Cliente = {
+      cedula: pago.estudiante.dni_factura.substr(0, 10),
+      razon_social: pago.nombres_factura,
+      telefonos: pago.estudiante.telefono,
+      direccion: pago.estudiante.direccion,
+      tipo: 'N',
+      email: pago.estudiante.email,
+      es_extranjero: false,
+    };
+
+    if (pago.estudiante.dni_factura.length > 10) {
+      cliente.ruc = pago.estudiante.dni_factura;
+    }
+
+    const vendedor: Vendedor = {
+      cedula: pago.encargado.dni,
+      razon_social: `${pago.encargado.nombres} ${pago.encargado.apellidos}`,
+      telefonos: pago.encargado.telefono,
+      direccion: '',
+      tipo: 'N',
+      email: pago.encargado.email,
+      es_extranjero: false,
+    };
+
+    const cobros: Cobro[] = detalles.map((detalle) => {
+      const { documento } = detalle;
+
+      return {
+        forma_cobro: documento.cuenta == 'Efectivo' ? 'EF' : 'TRA',
+        monto:
+          documento.valor_oginal ||
+          detalles.reduce(
+            (sum, det) =>
+              det.documento.documento === documento.documento
+                ? sum + det.valor
+                : sum,
+            0
+          ),
+        numero_comprobante: documento.documento || 'Sin comprobante',
+        fecha: this.getEcuadorDate(documento.f_deposito),
+      };
+    });
+
+    return {
+      //pos: 'ceaa9097-1d76-4eb8-0000-6f412fa0297b', // Token fijo o dinámico
+      fecha_emision: this.getEcuadorDate(), // Fecha actual
+      tipo_documento: 'FAC',
+      electronico: true,
+      //documento: pago._id,
+      estado: 'P',
+      //autorizacion: '0123456789',
+      caja_id: null,
+      cliente: cliente,
+      vendedor: vendedor,
+      descripcion: `VENTA DESDE PUNTO DE VENTA`,
+      subtotal_0: 0.0,
+      subtotal_12: detalles.reduce((sum, det) => sum + det.valor, 0),
+      iva: detalles.reduce((sum, det) => sum + det.valor, 0),
+      ice: 0.0,
+      total: detalles.reduce((sum, det) => sum + det.valor, 0),
+      adicional1:
+        'Estudiante: ' +
+        pago.estudiante.nombres +
+        ' ' +
+        pago.estudiante.apellidos,
+      detalles: detalles.map((detalle) => ({
+        adicional1: detalle.descripcion + ' ' + detalle.estado,
+        producto_id: detalle.id_contifico_producto,
+        cantidad: 1.0,
+        precio: detalle.valor,
+        porcentaje_iva: 0,
+        base_cero: detalle.valor,
+        base_gravable: 0.0,
+        base_no_gravable: 0.0,
+        ibpnr: 0.0,
+        valor_ice: 0.0,
+      })),
+      cobros: cobros,
+    };
+  }
+
+  crear_documento(documento: Documento) {
+    try {
+      this._transactionService
+        .createDocument(documento)
+        .subscribe((response) => {
+          console.log(response);
+          if (response) {
+            console.log('Documento creado con exito');
+          } else {
+            console.log('Error al crear el documento');
+          }
+        });
+    } catch (error) {}
+  }
+
   ngOnInit(): void {
     this.consultar_apikey();
     //this.consultaTodosProducto();
-    this.consultarDocumento();
+    //this.consultarDocumento();
     this._adminService.obtener_info_admin(this.token).subscribe((responese) => {
       if (responese.data) {
         this.info = responese.data;
@@ -231,6 +344,11 @@ export class ShowPaymentsComponent implements OnInit {
           this.base = aux.base;
           this.idp = aux._id;
           await this.init_data();
+          if (this.apikey && !this.pago.id_contifico) {
+            this.crear_documento(
+              this.armado_Documento_envio_Contifico(this.pago, this.detalles)
+            );
+          }
         });
       }
     });

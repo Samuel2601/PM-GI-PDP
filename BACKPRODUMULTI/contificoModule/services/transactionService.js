@@ -1,5 +1,7 @@
 // services/transactionService.js
+var mongoose = require("mongoose");
 const { makeRequest } = require("../helpers/requests.helper");
+const InstitucionSchema = require("../../models/Institucion");
 
 // Document endpoints
 const getDocuments = async (req) => {
@@ -9,9 +11,13 @@ const getDocuments = async (req) => {
       method: "get",
     });
   } catch (error) {
-    throw new Error(
-      `Error fetching documents: ${error.response?.data || error.message}`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -22,25 +28,78 @@ const getDocumentById = async (req, id) => {
       method: "get",
     });
   } catch (error) {
-    throw new Error(
-      `Error fetching document with ID ${id}: ${
-        error.response?.data || error.message
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
+const generate_num_documento = async (req, session) => {
+  if (!req.user) {
+    throw new Error("No autorizado");
+  }
+
+  const conn = mongoose.connection.useDb("Instituciones");
+  const Institucion = conn.model("institucion", InstitucionSchema);
+
+  let institucion = await Institucion.findOne({ base: req.user.base }, null, {
+    session,
+  });
+
+  if (!institucion) {
+    throw new Error("Institución no encontrada");
+  }
+
+  const prefijo =
+    institucion.generacion_numero_comprobante || "000-000-000000000";
+  const match = prefijo.match(/^(\d{3}-\d{3})-(\d{9})$/);
+
+  if (!match) {
+    throw new Error("Formato de generacion_numero_comprobante no válido");
+  }
+
+  const basePrefijo = match[1];
+  const sufijo = parseInt(match[2], 10);
+  const nuevoSufijo = String(sufijo + 1).padStart(9, "0");
+  const nuevoNumeroComprobante = `${basePrefijo}-${nuevoSufijo}`;
+
+  institucion.generacion_numero_comprobante = nuevoNumeroComprobante;
+  await institucion.save({ session });
+
+  return nuevoNumeroComprobante;
+};
+
 const createDocument = async (req, documentData) => {
+  const session = await mongoose.startSession();
+  session.startTransaction(); // Inicia la transacción
+
   try {
-    return await makeRequest(req, {
+    documentData.pos = req.institutionConfig.apitoken;
+    documentData.documento = await generate_num_documento(req, session);
+
+    const response = await makeRequest(req, {
       path: "/documento/",
       method: "post",
       data: documentData,
     });
+
+    // Si makeRequest falla, la transacción se revertirá automáticamente
+    return response;
   } catch (error) {
-    throw new Error(
-      `Error creating document: ${error.response?.data || error.message}`
-    );
+    await session.abortTransaction(); // Revierte la transacción si algo falla
+    session.endSession();
+
+    if (error.response?.data) {
+      throw error.response.data;
+    }
+    console.error("Error en la creación del Documento:", error);
+    throw new Error(error.mensaje || "Error desconocido al crear la Documento");
+  } finally {
+    session.endSession();
   }
 };
 
@@ -52,9 +111,13 @@ const updateDocument = async (req, documentData) => {
       data: documentData,
     });
   } catch (error) {
-    throw new Error(
-      `Error updating document: ${error.response?.data || error.message}`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -67,11 +130,13 @@ const submitDocumentToSRI = async (req, id, sriData) => {
       data: sriData,
     });
   } catch (error) {
-    throw new Error(
-      `Error submitting document ${id} to SRI: ${
-        error.response?.data || error.message
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -83,11 +148,13 @@ const getDocumentCollections = async (req, id) => {
       method: "get",
     });
   } catch (error) {
-    throw new Error(
-      `Error fetching collections for document ${id}: ${
-        error.response?.data || error.message
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -99,11 +166,13 @@ const createDocumentCollection = async (req, id, collectionData) => {
       data: collectionData,
     });
   } catch (error) {
-    throw new Error(
-      `Error creating collection for document ${id}: ${
-        error.response?.data || error.message
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -114,11 +183,13 @@ const deleteDocumentCollection = async (req, id) => {
       method: "delete",
     });
   } catch (error) {
-    throw new Error(
-      `Error deleting collection for document ${id}: ${
-        error.response?.data || error.message
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -131,11 +202,13 @@ const createDocumentCrossReference = async (req, id, crossRefData) => {
       data: crossRefData,
     });
   } catch (error) {
-    throw new Error(
-      `Error creating cross-reference for document ${id}: ${
-        error.response?.data || error.message
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -151,11 +224,13 @@ const createDocumentAccountCrossReference = async (
       data: accountCrossRefData,
     });
   } catch (error) {
-    throw new Error(
-      `Error creating account cross-reference for document ${id}: ${
-        error.response?.data || error.message
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -167,11 +242,13 @@ const getDocumentRetention = async (req, id) => {
       method: "get",
     });
   } catch (error) {
-    throw new Error(
-      `Error fetching retention for document ${id}: ${
-        error.response?.data || error.message
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -183,9 +260,13 @@ const getTransactions = async (req) => {
       method: "get",
     });
   } catch (error) {
-    throw new Error(
-      `Error fetching transactions: ${error.response?.data || error.message}`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 
@@ -196,11 +277,13 @@ const getTransactionById = async (req, id) => {
       method: "get",
     });
   } catch (error) {
-    throw new Error(
-      `Error fetching transaction with ID ${id}: ${
-        error.response?.data || error.message
-      }`
-    );
+    // Reenviar el mensaje de error tal como lo envía la API
+    if (error.response?.data) {
+      // Lanza el error directamente con el mensaje y código de la API
+      throw error.response.data;
+    }
+    // En caso de un error desconocido, lanza un mensaje genérico
+    throw new Error(error.mensaje || "Error desconocido al crear la persona");
   }
 };
 

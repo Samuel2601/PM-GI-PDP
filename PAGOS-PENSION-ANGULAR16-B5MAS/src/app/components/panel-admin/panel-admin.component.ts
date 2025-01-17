@@ -43,6 +43,7 @@ export class PanelAdminComponent implements OnInit {
       type_school: ['', Validators.required],
       apiKey: ['', Validators.required],
       apitoken: ['', Validators.required],
+      generacion_numero_comprobante: ['', Validators.required],
       base: ['', Validators.required],
     });
   }
