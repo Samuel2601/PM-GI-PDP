@@ -369,6 +369,9 @@ export class ShowPaymentsComponent implements OnInit {
               },
               this.token
             );
+            setTimeout(() => {
+              location.reload();
+            }, 2000);
           } else {
             this.mensajes.creacion = 'Error al crear el documento';
             this.showErrorToast(
@@ -412,7 +415,9 @@ export class ShowPaymentsComponent implements OnInit {
     emision: '',
     consultaDoc: '',
   };
+  habilitar_boton_generar: boolean = false;
   async generarDocumento() {
+    this.habilitar_boton_generar = false;
     if (this.apikey && !this.pago.id_contifico) {
       const pre_factura = this.armado_Documento_envio_Contifico(
         this.pago,
@@ -420,11 +425,10 @@ export class ShowPaymentsComponent implements OnInit {
       );
       console.log(pre_factura);
       try {
-        await this.crear_documento(pre_factura).finally(() => {
-          setTimeout(() => location.reload(), 2000);
-        });
+        await this.crear_documento(pre_factura);
       } catch (error) {
         console.error(error);
+        this.habilitar_boton_generar = true;
       }
     }
   }
@@ -440,7 +444,7 @@ export class ShowPaymentsComponent implements OnInit {
           console.log(response);
           this.documento_contifico = response;
           this.mensajes.emision = 'Documento emitido exitosamente al SRI';
-          setTimeout(() => location.reload(), 2000);
+          setTimeout(() => location.reload(), 5000);
         },
         error: (error) => {
           this.mensajes.emision = 'Error al emitir al SRI: ' + error.message;
@@ -506,7 +510,6 @@ export class ShowPaymentsComponent implements OnInit {
           try {
             this.id = params['id'];
             await this.init_data();
-            await this.manejarDocumentoContifico();
             resolve();
           } catch (error) {
             reject(error);
@@ -705,6 +708,8 @@ export class ShowPaymentsComponent implements OnInit {
         });
         //await this.consultaProducto();
         //await this.armado(); // Luego espera este
+
+        await this.manejarDocumentoContifico();
       } else {
         this.pago = undefined;
       }

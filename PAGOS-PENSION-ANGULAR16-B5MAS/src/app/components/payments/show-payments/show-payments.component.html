@@ -403,6 +403,7 @@
                   *ngIf="apikey && !pago.id_contifico"
                   id="tbnfacturar"
                   mat-raised-button
+                  disabled="{{!habilitar_boton_generar}}"
                   class="btn btn-primary btn-sm"
                   (click)="generarDocumento()"
                 >
