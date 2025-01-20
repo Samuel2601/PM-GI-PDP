@@ -37,8 +37,8 @@ export class TransactionService {
     });
   }
 
-  createDocument(data: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/documento`, data, {
+  createDocument(data: any, id: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/documento/` + id, data, {
       headers: this.getHeaders(),
     });
   }

@@ -2,7 +2,95 @@
   <div class="sidebar">
     <app-sidebar></app-sidebar>
   </div>
+  <!-- Alerta de estado -->
+  <!-- Alertas de estado -->
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    <!-- Alerta de Generación -->
+    <div
+      class="alert alert-info alert-dismissible fade show"
+      role="alert"
+      *ngIf="loading.generacion"
+    >
+      <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm me-2" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        {{ mensajes.generacion }}
+      </div>
+    </div>
 
+    <!-- Alerta de Creación -->
+    <div
+      class="alert"
+      [ngClass]="{
+        'alert-info': loading.creacion,
+        'alert-success':
+          !loading.creacion && mensajes.creacion.includes('exitosamente'),
+        'alert-danger': !loading.creacion && mensajes.creacion.includes('Error')
+      }"
+      role="alert"
+      *ngIf="loading.creacion || mensajes.creacion"
+    >
+      <div class="d-flex align-items-center">
+        <div
+          class="spinner-border spinner-border-sm me-2"
+          role="status"
+          *ngIf="loading.creacion"
+        >
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        {{ mensajes.creacion }}
+      </div>
+    </div>
+
+    <!-- Alerta de Emisión SRI -->
+    <div
+      class="alert"
+      [ngClass]="{
+        'alert-info': loading.emision,
+        'alert-success':
+          !loading.emision && mensajes.emision.includes('exitosamente'),
+        'alert-danger': !loading.emision && mensajes.emision.includes('Error')
+      }"
+      role="alert"
+      *ngIf="loading.emision || mensajes.emision"
+    >
+      <div class="d-flex align-items-center">
+        <div
+          class="spinner-border spinner-border-sm me-2"
+          role="status"
+          *ngIf="loading.emision"
+        >
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        {{ mensajes.emision }}
+      </div>
+    </div>
+    <!-- Alerta de Consulta Doc -->
+    <!-- Estado de consulta de documento -->
+    <div
+      class="alert alert-info alert-dismissible fade show"
+      role="alert"
+      *ngIf="loading.consultaDoc"
+    >
+      <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm me-2" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        {{ mensajes.consultaDoc }}
+      </div>
+    </div>
+
+    <!-- Indicador general de carga -->
+    <div
+      class="position-fixed top-50 start-50 translate-middle"
+      *ngIf="load_data"
+    >
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  </div>
   <div class="content">
     <div class="container-fluid">
       <div class="row justify-content-center">
@@ -22,9 +110,6 @@
               <!-- / .row -->
             </div>
           </div>
-          <div id="iframe1">
-            <span id="link1"></span>
-          </div>
           <!-- Alert -->
 
           <ng-container *ngIf="!load_data">
@@ -43,6 +128,20 @@
                 <div class="card">
                   <div class="card-header">Acciones:</div>
                   <div class="card-body">
+                    <!-- Botón estilizado que funciona como enlace -->
+                    <a
+                      *ngIf="
+                        documento_contifico?.url_ride &&
+                        documento_contifico?.firmado == true
+                      "
+                      [href]="documento_contifico?.url_ride"
+                      target="_blank"
+                      class="btn btn-primary btn-sm"
+                      mat-raised-button
+                      style="text-decoration: none; margin-left: 8px"
+                    >
+                      PDF
+                    </a>
                     <!--
 
                                                 <button
@@ -241,7 +340,29 @@
                           <tr>
                             <th class="border-0 py-2 pl-0">Estado:</th>
                             <td class="border-0 py-2 px-0 text-muted">
-                              {{ pago.estado }}
+                              <ng-container *ngIf="!apikey">
+                                {{ pago.estado }}
+                              </ng-container>
+                              <ng-container
+                                *ngIf="apikey && !documento_contifico"
+                              >
+                                SIN EMITIR
+                              </ng-container>
+                              <ng-container
+                                *ngIf="
+                                  apikey &&
+                                  documento_contifico?.firmado == false
+                                "
+                              >
+                                EMITIDO
+                              </ng-container>
+                              <ng-container
+                                *ngIf="
+                                  apikey && documento_contifico?.firmado == true
+                                "
+                              >
+                                FIRMADO
+                              </ng-container>
                             </td>
                           </tr>
                           <tr>
@@ -279,14 +400,28 @@
                   Emitir Factura
                 </button>
                 <button
-                id="tbnfacturar"
-                mat-raised-button
-                class="btn btn-primary btn-sm"
-                (click)="consultaProducto()"
-              >
-                Consultar Producto
-              </button>
-
+                  *ngIf="apikey && !pago.id_contifico"
+                  id="tbnfacturar"
+                  mat-raised-button
+                  class="btn btn-primary btn-sm"
+                  (click)="generarDocumento()"
+                >
+                  Crear Factura
+                </button>
+                <button
+                  *ngIf="
+                    apikey &&
+                    pago.id_contifico &&
+                    documento_contifico &&
+                    documento_contifico.firmado == false
+                  "
+                  id="tbnfacturar"
+                  mat-raised-button
+                  class="btn btn-primary btn-sm"
+                  (click)="emitirSRI()"
+                >
+                  Emitir al SRI
+                </button>
               </div>
 
               <div class="card mb-5" id="titular" style="display: none">
@@ -984,19 +1119,6 @@
                 </div>
               </div>
             </ng-container>
-          </ng-container>
-          <ng-container *ngIf="load_data">
-            <div class="card">
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-12 text-center">
-                    <div class="spinner-border text-primary" role="status">
-                      <span class="visually-hidden"></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </ng-container>
         </div>
       </div>

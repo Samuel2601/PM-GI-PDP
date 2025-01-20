@@ -39,14 +39,16 @@ router.get(
 
 // Crear un nuevo documento
 router.post(
-  "/documento",
+  "/documento/:id",
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
+    const { id } = req.params;
     const documentData = req.body;
     const newDocument = await transactionService.createDocument(
       req,
-      documentData
+      documentData,
+      id
     );
     res.status(201).json(newDocument);
   })

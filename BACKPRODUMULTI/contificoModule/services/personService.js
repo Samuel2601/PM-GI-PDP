@@ -65,6 +65,7 @@ const createPerson = async (req, personData) => {
       path: "/persona/",
       method: "post",
       data: personData,
+      pos: true,
     });
   } catch (error) {
     // Reenviar el mensaje de error tal como lo envía la API

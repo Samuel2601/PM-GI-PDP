@@ -134,9 +134,6 @@ export class ShowPaymentsComponent implements OnInit {
       }
 
       try {
-        // Build description
-        element.descripcion = this.buildDescripcion(element);
-
         console.log('Consultando producto', element.tipo);
 
         // Handle matrícula type conversion
@@ -169,9 +166,9 @@ export class ShowPaymentsComponent implements OnInit {
             throw new Error('Error al crear nuevo producto');
           }
 
-          this.showErrorToast(
+          /*this.showErrorToast(
             `No se encontró el producto: ${element.descripcion}`
-          );
+          );*/
         }
       } catch (error) {
         console.error('Error al procesar producto:', error);
@@ -233,6 +230,13 @@ export class ShowPaymentsComponent implements OnInit {
       message,
     });
   }
+  private showSuccessToast(message: string): void {
+    iziToast.success({
+      title: 'SUCCESS',
+      position: 'topRight',
+      message,
+    });
+  }
 
   getEcuadorDate = (date?: Date) => {
     const ecuadorOffset = -5; // Zona horaria de Ecuador (GMT-5)
@@ -252,11 +256,11 @@ export class ShowPaymentsComponent implements OnInit {
   armado_Documento_envio_Contifico(pago: any, detalles: any[]): Documento {
     const cliente: Cliente = {
       cedula: pago.estudiante.dni_factura.substr(0, 10),
-      razon_social: pago.nombres_factura,
+      razon_social: pago.estudiante.nombres_factura,
       telefonos: pago.estudiante.telefono,
       direccion: pago.estudiante.direccion,
       tipo: 'N',
-      email: pago.estudiante.email,
+      email: pago.estudiante.email_padre,
       es_extranjero: false,
       ruc: null,
     };
@@ -340,54 +344,207 @@ export class ShowPaymentsComponent implements OnInit {
         valor_ice: 0.0,
         porcentaje_ice: 0.0,
         porcentaje_descuento: 0.0,
+        tipo: detalle.tipo,
       })),
       cobros: cobros,
     };
   }
 
   crear_documento(documento: Documento) {
-    try {
-      this._transactionService
-        .createDocument(documento)
-        .subscribe((response) => {
-          console.log(response);
+    this.loading.creacion = true;
+    this.mensajes.creacion = 'Creando documento en el sistema...';
+
+    this._transactionService
+      .createDocument(documento, this.pago._id)
+      .subscribe({
+        next: (response) => {
           if (response) {
-            console.log('Documento creado con exito');
+            console.log('Documento creado con éxito', response);
+            this.mensajes.creacion = 'Documento creado exitosamente';
+            this.showSuccessToast('Documento creado con éxito');
+            this._adminService.actualizar_pago_id_contifico(
+              {
+                id: this.pago._id,
+                id_contifico: response.id,
+              },
+              this.token
+            );
           } else {
-            console.log('Error al crear el documento');
+            this.mensajes.creacion = 'Error al crear el documento';
+            this.showErrorToast(
+              'Error al crear el documento. Por favor, inténtelo nuevamente.'
+            );
           }
-        });
-    } catch (error) {}
+        },
+        error: (error) => {
+          console.error('Error en la creación del documento:', error);
+          let errorMessage =
+            'Ocurrió un error desconocido. Por favor, inténtelo más tarde.';
+
+          if (error?.error?.error?.mensaje) {
+            errorMessage = error.error.error.mensaje;
+          } else if (error?.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error?.message) {
+            errorMessage = error.message;
+          }
+
+          this.mensajes.creacion = errorMessage;
+          this.showErrorToast(errorMessage);
+        },
+        complete: () => {
+          this.loading.generacion = false;
+          this.loading.creacion = false;
+        },
+      });
+  }
+  // Agrega estas variables en tu clase
+  loading = {
+    generacion: false,
+    creacion: false,
+    emision: false,
+    consultaDoc: false,
+  };
+
+  mensajes = {
+    generacion: '',
+    creacion: '',
+    emision: '',
+    consultaDoc: '',
+  };
+  generarDocumento() {
+    if (this.apikey && !this.pago.id_contifico) {
+      const pre_factura = this.armado_Documento_envio_Contifico(
+        this.pago,
+        this.detalles
+      );
+      console.log(pre_factura);
+      try {
+        this.crear_documento(pre_factura);
+      } catch (error) {
+        console.error(error);
+      }
+    }
   }
 
-  ngOnInit(): void {
-    this.consultar_apikey();
-    //this.consultaTodosProducto();
-    //this.consultarDocumento();
-    this._adminService.obtener_info_admin(this.token).subscribe((responese) => {
-      if (responese.data) {
-        this.info = responese.data;
-        this.imagen = JSON.parse(
-          localStorage.getItem('user_data') || ''
-        )?.portada;
-        this._route.params.subscribe(async (params) => {
-          this.id = params['id'];
-          let aux = JSON.parse(localStorage.getItem('user_data')!);
-          this.rol = aux.rol;
-          this.base = aux.base;
-          this.idp = aux._id;
-          await this.init_data();
-          if (this.apikey && !this.pago.id_contifico) {
-            const pre_factura = this.armado_Documento_envio_Contifico(
-              this.pago,
-              this.detalles
-            );
-            console.log(pre_factura);
-            this.crear_documento(pre_factura);
-          }
-        });
+  emitirSRI() {
+    this.loading.emision = true;
+    this.mensajes.emision = 'Emitiendo documento al SRI...';
+
+    this._transactionService
+      .submitDocumentToSRI(this.pago.id_contifico, this.documento_contifico)
+      .subscribe({
+        next: (response: any) => {
+          console.log(response);
+          this.documento_contifico = response;
+          this.mensajes.emision = 'Documento emitido exitosamente al SRI';
+          setTimeout(() => location.reload(), 2000);
+        },
+        error: (error) => {
+          this.mensajes.emision = 'Error al emitir al SRI: ' + error.message;
+        },
+        complete: () => {
+          this.loading.emision = false;
+        },
+      });
+  }
+
+  documento_contifico: any = null;
+  async ngOnInit(): Promise<void> {
+    try {
+      this.load_data = true;
+
+      // Consultar API key primero
+      await this.consultar_apikey();
+
+      // Obtener información del admin
+      const adminResponse = await lastValueFrom(
+        this._adminService.obtener_info_admin(this.token)
+      );
+
+      if (!adminResponse?.data) {
+        throw new Error('No se pudo obtener la información del administrador');
       }
+
+      // Establecer información básica
+      this.info = adminResponse.data;
+      this.setUserData();
+
+      // Obtener parámetros de la ruta y procesar documento
+      await this.procesarRutaYDocumento();
+    } catch (error) {
+      console.error('Error en la inicialización:', error);
+      this.showErrorToast(
+        'Error al cargar los datos. Por favor, recargue la página.'
+      );
+    } finally {
+      this.load_data = false;
+    }
+  }
+
+  private setUserData(): void {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user_data') || '');
+      if (!userData) throw new Error('No hay datos de usuario');
+
+      this.imagen = userData.portada;
+      this.rol = userData.rol;
+      this.base = userData.base;
+      this.idp = userData._id;
+    } catch (error) {
+      console.error('Error al obtener datos del usuario:', error);
+      this.showErrorToast('Error al cargar datos del usuario');
+    }
+  }
+
+  private async procesarRutaYDocumento(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this._route.params.subscribe({
+        next: async (params) => {
+          try {
+            this.id = params['id'];
+            await this.init_data();
+            await this.manejarDocumentoContifico();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        },
+        error: (error) => reject(error),
+      });
     });
+  }
+
+  private async manejarDocumentoContifico(): Promise<void> {
+    if (!this.apikey) {
+      console.log('No hay API key configurada');
+      return;
+    }
+
+    try {
+      if (!this.pago.id_contifico) {
+        // Si no hay ID Contífico, generar documento
+        await this.generarDocumento();
+      } else {
+        // Si hay ID Contífico, obtener documento
+        this.loading = { ...this.loading, consultaDoc: true };
+        this.mensajes.consultaDoc = 'Consultando documento...';
+
+        const response = await lastValueFrom(
+          this._transactionService.getDocumentById(this.pago.id_contifico)
+        );
+
+        this.documento_contifico = response;
+        this.mensajes.consultaDoc = 'Documento consultado exitosamente';
+        console.log('Documento consultado:', this.documento_contifico);
+      }
+    } catch (error) {
+      console.error('Error al manejar documento Contífico:', error);
+      this.mensajes.consultaDoc = 'Error al consultar documento';
+      this.showErrorToast('Error al procesar el documento');
+    } finally {
+      this.loading = { ...this.loading, consultaDoc: false };
+    }
   }
   public create_person: boolean = false;
   async consultar_Cedula(cedula: any): Promise<boolean> {
@@ -449,7 +606,6 @@ export class ShowPaymentsComponent implements OnInit {
             telefonos: this.pago.estudiante.telefono,
             tipo: 'N',
             es_cliente: true,
-            //origen: 'www.goldenincorp.com',
           };
 
           if (this.pago.estudiante.dni_factura.length > 10) {
@@ -525,7 +681,7 @@ export class ShowPaymentsComponent implements OnInit {
       if (response.data != undefined) {
         console.log(response);
         this.pago = response.data;
-        await this.verificar_persona();
+        //await this.verificar_persona();
         this.detalles = response.detalles;
 
         this.detalles.forEach((element: any) => {
@@ -537,20 +693,21 @@ export class ShowPaymentsComponent implements OnInit {
         });
 
         console.log(this.detalles);
-        this.load_data = false;
 
         await this.detalle_data(); // Espera que termine
 
         await this.armado2();
-        await this.consultaProducto();
+        this.detalles.forEach((element: any) => {
+          // Build description
+          element.descripcion = this.buildDescripcion(element);
+        });
+        //await this.consultaProducto();
         //await this.armado(); // Luego espera este
       } else {
         this.pago = undefined;
-        this.load_data = false;
       }
     } catch (error) {
       console.error('Error al obtener los detalles:', error);
-      this.load_data = false;
     }
   }
   exportTable() {

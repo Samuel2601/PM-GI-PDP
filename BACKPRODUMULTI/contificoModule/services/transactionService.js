@@ -1,7 +1,9 @@
 // services/transactionService.js
 var mongoose = require("mongoose");
 const { makeRequest } = require("../helpers/requests.helper");
-const InstitucionSchema = require("../../models/Institucion");
+const InstitucionSchema = require("../../models/Institucion.js");
+const { PRODUCTOS_BASE } = require("../seeds/product.seeds.js");
+const VentaSchema = require("../../models/Pago.js");
 
 // Document endpoints
 const getDocuments = async (req) => {
@@ -55,7 +57,9 @@ const generate_num_documento = async (req, session) => {
   );
 
   if (!institucion) {
-    throw new Error("Institución no encontrada: " + req.institutionConfig.id_institucion);
+    throw new Error(
+      "Institución no encontrada: " + req.institutionConfig.id_institucion
+    );
   }
 
   const prefijo =
@@ -77,32 +81,103 @@ const generate_num_documento = async (req, session) => {
   return nuevoNumeroComprobante;
 };
 
-const createDocument = async (req, documentData) => {
+const updatePagoIdCont = async (req, id, idCont, session) => {
+  // Añadido session como parámetro
+  if (!req.institutionConfig.id_institucion) {
+    throw new Error("No autorizado");
+  }
+
+  let conn = mongoose.connection.useDb("Instituciones");
+  const Institucion = conn.model("instituto", InstitucionSchema);
+
+  const institucion = await Institucion.findById(
+    req.institutionConfig.id_institucion,
+    null,
+    { session }
+  );
+
+  if (!institucion) {
+    throw new Error(
+      "Institución no encontrada: " + req.institutionConfig.id_institucion
+    );
+  }
+
+  const con = mongoose.connection.useDb(institucion.base); // Cambiado 'con =' a 'const con ='
+  const Pago = con.model("pago", VentaSchema);
+  const pago = await Pago.findById(id, null, { session });
+
+  if (!pago) {
+    throw new Error("Pago no encontrado: " + id);
+  }
+
+  pago.id_contifico = idCont;
+  await pago.save({ session });
+  return true;
+};
+
+const createDocument = async (req, documentData, idpago) => {
+  const productos = await makeRequest(req, {
+    path: "/producto/",
+    method: "get",
+  });
+
+  // Cambiar forEach por Promise.all con map para manejar correctamente las promesas
+  await Promise.all(
+    documentData.detalles.map(async (element) => {
+      if (!element.producto_id) {
+        // Formatear el tipo con prefijo de ceros
+        const tipoConPrefijo = "P" + element.tipo.toString().padStart(3, "0");
+        let producto = productos.find(
+          (producto) => producto.codigo === tipoConPrefijo
+        );
+
+        if (!producto) {
+          const new_Producto = PRODUCTOS_BASE.find(
+            (producto) => producto.codigo === tipoConPrefijo
+          );
+          if (!new_Producto) {
+            throw new Error(
+              `No se encontró producto base para tipo ${element.tipo}`
+            );
+          }
+          producto = await makeRequest(req, {
+            path: "/producto/",
+            method: "post",
+            data: new_Producto,
+          });
+        }
+
+        // Asignar el ID del producto encontrado o creado
+        element.producto_id = producto.id;
+      }
+      delete element.tipo;
+    })
+  );
+
   const session = await mongoose.startSession();
-  session.startTransaction(); // Inicia la transacción
+  session.startTransaction();
 
   try {
     documentData.pos = req.institutionConfig.apitoken;
-    documentData.documento = await generate_num_documento(req, session);   
-    
+    documentData.documento = await generate_num_documento(req, session);
+
     const response = await makeRequest(req, {
       path: "/documento/",
       method: "post",
       data: documentData,
-      post: true
+      post: true,
     });
-
-    // Si makeRequest falla, la transacción se revertirá automáticamente
+    if (response.id) {
+      await updatePagoIdCont(req, idpago, response.id, session);
+    }
+    await session.commitTransaction(); // Añadido: confirmar la transacción
     return response;
   } catch (error) {
-    await session.abortTransaction(); // Revierte la transacción si algo falla
-    session.endSession();
-
-    if (error.response?.data) {
-      throw error.response.data;
-    }
-    console.error("Error en la creación del Documento:", error);
-    throw new Error(error.mensaje || "Error desconocido al crear la Documento");
+    await session.abortTransaction();
+    throw (
+      error.response?.data ||
+      new Error(error.message || "Error desconocido al crear el Documento")
+    );
   } finally {
     session.endSession();
   }
