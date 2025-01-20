@@ -241,7 +241,7 @@ export class CreatePaymentsComponent implements OnInit {
         (response) => {
           if (response.data) {
             this.pension = [...response.data]; // Copiar propiedades de response.data a this.pension
-            console.log(response.data, this.pension);
+            console.log(this.pension);
             $('#modalEstudiante').modal('hide');
             $('#input-estudiante').val(`${item.nombres} ${item.apellidos}`);
 
@@ -485,12 +485,15 @@ export class CreatePaymentsComponent implements OnInit {
         } else {
           auxmeses = 10;
         }
+        this.fecha = [];
+        const baseDate = new Date(this.pension[this.indexpen].anio_lectivo);
+        const baseYear = baseDate.getFullYear();
+        const baseMonth = baseDate.getMonth();
 
         for (let j = 0; j < auxmeses; j++) {
+          const targetDate = new Date(baseYear, baseMonth + j, 1);
           this.fecha.push({
-            date: new Date(this.pension[this.indexpen].anio_lectivo).setMonth(
-              new Date(this.pension[this.indexpen].anio_lectivo).getMonth() + j
-            ),
+            date: targetDate,
             beca: 0,
           });
         }
@@ -559,7 +562,7 @@ export class CreatePaymentsComponent implements OnInit {
         console.log(this.selec_est.estado);
         /*if (this.selec_est.estado === 'Desactivado') {
 			  const con = this.fecha.filter((element) => element !== '').length;
-	  
+
 			  if (con === 1 && this.dpago.length === 0) {
 				console.log(this.pago.estudiante);
 				this.pago.estudiante = '';
