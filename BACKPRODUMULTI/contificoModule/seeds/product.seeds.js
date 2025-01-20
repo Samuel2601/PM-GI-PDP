@@ -1,4 +1,4 @@
-module.exports = PRODUCTOS_BASE = [
+module.exports.PRODUCTOS_BASE = [
   {
     codigo: "P001",
     tipo_producto: "SIM",
