@@ -46,7 +46,7 @@ const generate_num_documento = async (req, session) => {
   const conn = mongoose.connection.useDb("Instituciones");
   const Institucion = conn.model("instituto", InstitucionSchema);
 
-  let institucion = await Institucion.findById(
+  const institucion = await Institucion.findById(
     req.institutionConfig.id_institucion,
     null,
     {
@@ -89,6 +89,7 @@ const createDocument = async (req, documentData) => {
       path: "/documento/",
       method: "post",
       data: documentData,
+      post: true
     });
 
     // Si makeRequest falla, la transacción se revertirá automáticamente

@@ -2,13 +2,13 @@ const { sanitizer } = require("../interceptors/satinizador.interceptor.js");
 const { logTimeElapsed } = require("../loggers/timer.logger.js");
 const httpClient = require("../services/httpClient.js");
 // Helper function para manejar las requests HTTP
-const makeRequest = async (req, { path, method, data = null }, id) => {
+const makeRequest = async (req, { path, method, data = null , pos=false}, id) => {
   const startTime = process.hrtime();
 
   try {
     // Agregar el token a la URL si el método no es GET
     let url = `${req.institutionConfig.baseURL}${path}${
-      method !== "get" ? `?pos=${req.institutionConfig.apitoken}` : ""
+      pos? `?pos=${req.institutionConfig.apitoken}` : ""
     }`;
     if (id) {
       url = `${url}/${id}`;

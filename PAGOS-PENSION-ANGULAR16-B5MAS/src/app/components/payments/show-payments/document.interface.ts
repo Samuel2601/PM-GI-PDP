@@ -13,17 +13,17 @@ export interface Documento {
   subtotal_12: number;
   iva: number;
   ice: number;
-  servicio?: number;
   total: number;
   adicional1?: string;
   adicional2?: string;
   detalles: Detalle[];
   cobros?: Cobro[];
-  electronico:true;
+  electronico: true;
+  servicio: number | 0.0;
 }
 
 export interface Cliente {
-  ruc?: string;
+  ruc: string | null;
   cedula: string;
   razon_social: string;
   telefonos?: string;
@@ -48,13 +48,13 @@ export interface Detalle {
   producto_id: string;
   cantidad: number;
   precio: number;
-  porcentaje_iva?: number;
-  porcentaje_descuento?: number;
+  porcentaje_iva: number | 0.0;
+  porcentaje_descuento: number | 0.0;
   base_cero: number;
   base_gravable: number;
-  base_no_gravable?: number;
-  porcentaje_ice?: number;
-  valor_ice?: number;
+  base_no_gravable: number;
+  porcentaje_ice: number | 0.0;
+  valor_ice: number | 0.0;
 }
 
 export interface Cobro {

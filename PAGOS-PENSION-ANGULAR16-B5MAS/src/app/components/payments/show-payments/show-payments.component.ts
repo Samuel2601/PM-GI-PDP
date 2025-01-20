@@ -127,92 +127,111 @@ export class ShowPaymentsComponent implements OnInit {
       },
     });
   }
-  async consultaProducto() {
+  async consultaProducto(): Promise<void> {
     for (const element of this.detalles) {
       if (element.tipo > 11) {
         continue;
       }
+
       try {
-        //Descripción del producto
-        element.descripcion =
-          (element.tipo === 0 ? 'Matricula' : 'Pensión') +
-          ' ' +
-          (element.tipo >= 1 && element.tipo <= 10
-            ? element.tipo +
-              ' ' +
-              this.datePipe.transform(this.fecha[element.tipo - 1].date, 'MMMM')
-            : '') +
-          ' ' +
-          element.idpension.curso +
-          ' ' +
-          element.idpension.paralelo +
-          ' ' +
-          element.idpension.especialidad +
-          ' ' +
-          this.datePipe.transform(element.idpension.anio_lectivo, 'YYYY') +
-          '-' +
-          element.aniosup;
+        // Build description
+        element.descripcion = this.buildDescripcion(element);
 
         console.log('Consultando producto', element.tipo);
-        if (element.tipo === 0) {
-          element.tipo = 11;
-        }
-        const response: any = await this._invetarioService
-          .getProductsTipo(element.tipo)
+
+        // Handle matrícula type conversion
+        const tipoConsulta = element.tipo === 0 ? 11 : element.tipo;
+
+        const response = await this._invetarioService
+          .getProductsTipo(tipoConsulta)
           .toPromise();
-        if (response) {
-          console.log(response);
+
+        if (response?.id) {
+          console.log('Producto encontrado:', response);
           element.id_contifico_producto = response.id;
         } else {
-          console.log('No se encontró el producto', 'Creando producto');
-          // Llamar a la función para crear el producto
+          console.log('No se encontró el producto, creando nuevo producto');
           const productoseed = PRODUCTOS_BASE.find(
-            (element: any) =>
-              parseInt(element.codigo) === parseInt(element.codigo)
+            (producto) =>
+              producto.codigo === 'P' + tipoConsulta.toString().padStart(3, '0')
           );
-          const newresponse = await this.crear_producto(productoseed);
-          element.id_contifico_producto = newresponse.id_contifico_producto;
-          iziToast.error({
-            title: 'ERROR',
-            position: 'topRight',
-            message: 'No se encontró el producto: ' + element.descripcion,
-          });
+
+          if (!productoseed) {
+            throw new Error(
+              `No se encontró producto base para tipo ${tipoConsulta}`
+            );
+          }
+
+          const newProduct = await this.crear_producto(productoseed);
+          if (newProduct?.id) {
+            element.id_contifico_producto = newProduct.id;
+          } else {
+            throw new Error('Error al crear nuevo producto');
+          }
+
+          this.showErrorToast(
+            `No se encontró el producto: ${element.descripcion}`
+          );
         }
       } catch (error) {
-        console.error('Error al consultar el producto:', error);
+        console.error('Error al procesar producto:', error);
+        this.showErrorToast(
+          'Ocurrió un error inesperado. Por favor, revisa los datos e intenta de nuevo.'
+        );
       }
     }
   }
 
-  async crear_producto(producto: any) {
-    try {
-      const response: any = await this._invetarioService.createProduct(
-        producto
-      );
+  private buildDescripcion(element: any): string {
+    const tipoText = element.tipo === 0 ? 'Matricula' : 'Pensión';
+    let periodoText = '';
 
-      if (response.message) {
-        iziToast.error({
-          title: 'ERROR',
-          position: 'topRight',
-          message: response.message,
-        });
-      } else {
-        iziToast.success({
-          title: 'ÉXITOSO',
-          position: 'topRight',
-          message: 'Producto creado con exito',
-        });
-        return response;
-      }
-    } catch (error) {
-      console.error('Error al crear producto:', error);
-      iziToast.error({
-        title: 'ERROR',
-        position: 'topRight',
-        message:
-          'Ocurrió un error inesperado. Por favor, revisa los datos e intenta de nuevo.',
-      });
+    if (element.tipo >= 1 && element.tipo <= 10) {
+      const mes = this.datePipe.transform(
+        this.fecha[element.tipo - 1].date,
+        'MMMM'
+      );
+      periodoText = `${element.tipo} ${mes}`;
     }
+
+    return [
+      tipoText,
+      periodoText,
+      element.idpension.curso,
+      element.idpension.paralelo,
+      element.idpension.especialidad,
+      `${this.datePipe.transform(element.idpension.anio_lectivo, 'YYYY')}-${
+        element.aniosup
+      }`,
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  async crear_producto(producto: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this._invetarioService.createProduct(producto).subscribe({
+        next: (response: any) => {
+          console.log('Producto creado:', response);
+          resolve(response);
+        },
+        error: (error) => {
+          console.error('Error al crear producto:', error);
+          this.showErrorToast(
+            'Error al crear el producto. Por favor, intenta de nuevo.'
+          );
+          reject(error);
+        },
+      });
+    });
+  }
+
+  private showErrorToast(message: string): void {
+    iziToast.error({
+      title: 'ERROR',
+      position: 'topRight',
+      message,
+    });
   }
 
   getEcuadorDate = (date?: Date) => {
@@ -239,6 +258,7 @@ export class ShowPaymentsComponent implements OnInit {
       tipo: 'N',
       email: pago.estudiante.email,
       es_extranjero: false,
+      ruc: null,
     };
 
     if (pago.estudiante.dni_factura.length > 10) {
@@ -255,40 +275,46 @@ export class ShowPaymentsComponent implements OnInit {
       es_extranjero: false,
     };
 
-    const cobros: Cobro[] = detalles.map((detalle) => {
-      const { documento } = detalle;
+    const cobros: Cobro[] = Object.values(
+      detalles.reduce((acc, detalle) => {
+        const { documento } = detalle;
+        const docKey = documento.documento || 'Sin comprobante';
 
-      return {
-        forma_cobro: documento.cuenta == 'Efectivo' ? 'EF' : 'TRA',
-        monto:
-          documento.valor_oginal ||
-          detalles.reduce(
-            (sum, det) =>
-              det.documento.documento === documento.documento
-                ? sum + det.valor
-                : sum,
-            0
-          ),
-        numero_comprobante: documento.documento || 'Sin comprobante',
-        fecha: this.getEcuadorDate(documento.f_deposito),
-      };
-    });
+        if (!acc[docKey]) {
+          acc[docKey] = {
+            forma_cobro: 'EF', //documento.cuenta === 'Efectivo' ? 'EF' : 'TRA',
+            monto: documento.valor_original || 0,
+            numero_comprobante: docKey,
+            fecha: this.getEcuadorDate(documento.f_deposito),
+          };
+        }
+
+        // Sumar los valores si el documento ya existe en el acumulador
+        acc[docKey].monto +=
+          !documento.valor_original && documento.documento === docKey
+            ? detalle.valor
+            : 0;
+
+        return acc;
+      }, {})
+    );
 
     return {
       //pos: 'ceaa9097-1d76-4eb8-0000-6f412fa0297b', // Token fijo o dinámico
       fecha_emision: this.getEcuadorDate(), // Fecha actual
       tipo_documento: 'FAC',
       electronico: true,
+      servicio: 0.0,
       //documento: pago._id,
       estado: 'P',
       //autorizacion: '0123456789',
       caja_id: null,
       cliente: cliente,
-      vendedor: vendedor,
+      //vendedor: vendedor,
       descripcion: `VENTA DESDE PUNTO DE VENTA`,
-      subtotal_0: 0.0,
-      subtotal_12: detalles.reduce((sum, det) => sum + det.valor, 0),
-      iva: detalles.reduce((sum, det) => sum + det.valor, 0),
+      subtotal_12: 0.0,
+      subtotal_0: detalles.reduce((sum, det) => sum + det.valor, 0),
+      iva: 0.0, //detalles.reduce((sum, det) => sum + det.valor, 0),
       ice: 0.0,
       total: detalles.reduce((sum, det) => sum + det.valor, 0),
       adicional1:
@@ -296,6 +322,12 @@ export class ShowPaymentsComponent implements OnInit {
         pago.estudiante.nombres +
         ' ' +
         pago.estudiante.apellidos,
+      adicional2: detalles
+        .reduce(
+          (sum, det) => sum + (det.descripcion ? det.descripcion + '/ ' : ''),
+          ''
+        )
+        .slice(0, -2),
       detalles: detalles.map((detalle) => ({
         adicional1: detalle.descripcion + ' ' + detalle.estado,
         producto_id: detalle.id_contifico_producto,
@@ -305,8 +337,9 @@ export class ShowPaymentsComponent implements OnInit {
         base_cero: detalle.valor,
         base_gravable: 0.0,
         base_no_gravable: 0.0,
-        ibpnr: 0.0,
         valor_ice: 0.0,
+        porcentaje_ice: 0.0,
+        porcentaje_descuento: 0.0,
       })),
       cobros: cobros,
     };

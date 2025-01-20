@@ -1,5 +1,5 @@
 // services/inventoryService.js
-
+const { firstValueFrom } = require("rxjs");
 const { makeRequest } = require("../helpers/requests.helper");
 
 // Category endpoints
@@ -105,19 +105,21 @@ const getProducts = async (req) => {
 
 const getProductsTipo = async (req, tipo) => {
   try {
+    // Formatear el tipo con prefijo de ceros para que coincida con producto.codigo
+    const tipoConPrefijo = "P" + tipo.toString().padStart(3, "0");
+
     const productos = await makeRequest(req, {
       path: "/producto/",
       method: "get",
     });
 
     return (
-      productos.filter(
-        (producto) => parseInt(producto.codigo) === parseInt(tipo)
-      )[0] || {}
+      productos.filter((producto) => producto.codigo === tipoConPrefijo)[0] ||
+      {}
     );
   } catch (error) {
     throw new Error(
-      `Error fetching products: ${error.response?.data || error.mensaje}`
+      `Error fetching products: ${error.response?.data || error.message}`
     );
   }
 };
@@ -139,11 +141,15 @@ const getProductById = async (req, id) => {
 
 const createProduct = async (req, productData) => {
   try {
-    return await makeRequest(req, {
+    console.log("CREANDO PRODUCTO");
+    // Usar firstValueFrom para obtener el valor del Observable
+    const response = await makeRequest(req, {
       path: "/producto/",
       method: "post",
       data: productData,
     });
+
+    return response; // Devolver el objeto JSON esperado
   } catch (error) {
     throw new Error(
       `Error creating product: ${error.response?.data || error.mensaje}`

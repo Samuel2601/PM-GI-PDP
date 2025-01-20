@@ -271,13 +271,22 @@
                 </div>
                 <button
                   id="tbnfacturar"
-                  *ngIf="pago.estado != 'Emitido' && loademit"
+                  *ngIf="pago.estado != 'Emitido' && loademit && !apikey"
                   mat-raised-button
                   class="btn btn-primary btn-sm"
                   (click)="factura_electronica_soap()"
                 >
                   Emitir Factura
                 </button>
+                <button
+                id="tbnfacturar"
+                mat-raised-button
+                class="btn btn-primary btn-sm"
+                (click)="consultaProducto()"
+              >
+                Consultar Producto
+              </button>
+
               </div>
 
               <div class="card mb-5" id="titular" style="display: none">

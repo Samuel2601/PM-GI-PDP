@@ -40,7 +40,7 @@ interface Producto {
 
 export const PRODUCTOS_BASE: Producto[] = [
   {
-    codigo: '01',
+    codigo: 'P001',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION UNO',
@@ -80,7 +80,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "Zxgepnl5EF7ZRb1p",
-    codigo: '02',
+    codigo: 'P002',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION DOS',
@@ -121,7 +121,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "pXKdwxvL9I2nwegW",
-    codigo: '03',
+    codigo: 'P003',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION TRES',
@@ -162,7 +162,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "XPnazAyOKt7zjeO2",
-    codigo: '04',
+    codigo: 'P004',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION CUATRO',
@@ -203,7 +203,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "wy7aArgZNT85DbgZ",
-    codigo: '05',
+    codigo: 'P005',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION CINCO',
@@ -244,7 +244,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "wJvaMXxvoT7Ynepz",
-    codigo: '06',
+    codigo: 'P006',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION SEIS',
@@ -285,7 +285,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "oLqdPGAyJtPnLbl4",
-    codigo: '07',
+    codigo: 'P007',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION SIETE',
@@ -326,7 +326,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "nRMdRXDAXixX3al6",
-    codigo: '08',
+    codigo: 'P008',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION OCHO',
@@ -367,7 +367,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "x01dNGywXizpgeX7",
-    codigo: '09',
+    codigo: 'P009',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION NUEVE',
@@ -408,7 +408,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "rQzaOGzx6sMkBap4",
-    codigo: '10',
+    codigo: 'P010',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION DIEZ',
@@ -449,7 +449,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "GP9aQXBzKhYLweDM",
-    codigo: '11',
+    codigo: 'P011',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'MATRICULA',
@@ -490,7 +490,7 @@ export const PRODUCTOS_BASE: Producto[] = [
   },
   {
     //"id": "0pZeVWKGrFY8paGW",
-    codigo: '12',
+    codigo: 'P012',
     tipo_producto: 'SIM',
     para_pos: true,
     nombre: 'PENSION ATRASADA',
