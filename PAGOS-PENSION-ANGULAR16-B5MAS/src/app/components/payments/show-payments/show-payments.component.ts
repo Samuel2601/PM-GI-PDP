@@ -350,7 +350,7 @@ export class ShowPaymentsComponent implements OnInit {
     };
   }
 
-  crear_documento(documento: Documento) {
+  async crear_documento(documento: Documento) {
     this.loading.creacion = true;
     this.mensajes.creacion = 'Creando documento en el sistema...';
 
@@ -412,7 +412,7 @@ export class ShowPaymentsComponent implements OnInit {
     emision: '',
     consultaDoc: '',
   };
-  generarDocumento() {
+  async generarDocumento() {
     if (this.apikey && !this.pago.id_contifico) {
       const pre_factura = this.armado_Documento_envio_Contifico(
         this.pago,
@@ -420,7 +420,9 @@ export class ShowPaymentsComponent implements OnInit {
       );
       console.log(pre_factura);
       try {
-        this.crear_documento(pre_factura);
+        await this.crear_documento(pre_factura).finally(() => {
+          setTimeout(() => location.reload(), 2000);
+        });
       } catch (error) {
         console.error(error);
       }
