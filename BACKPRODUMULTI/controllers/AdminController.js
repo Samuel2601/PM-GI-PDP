@@ -1516,19 +1516,23 @@ const obtener_detallespagos_admin = async function (req, res) {
       var id = req.params["id"];
       let conn = mongoose.connection.useDb(req.user.base);
       Pago = conn.model("pago", VentaSchema);
+      Config = conn.model("config", ConfigSchema);
       Pension = conn.model("pension", PensionSchema);
       Estudiante = conn.model("estudiante", EstudianteSchema);
       Documento = conn.model("document", DocumentoSchema);
       Dpago = conn.model("dpago", DpagoSchema);
       let detalle = [];
       let pagosd = [];
-      if (id != "null") {
+
+      const config = await Config.findById(id);
+      
+      if (config) {
         detalle = await Dpago.find()
           .populate("idpension")
           .populate("pago")
           .lean();
         pagosd = detalle.filter(
-          (element) => element.idpension.idanio_lectivo == id
+          (element) => element.idpension.idanio_lectivo == config._id || new Date(element.idpension.anio_lectivo).getTime() === new Date(config.anio_lectivo).getTime()
         );
         res.status(200).send({ data: pagosd });
       } else {
