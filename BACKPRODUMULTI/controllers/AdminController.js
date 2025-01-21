@@ -1648,7 +1648,11 @@ const obtener_becas_conf = async function (req, res) {
       let becasconfig = [];
       becas.forEach((element) => {
         //element.idpension.idanio_lectivo==id
-        if (element.idpension.idanio_lectivo == id) {
+        if (
+          element.idpension &&
+          element.idpension.idanio_lectivo &&
+          element.idpension.idanio_lectivo == id
+        ) {
           becasconfig.push(element);
         }
       });
