@@ -492,6 +492,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
       this._adminService
         .obtener_detallespagos_admin(this.token, this.config[val]._id)
         .subscribe((response) => {
+          console.log(response);
           this.estudiantes = response.data.map((item: any) => {
             return {
               abono: item.abono,

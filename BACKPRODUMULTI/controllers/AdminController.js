@@ -1522,21 +1522,14 @@ const obtener_detallespagos_admin = async function (req, res) {
       Dpago = conn.model("dpago", DpagoSchema);
       let detalle = [];
       let pagosd = [];
-
       if (id != "null") {
         detalle = await Dpago.find()
           .populate("idpension")
           .populate("pago")
           .lean();
-
-        if (id !== "null") {
-          pagosd = detalle.filter(
-            (element) => element.idpension.idanio_lectivo === id
-          );
-        } else {
-          pagosd = detalle;
-        }
-
+        pagosd = detalle.filter(
+          (element) => element.idpension.idanio_lectivo == id
+        );
         res.status(200).send({ data: pagosd });
       } else {
         detalle = await Dpago.find().populate("idpension");
