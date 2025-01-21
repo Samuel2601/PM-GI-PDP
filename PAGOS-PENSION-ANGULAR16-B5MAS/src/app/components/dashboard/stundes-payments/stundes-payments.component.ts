@@ -490,7 +490,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
   ) {
     if (this.actualizar_dashest == true) {
       this._adminService
-        .obtener_detallespagos_admin(this.token, this.config[val].anio_lectivo)
+        .obtener_detallespagos_admin(this.token, this.config[val]._id)
         .subscribe((response) => {
           this.estudiantes = response.data.map((item: any) => {
             return {

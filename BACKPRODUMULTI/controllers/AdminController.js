@@ -1527,7 +1527,7 @@ const obtener_detallespagos_admin = async function (req, res) {
         detalle = await Dpago.find().populate("idpension").populate("pago");
         detalle.forEach((element) => {
           if (
-            new Date(element.idpension.anio_lectivo).getTime() ==
+            new Date(element.idpension.idanio_lectivo).getTime() ==
             new Date(id).getTime()
           ) {
             pagosd.push(element);

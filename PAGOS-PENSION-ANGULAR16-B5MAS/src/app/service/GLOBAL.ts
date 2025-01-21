@@ -1,5 +1,5 @@
 export var GLOBAL = {
-  url: 'https://api.goldenincorp.com/api/',
+  //url: 'https://api.goldenincorp.com/api/',
   //url: 'http://127.0.0.1:4201/api/',
 
   //url: "https://api.pagosegbfcristorey.tk/api/",
