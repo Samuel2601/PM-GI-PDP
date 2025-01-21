@@ -1524,15 +1524,19 @@ const obtener_detallespagos_admin = async function (req, res) {
       let pagosd = [];
 
       if (id != "null") {
-        detalle = await Dpago.find().populate("idpension").populate("pago");
-        detalle.forEach((element) => {
-          if (
-            element.idpension.idanio_lectivo ==
-            id
-          ) {
-            pagosd.push(element);
-          }
-        });
+        detalle = await Dpago.find()
+          .populate("idpension")
+          .populate("pago")
+          .lean();
+
+        if (id !== "null") {
+          pagosd = detalle.filter(
+            (element) => element.idpension.idanio_lectivo === id
+          );
+        } else {
+          pagosd = detalle;
+        }
+
         res.status(200).send({ data: pagosd });
       } else {
         detalle = await Dpago.find().populate("idpension");
