@@ -1525,15 +1525,16 @@ const obtener_detallespagos_admin = async function (req, res) {
       let pagosd = [];
 
       const config = await Config.findById(id);
-      
+      console.log("Configuración buscada: ",config);
       if (config) {
         detalle = await Dpago.find()
           .populate("idpension")
           .populate("pago")
           .lean();
         pagosd = detalle.filter(
-          (element) => element.idpension.idanio_lectivo == config._id || new Date(element.idpension.anio_lectivo).getTime() === new Date(config.anio_lectivo).getTime()
+          (element) => element.idpension && element.idpension.idanio_lectivo == config._id || new Date(element.idpension.anio_lectivo).getTime() === new Date(config.anio_lectivo).getTime()
         );
+        console.error(detalle.filter((elment)=>!elment.idpension).length);
         res.status(200).send({ data: pagosd });
       } else {
         detalle = await Dpago.find().populate("idpension");
