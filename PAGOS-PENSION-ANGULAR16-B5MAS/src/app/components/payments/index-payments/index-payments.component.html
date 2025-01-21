@@ -1,276 +1,406 @@
 <div class="container">
-	<div class="sidebar">
-		<app-sidebar></app-sidebar>
-	</div>
-	
-	<div class="content">
-        <div class="container-fluid">
-            <div class="row justify-content-center">
-                <div class="col-12">
-                    <!-- Header -->
-                    <div class="header mt-md-5">
-                        <div class="header-body">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <!-- Pretitle -->
-                                    <h6 class="header-pretitle">Módulo</h6>
-    
-                                    <!-- Title -->
-                                    <h1 class="header-title">Pagos</h1>
-                                </div>
-                            </div>
-                            <!-- / .row -->
-                        </div>
-                    </div>
-    
-                    <!-- Alert -->
-    
-                    <!-- Card -->
-                    <div class="card">
-                        <div class="card-header">
-                            <!-- Title -->
-                            <h4 class="card-header-title">Mostrando todos tus pagos {{ pagos.length }}</h4>
-                            <h4 class="card-header-title">{{ auxtotal | currency : 'USD' }} Monton total</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row justify-content-between mb-4">
-                                <div class="col">
-                                    <div class="input-group input-group-merge">
-                                        <input
-                                            type="text"
-                                            class="form-control form-control-appended"
-                                            placeholder="Buscar venta por código"
-                                            name="filtro"
-                                            [(ngModel)]="filtro"
-                                        />
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" (click)="filtrar_pagos()">Buscar</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div
-                                    class="col"
-                                    *ngIf="rol == 'secrt' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'"
-                                >
-                                    <a
-                                        class="btn btn-primary btn-block"
-                                        [routerLink]="['/pagos/create']"
-                                        routerLinkActive="router-link-active"
-                                        style="cursor: pointer"
-                                    >
-                                        Nueva venta
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-3">
-                                     <p> Desde: {{ desde | date:'short' }}</p>
-                                    <input type="date" class="form-control" name="desde" [(ngModel)]="desde" />
-                                </div>
-                                <div class="col-3">
-                                     <p> Hasta: {{ hasta | date:'short' }}</p>
-                                    <input type="date" class="form-control" name="hasta" [(ngModel)]="hasta" />
-                                </div>
-                                <div class="col">
-                                    <button class="btn btn-primary btn-block" (click)="filtrar_fechas()">Buscar</button>
-                                </div>
-                                <div class="col">
-                                    <button class="btn btn-danger btn-block" (click)="reset_data()">Reset</button>
-                                </div>
-                                <div
-                                    class="col"
-                                    *ngIf="rol == 'direc' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'"
-                                >
-                                    <button class="btn btn-danger active" data-bs-toggle="modal" [attr.data-bs-target]="'#delete-todo'">
-                                        Eliminar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-nowrap card-table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th *ngIf="rol == 'direc' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'">
-                                            <input
-                                                type="checkbox"
-                                                value="1"
-                                                placeholder="total"
-                                                [(ngModel)]="total"
-                                                (click)="select_todo()"
-                                            />
-                                        </th>
-                                        <th>Estudiante</th>
-    
-                                        <th>Monto</th>
-                                        <th>Fecha</th>
-                                        <th>Estado</th>
-                                        <th>Opciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="font-size-base" *ngIf="!load">
-                                    <tr
-                                        *ngFor="
-                                            let item of pagos | slice : (page - 1) * pageSize : (page - 1) * pageSize + pageSize
-                                        "
-                                    >
-                                        <td *ngIf="rol == 'direc' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'">
-                                            <input type="checkbox" value="1" placeholder="item.ckechk" [(ngModel)]="item.ckechk" />
-                                        </td>
-                                        <td>
-                                            <a
-                                                class="text-primary"
-                                                style="cursor: pointer"
-                                                [routerLink]="['/estudiantes/detalle', item.element.estudiante._id]"
-                                                >{{ item.element.estudiante.nombres }} {{ item.element.estudiante.apellidos }}</a
-                                            ><br />
-                                            <a 	class="text-muted"
-                                            [routerLink]="['/pagos/', item.element._id]" style="cursor: pointer">
-                                                <small
-                                            
-                                                
-                                            >
-                                                {{ item.element._id }}
-                                            </small>
-                                            </a>
-                                            
-                                        </td>
-                                        <td>
-                                            <span>{{ item.element.total_pagar | currency : 'USD' }}</span>
-                                        </td>
-                                        <td>
-                                            {{ item.element.createdAt | date : 'short' : 'IST' }}
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-success" *ngIf="item.element.estado == 'Emitido'">{{
-                                                item.element.estado
-                                            }}</span>
-                                            <span class="badge badge-warning" *ngIf="item.element.estado == 'Registrado'">{{
-                                                item.element.estado
-                                            }}</span>
-                                            <span class="badge badge-info" *ngIf="item.element.estado == 'Enviado'">{{
-                                                item.element.estado
-                                            }}</span>
-                                            <span class="badge badge-danger" *ngIf="item.element.estado == 'Finalizado'">{{
-                                                item.element.estado
-                                            }}</span>
-                                        </td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <button
-                                                    class="btn btn-secondary"
-                                                    type="button"
-                                                    id="dropdownMenuButtonAlias"
-                                                    data-bs-toggle="dropdown"
-                                                    aria-haspopup="true"
-                                                    aria-expanded="false"
-                                                >
-                                                    Opciones
-                                                    <i class="bi bi-caret-down-fill"></i>
-                                                </button>
-    
-                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAlias">
-                                                    <li>
-                                                        <a class="dropdown-item" [routerLink]="['/pagos/', item.element._id]">Detalles</a>
-                                                    </li>
-                                                    <li *ngIf="rol == 'direc' || rol == 'admin' || aux == 'samuel.arevalo@espoch.edu.ec'">
-                                                        <a
-                                                            class="dropdown-item"
-                                                            style="cursor: pointer"
-                                                            data-bs-toggle="modal"
-                                                            [attr.data-bs-target]="'#delete-' + item.element._id"
-                                                            >Eliminar</a
-                                                        >
-                                                    </li>
-                                                </ul>
-                                            </div>
-    
-                                            <div
-                                                class="modal fade"
-                                                id="delete-{{ item.element._id }}"
-                                                tabindex="-1"
-                                                style="display: none"
-                                                aria-hidden="true"
-                                            >
-                                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h4 class="modal-title">
-                                                                Eliminar el pago de {{ item.element.estudiante.nombres }}
-                                                                {{ item.element.estudiante.apellidos }}
-                                                            </h4>
-                                                            <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true">×</span>
-                                                            </button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <p>Desea eliminar este pago? {{ item.element._id }}</p>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
-                                                                Cancelar
-                                                            </button>
-                                                            <button
-                                                                class="btn btn-primary btn-shadow btn-sm"
-                                                                (click)="eliminar(item.element._id)"
-                                                                type="button"
-                                                            >
-                                                                Si, eliminar
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tbody *ngIf="load">
-                                    <tr>
-                                        <td colspan="5" class="text-center">
-                                            <div class="spinner-border text-primary" role="status">
-                                                <span class="visually-hidden"></span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <ngb-pagination
-                        *ngIf="pagos.length >= 1"
-                        [(page)]="page"
-                        [pageSize]="pageSize"
-                        [maxSize]="10"
-                        [rotate]="true"
-                        [boundaryLinks]="true"
-                        [collectionSize]="pagos.length"
-                    ></ngb-pagination>
-    
-                    <br />
+  <div class="sidebar">
+    <app-sidebar></app-sidebar>
+  </div>
+
+  <div class="content">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col-12">
+          <!-- Header -->
+          <div class="header mt-md-5">
+            <div class="header-body">
+              <div class="row align-items-center">
+                <div class="col">
+                  <!-- Pretitle -->
+                  <h6 class="header-pretitle">Módulo</h6>
+
+                  <!-- Title -->
+                  <h1 class="header-title">Pagos</h1>
                 </div>
-                <div class="modal fade" id="delete-todo" tabindex="-1" style="display: none" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
+              </div>
+              <!-- / .row -->
+            </div>
+          </div>
+
+          <!-- Alert -->
+
+          <!-- Card -->
+          <div class="card">
+            <div class="card-header">
+              <!-- Title -->
+              <h4 class="card-header-title">
+                Mostrando todos tus pagos {{ pagos.length }}
+              </h4>
+              <h4 class="card-header-title">
+                {{ auxtotal | currency : "USD" }} Monton total
+              </h4>
+            </div>
+            <div class="card-body">
+              <div class="row justify-content-between mb-4">
+                <div class="col">
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="text"
+                      class="form-control form-control-appended"
+                      placeholder="Buscar venta por código"
+                      name="filtro"
+                      [(ngModel)]="filtro"
+                    />
+                    <div class="input-group-append">
+                      <button class="btn btn-primary" (click)="filtrar_pagos()">
+                        Buscar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="col"
+                  *ngIf="
+                    rol == 'secrt' ||
+                    rol == 'admin' ||
+                    aux == 'samuel.arevalo@espoch.edu.ec'
+                  "
+                >
+                  <a
+                    class="btn btn-primary btn-block"
+                    [routerLink]="['/pagos/create']"
+                    routerLinkActive="router-link-active"
+                    style="cursor: pointer"
+                  >
+                    Nueva venta
+                  </a>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-3">
+                  <p>Desde: {{ desde | date : "short" }}</p>
+                  <input
+                    type="date"
+                    class="form-control"
+                    name="desde"
+                    [(ngModel)]="desde"
+                  />
+                </div>
+                <div class="col-3">
+                  <p>Hasta: {{ hasta | date : "short" }}</p>
+                  <input
+                    type="date"
+                    class="form-control"
+                    name="hasta"
+                    [(ngModel)]="hasta"
+                  />
+                </div>
+                <div class="col">
+                  <button
+                    class="btn btn-primary btn-block"
+                    (click)="filtrar_fechas()"
+                  >
+                    Buscar
+                  </button>
+                </div>
+                <div class="col">
+                  <button
+                    class="btn btn-danger btn-block"
+                    (click)="reset_data()"
+                  >
+                    Reset
+                  </button>
+                </div>
+                <div
+                  class="col"
+                  *ngIf="
+                    rol == 'direc' ||
+                    rol == 'admin' ||
+                    aux == 'samuel.arevalo@espoch.edu.ec'
+                  "
+                >
+                  <button
+                    class="btn btn-danger active"
+                    data-bs-toggle="modal"
+                    [attr.data-bs-target]="'#delete-todo'"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-nowrap card-table table-hover">
+                <thead>
+                  <tr>
+                    <th
+                      *ngIf="
+                        rol == 'direc' ||
+                        rol == 'admin' ||
+                        aux == 'samuel.arevalo@espoch.edu.ec'
+                      "
+                    >
+                      <input
+                        type="checkbox"
+                        value="1"
+                        placeholder="total"
+                        [(ngModel)]="total"
+                        (click)="select_todo()"
+                      />
+                    </th>
+                    <th>Estudiante</th>
+
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Opciones</th>
+                  </tr>
+                </thead>
+                <tbody class="font-size-base" *ngIf="!load">
+                  <tr
+                    *ngFor="
+                      let item of pagos
+                        | slice
+                          : (page - 1) * pageSize
+                          : (page - 1) * pageSize + pageSize
+                    "
+                  >
+                    <td
+                      *ngIf="
+                        rol == 'direc' ||
+                        rol == 'admin' ||
+                        aux == 'samuel.arevalo@espoch.edu.ec'
+                      "
+                    >
+                      <input
+                        type="checkbox"
+                        value="1"
+                        placeholder="item.ckechk"
+                        [(ngModel)]="item.ckechk"
+                      />
+                    </td>
+                    <td>
+                      <a
+                        class="text-primary"
+                        style="cursor: pointer"
+                        [routerLink]="[
+                          '/estudiantes/detalle',
+                          item.element.estudiante._id
+                        ]"
+                        >{{ item.element.estudiante.nombres }}
+                        {{ item.element.estudiante.apellidos }}</a
+                      ><br />
+                      <a
+                        class="text-muted"
+                        [routerLink]="['/pagos/', item.element._id]"
+                        style="cursor: pointer"
+                      >
+                        <small>
+                          {{ item.element._id }}
+                        </small>
+                      </a>
+                    </td>
+                    <td>
+                      <span>{{
+                        item.element.total_pagar | currency : "USD"
+                      }}</span>
+                    </td>
+                    <td>
+                      {{ item.element.createdAt | date : "short" : "IST" }}
+                    </td>
+                    <td>
+                      <ng-container *ngIf="!item.element.id_contifico">
+                        <span
+                          class="badge badge-success"
+                          *ngIf="item.element.estado == 'Emitido'"
+                          >{{ item.element.estado }}</span
+                        >
+                        <span
+                          class="badge badge-warning"
+                          *ngIf="item.element.estado == 'Registrado'"
+                          >{{ item.element.estado }}</span
+                        >
+                        <span
+                          class="badge badge-info"
+                          *ngIf="item.element.estado == 'Enviado'"
+                          >{{ item.element.estado }}</span
+                        >
+                        <span
+                          class="badge badge-danger"
+                          *ngIf="item.element.estado == 'Finalizado'"
+                          >{{ item.element.estado }}</span
+                        >
+                      </ng-container>
+                      <ng-container *ngIf="item.element.id_contifico">
+                        <span
+                          class="badge badge-info"
+                          >Enviado</span
+                        >
+                      </ng-container>
+                    </td>
+                    <td>
+                      <div class="dropdown">
+                        <button
+                          class="btn btn-secondary"
+                          type="button"
+                          id="dropdownMenuButtonAlias"
+                          data-bs-toggle="dropdown"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                        >
+                          Opciones
+                          <i class="bi bi-caret-down-fill"></i>
+                        </button>
+
+                        <ul
+                          class="dropdown-menu"
+                          aria-labelledby="dropdownMenuButtonAlias"
+                        >
+                          <li>
+                            <a
+                              class="dropdown-item"
+                              [routerLink]="['/pagos/', item.element._id]"
+                              >Detalles</a
+                            >
+                          </li>
+                          <li
+                            *ngIf="
+                              rol == 'direc' ||
+                              rol == 'admin' ||
+                              aux == 'samuel.arevalo@espoch.edu.ec'
+                            "
+                          >
+                            <a
+                              class="dropdown-item"
+                              style="cursor: pointer"
+                              data-bs-toggle="modal"
+                              [attr.data-bs-target]="
+                                '#delete-' + item.element._id
+                              "
+                              >Eliminar</a
+                            >
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div
+                        class="modal fade"
+                        id="delete-{{ item.element._id }}"
+                        tabindex="-1"
+                        style="display: none"
+                        aria-hidden="true"
+                      >
+                        <div
+                          class="modal-dialog modal-dialog-centered"
+                          role="document"
+                        >
+                          <div class="modal-content">
                             <div class="modal-header">
-                                <h4 class="modal-title">Eliminación masiva</h4>
-                                <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">×</span>
-                                </button>
+                              <h4 class="modal-title">
+                                Eliminar el pago de
+                                {{ item.element.estudiante.nombres }}
+                                {{ item.element.estudiante.apellidos }}
+                              </h4>
+                              <button
+                                class="close"
+                                type="button"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                              >
+                                <span aria-hidden="true">×</span>
+                              </button>
                             </div>
                             <div class="modal-body">
-                                <p>Desea eliminar estos pagos?</p>
+                              <p>
+                                Desea eliminar este pago? {{ item.element._id }}
+                              </p>
                             </div>
                             <div class="modal-footer">
-                                <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">Cancelar</button>
-                                <button class="btn btn-primary btn-shadow btn-sm" (click)="eliminar_todo()" type="button">
-                                    Si, eliminar
-                                </button>
+                              <button
+                                class="btn btn-secondary btn-sm"
+                                type="button"
+                                data-bs-dismiss="modal"
+                              >
+                                Cancelar
+                              </button>
+                              <button
+                                class="btn btn-primary btn-shadow btn-sm"
+                                (click)="eliminar(item.element._id)"
+                                type="button"
+                              >
+                                Si, eliminar
+                              </button>
                             </div>
+                          </div>
                         </div>
-                    </div>
-                </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+                <tbody *ngIf="load">
+                  <tr>
+                    <td colspan="5" class="text-center">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden"></span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <!-- / .row -->
+          </div>
+          <ngb-pagination
+            *ngIf="pagos.length >= 1"
+            [(page)]="page"
+            [pageSize]="pageSize"
+            [maxSize]="10"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            [collectionSize]="pagos.length"
+          ></ngb-pagination>
+
+          <br />
         </div>
+        <div
+          class="modal fade"
+          id="delete-todo"
+          tabindex="-1"
+          style="display: none"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Eliminación masiva</h4>
+                <button
+                  class="close"
+                  type="button"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>Desea eliminar estos pagos?</p>
+              </div>
+              <div class="modal-footer">
+                <button
+                  class="btn btn-secondary btn-sm"
+                  type="button"
+                  data-bs-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button
+                  class="btn btn-primary btn-shadow btn-sm"
+                  (click)="eliminar_todo()"
+                  type="button"
+                >
+                  Si, eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- / .row -->
     </div>
+  </div>
 </div>

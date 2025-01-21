@@ -24,7 +24,7 @@ export class IndexPaymentsComponent implements OnInit {
 	public desde: any = new Date();
 	public hasta: any = new Date();
 
-	
+
 	public load = false;
 	public rol: any;
 	public aux: any;
@@ -56,9 +56,9 @@ export class IndexPaymentsComponent implements OnInit {
 					this.recarga();
 				}
 			}
-			
+
 		});
-		
+
 		//this.recarga();
 	}
 	recarga() {
@@ -80,7 +80,7 @@ export class IndexPaymentsComponent implements OnInit {
 			this.load = false;
 			this.listar();
 		});
-		
+
 		// this.auxtotal=parseFloat(this.auxtotal.toFixed(2));
 	}
 
