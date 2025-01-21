@@ -724,6 +724,90 @@ export class IndexStudentsComponent implements OnInit {
         //location.reload();
       });
   }
+
+  borrar_estudiante() {
+    this.load_data_est = true;
+    this.subidoss = 0;
+    this.resubidos = 0;
+    this.resubidosc = 0;
+    this.errorneoss = 0;
+    this.errorv = 0;
+    this.progressBarService.setProgress(
+      this.progressBarService.getProgress() + 10
+    );
+    console.log(this.proveedores);
+    this._adminService
+      .borrado_estudiante_masivo(this.proveedores, this.token)
+      .subscribe((response) => {
+        console.log(response);
+        this.subidoss = response.s;
+        this.resubidos = response.r;
+        this.resubidosc = response.rc;
+        this.errorneoss = response.e;
+        this.errorv = response.ev;
+        this.progressBarService.setProgress(
+          this.progressBarService.getProgress() + 50
+        );
+        if (this.subidoss != 0) {
+          iziToast.show({
+            title: 'SUCCESS',
+            titleColor: '#1DC74C',
+            color: '#FFF',
+            class: 'iziToast-success',
+            position: 'topRight',
+            message: 'Estudiante agregado con exito (' + this.subidoss + ')',
+          });
+        }
+        if (this.resubidos != 0) {
+          iziToast.show({
+            title: 'INFO',
+            titleColor: '#1DC74C',
+            color: '#FFF',
+            class: 'iziToast-primary',
+            position: 'topRight',
+            message: 'Reactivado (' + this.resubidos + ')',
+          });
+        }
+        if (this.resubidosc != 0) {
+          iziToast.show({
+            title: 'INFO',
+            titleColor: '#1DC74C',
+            color: '#FFF',
+            class: 'iziToast-info',
+            position: 'topRight',
+            message:
+              'Reactivado con pension existente(' + this.resubidosc + ')',
+          });
+        }
+        if (this.errorneoss != 0) {
+          iziToast.show({
+            title: 'ADVERTENCIA',
+            titleColor: 'RED',
+            color: 'RED',
+            class: 'iziToast-warning',
+            position: 'topRight',
+            message: 'Estudiante ya existente' + '(' + this.errorneoss + ')',
+          });
+        }
+        if (this.errorv != 0) {
+          iziToast.show({
+            title: 'ERROR',
+            titleColor: 'RED',
+            color: 'RED',
+            class: 'iziToast-dannger',
+            position: 'topRight',
+            message: 'Fila con campo vacio' + '(' + this.errorv + ')',
+          });
+        }
+        this.progressBarService.setProgress(
+          this.progressBarService.getProgress() + 100
+        );
+        this.load_eliminados = false;
+        this.progressBarService.setProgress(0);
+        //this.ngOnInit();
+        //location.reload();
+      });
+  }
   mostrar_eliminado() {
     this.total = 0;
     this.load_data_est = true;
@@ -823,7 +907,9 @@ export class IndexStudentsComponent implements OnInit {
     return (
       term.test(`${element.curso}-${element.paralelo}`) || // Curso y paralelo combinados
       term.test(`${element.especialidad}`) || // Curso y paralelo combinados
-      term.test(`${element.curso}-${element.paralelo}-${element.especialidad}`) || // Curso y paralelo combinados
+      term.test(
+        `${element.curso}-${element.paralelo}-${element.especialidad}`
+      ) || // Curso y paralelo combinados
       term.test(element.nombres) ||
       term.test(element.apellidos) ||
       term.test(element.genero) ||

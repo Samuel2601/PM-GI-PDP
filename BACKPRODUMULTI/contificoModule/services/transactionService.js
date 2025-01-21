@@ -116,43 +116,59 @@ const updatePagoIdCont = async (req, id, idCont, session) => {
 };
 
 const createDocument = async (req, documentData, idpago) => {
-  const productos = await makeRequest(req, {
-    path: "/producto/",
-    method: "get",
-  });
+  try {
+    const productos = await makeRequest(req, {
+      path: "/producto/",
+      method: "get",
+    });
 
-  // Cambiar forEach por Promise.all con map para manejar correctamente las promesas
-  await Promise.all(
-    documentData.detalles.map(async (element) => {
-      if (!element.producto_id) {
-        // Formatear el tipo con prefijo de ceros
-        const tipoConPrefijo = "P" + element.tipo.toString().padStart(3, "0");
-        let producto = productos.find(
-          (producto) => producto.codigo === tipoConPrefijo
-        );
+    const categorias = await makeRequest(req, {
+      path: "/categoria/",
+      method: "get",
+    });
 
-        if (!producto) {
-          const new_Producto = PRODUCTOS_BASE.find(
+    // Cambiar forEach por Promise.all con map para manejar correctamente las promesas
+    await Promise.all(
+      documentData.detalles.map(async (element) => {
+        if (!element.producto_id) {
+          // Formatear el tipo con prefijo de ceros
+          const tipoConPrefijo = "P" + element.tipo.toString().padStart(3, "0");
+          let producto = productos.find(
             (producto) => producto.codigo === tipoConPrefijo
           );
-          if (!new_Producto) {
-            throw new Error(
-              `No se encontró producto base para tipo ${element.tipo}`
-            );
-          }
-          producto = await makeRequest(req, {
-            path: "/producto/",
-            method: "post",
-            data: new_Producto,
-          });
-        }
 
-        // Asignar el ID del producto encontrado o creado
-        element.producto_id = producto.id;
-      }
-      delete element.tipo;
-    })
-  );
+          if (!producto) {
+            const new_Producto = PRODUCTOS_BASE.find(
+              (producto) => producto.codigo === tipoConPrefijo
+            );
+            if (!new_Producto) {
+              throw new Error(
+                `No se encontró producto base para tipo ${element.tipo}: ` +
+                  JSON.stringify(new_Producto)
+              );
+            }
+            new_Producto.categoria_id=categorias[0].id
+            producto = await makeRequest(req, {
+              path: "/producto/",
+              method: "post",
+              data: new_Producto,
+            });
+          }
+
+          // Asignar el ID del producto encontrado o creado
+          element.producto_id = producto.id;
+        }
+        delete element.tipo;
+      })
+    );
+  } catch (error) {
+    throw new Error(
+      error.mensaje ||
+        "Error desconocido al crear el PRODUCTO, " +
+          " ERROR:" +
+          JSON.stringify(error)
+    );
+  }
 
   const session = await mongoose.startSession();
   session.startTransaction();

@@ -182,7 +182,7 @@ const registro_estudiante = async function (req, res) {
     res.status(200).send({ message: "No Access" });
   }
 };
-
+//INICIO DE REGISTRAR ESTUDIANTE MASIVO
 const registro_estudiante_masivo = async (req, res) => {
   if (!req.user) {
     return res.status(403).send({ message: "No Access" });
@@ -412,10 +412,102 @@ async function reactivarEstudiante(
     stats.resubidosc++;
   }
 }
+//FIN DE REGISTRAR ESTUDIANTE
 
-module.exports = {
-  registro_estudiante_masivo,
+//INICIO BORRAR MASIVO
+const borrado_estudiante_masivo = async (req, res) => {
+  if (!req.user) {
+    return res.status(403).send({ message: "No Access" });
+  }
+
+  try {
+    const { body: estudiantes } = req;
+    if (!Array.isArray(estudiantes) || estudiantes.length === 0) {
+      return res.status(200).send({
+        d: 0, // eliminados
+        e: 0, // errores
+        ev: 0, // errores de validación
+      });
+    }
+
+    const conn = mongoose.connection.useDb(req.user.base);
+    const Estudiante = conn.model("estudiante", EstudianteSchema);
+    const Pension = conn.model("pension", PensionSchema);
+
+    const stats = {
+      eliminados: 0,
+      errores: 0,
+      errorv: 0,
+    };
+
+    // Procesamos los estudiantes de forma secuencial
+    for (const estudiante of estudiantes) {
+      await procesarBorradoEstudiante(estudiante, {
+        Estudiante,
+        Pension,
+        stats,
+      });
+    }
+
+    return res.status(200).send({
+      d: stats.eliminados,
+      e: stats.errores,
+      ev: stats.errorv,
+    });
+  } catch (error) {
+    console.error("Error en borrado masivo:", error);
+    return res.status(500).send({
+      message: "Error en el procesamiento",
+      error: error.message,
+    });
+  }
 };
+
+async function procesarBorradoEstudiante(
+  datos,
+  { Estudiante, Pension, stats }
+) {
+  try {
+    // Verificamos si el estudiante existe por DNI o nombre completo
+    const estudianteExistente = await Estudiante.findOne({
+      $or: [
+        { dni: datos.dni },
+        {
+          nombres: datos.nombres,
+          apellidos: datos.apellidos,
+        },
+      ],
+    });
+
+    if (!estudianteExistente) {
+      stats.errores++;
+      return;
+    }
+
+    // Primero eliminamos todas las pensiones asociadas
+    try {
+      await Pension.deleteMany({ idestudiante: estudianteExistente._id });
+    } catch (errorPension) {
+      console.error("Error eliminando pensiones:", errorPension);
+      stats.errorv++;
+      return;
+    }
+
+    // Luego eliminamos el estudiante
+    try {
+      await Estudiante.deleteOne({ _id: estudianteExistente._id });
+      stats.eliminados++;
+    } catch (errorEstudiante) {
+      console.error("Error eliminando estudiante:", errorEstudiante);
+      stats.errorv++;
+      return;
+    }
+  } catch (error) {
+    console.error("Error procesando borrado de estudiante:", datos.dni, error);
+    stats.errorv++;
+  }
+}
+//FIN DE BORRAR MASIVO
 
 const login_estudiante = async function (req, res) {
   var data = req.body;
@@ -1502,6 +1594,7 @@ module.exports = {
   listar_documentos_nuevos_publico,
   registro_estudiante,
   registro_estudiante_masivo,
+  borrado_estudiante_masivo,
   login_estudiante,
   obtener_estudiante_guest,
   actualizar_estudiante_admin,

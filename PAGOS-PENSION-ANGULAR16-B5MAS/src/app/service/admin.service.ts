@@ -194,6 +194,13 @@ export class AdminService {
 		});
 		return this._http.post(this.url + 'registro_estudiante_masivo', data, { headers: headers });
 	}
+  borrado_estudiante_masivo(data: any, token: any): Observable<any> {
+		let headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			Authorization: token,
+		});
+		return this._http.post(this.url + 'borrado_estudiante_masivo', data, { headers: headers });
+	}
 
 	registro_admin(data: any, token: any): Observable<any> {
 		let headers = new HttpHeaders({

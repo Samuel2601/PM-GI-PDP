@@ -1,275 +1,370 @@
 <div class="container-xl">
-	<div class="sidebar">
-		<app-sidebar></app-sidebar>
-	</div>
+  <div class="sidebar">
+    <app-sidebar></app-sidebar>
+  </div>
 
-	<div class="content" >
-		<div class="container-fluid" >
-			<div class="row" >
-				<div class="col-lg-12">
-					<!-- Header -->
-					<div class="header mt-md-5">
-						<div class="header-body">
-							<div class="row align-items-center">
-								<div class="col">
-									<!-- Pretitle -->
-									<h6 class="header-pretitle">Módulo</h6>
+  <div class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-12">
+          <!-- Header -->
+          <div class="header mt-md-5">
+            <div class="header-body">
+              <div class="row align-items-center">
+                <div class="col">
+                  <!-- Pretitle -->
+                  <h6 class="header-pretitle">Módulo</h6>
 
-									<!-- Title -->
-									<h1 class="header-title">Estudiantes</h1>
+                  <!-- Title -->
+                  <h1 class="header-title">Estudiantes</h1>
+                </div>
+              </div>
+              <!-- / .row -->
+            </div>
+          </div>
 
-								</div>
-							</div>
-							<!-- / .row -->
-						</div>
-					</div>
+          <!-- Alert -->
 
-					<!-- Alert -->
+          <!-- Card -->
+          <ng-container *ngIf="load_data_est">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-12 text-center">
+                  <div
+                    class="spinner-border"
+                    style="width: 3rem; height: 3rem"
+                    role="status"
+                  >
+                    <span class="visually-hidden"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!load_data_est">
+            <div class="card">
+              <div class="card-header">
+                <!-- Title -->
+                <h4 class="card-header-title">
+                  Mostrando todos tus estudiantes {{ estudiantes.length }}
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="input-group input-group-merge">
+                      <ng-container>
+                        <button
+                          class="btn btn-danger active"
+                          *ngIf="load_eliminados == false"
+                          (click)="mostrar_eliminado()"
+                        >
+                          ⥂
+                        </button>
+                        <button
+                          class="btn btn-success"
+                          *ngIf="load_eliminados == true"
+                          (click)="mostrar_normales()"
+                        >
+                          ⥄
+                        </button>
+                      </ng-container>
+                      <input
+                        type="text"
+                        class="form-control form-control-appended"
+                        placeholder="Buscar estudiante"
+                        name="filtro"
+                        [(ngModel)]="filtro"
+                      />
+                      <div class="input-group-append">
+                        <button
+                          class="btn btn-primary"
+                          (click)="filtrar_estudiante()"
+                        >
+                          Buscar
+                        </button>
+                        <ng-container
+                          *ngIf="rol == 'admin' || rol == 'secrt'"
+                          style="text-align: right"
+                        >
+                          <a
+                            class="btn btn-primary"
+                            [routerLink]="['/estudiantes/create']"
+                            routerLinkActive="router-link-active"
+                            style="cursor: pointer"
+                            >Nuevo Estudiante</a
+                          >
+                        </ng-container>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="modal fade"
+                    id="modalAddProvMasivo"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
+                      role="documentrubro"
+                    >
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <!-- Title -->
+                          <h4 class="card-header-title">
+                            Adjunto tu archivo CSV
+                          </h4>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
+                        </div>
+                        <div class="modal-body">
+                          <input
+                            type="file"
+                            class="form-control-file custom-file-input"
+                            id="fileInput"
+                            style="display: none"
+                            accept=".csv,.xlsx"
+                            (change)="onFileChange($event)"
+                          />
+                          <div #dropZone ngx-file-drop class="ratio ratio-4x3">
+                            <ngx-file-drop
+                              (onFileDrop)="onFileDrop($event)"
+                              [allowedFileTypes]="['csv', 'xlsx']"
+                              [dragOverClass]="'file-drop-target'"
+                              style="height: 100%"
+                            >
+                              <ng-template
+                                ngx-file-drop-content-tmp
+                                let-openFileSelector="openFileSelector"
+                              >
+                                <div class="row">
+                                  <div
+                                    class="file-drop-container"
+                                    style="height: 100%"
+                                  >
+                                    <div
+                                      class="file-drop-message"
+                                      style="height: 100%"
+                                    >
+                                      <div class="container">
+                                        <div
+                                          class="row align-items-center"
+                                          style="text-align: center"
+                                        >
+                                          <h2>
+                                            Arrastra y suelta un archivo aquí
+                                          </h2>
+                                        </div>
 
-					<!-- Card -->
-					<ng-container *ngIf="load_data_est">
-						<div class="card-body">
-							<div class="row">
-								<div class="col-12 text-center">
-									<div class="spinner-border" style="width: 3rem; height: 3rem" role="status">
-										<span class="visually-hidden"></span>
-									</div>
-								</div>
-							</div>
-						</div>
-					</ng-container>
-					<ng-container *ngIf="!load_data_est">
-						<div class="card">
-							<div class="card-header">
-								<!-- Title -->
-								<h4 class="card-header-title">Mostrando todos tus estudiantes {{ estudiantes.length }}</h4>
+                                        <div
+                                          class="row align-items-center"
+                                          style="text-align: center"
+                                        >
+                                          <div class="col"></div>
+                                          <div class="col">
+                                            <img
+                                              src="../../assets/img/df7da3c208654b4766e2.svg"
+                                            />
+                                          </div>
+                                          <div class="col"></div>
+                                        </div>
+                                        <div class="row align-items-center">
+                                          <div
+                                            class="custom-file"
+                                            style="text-align: center"
+                                          >
+                                            <button
+                                              class="btn btn-primary"
+                                              (click)="seleccionarArchivo()"
+                                            >
+                                              Selecciona un archivo
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </ng-template>
+                            </ngx-file-drop>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="modal fade"
+                    id="modalRevisionMasivo"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
+                      role="documentrubro"
+                      style="max-width: 98%"
+                    >
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <!-- Title -->
+                          <h4 class="card-header-title">Datos Errados</h4>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="container-fluid">
+                            <div class="table-responsive">
+                              <!-- En tu componente HTML -->
+                              <table
+                                class="table table-nowrap card-table table-hover"
+                              >
+                                <thead>
+                                  <tr>
+                                    <th>N°</th>
+                                    <th *ngFor="let item of proveedor">
+                                      {{ item.label }}
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr
+                                    *ngFor="
+                                      let item of proveedores_erro;
+                                      let i = index
+                                    "
+                                  >
+                                    <td>{{ item.index + 1 }}</td>
+                                    <td
+                                      *ngFor="
+                                        let entry of getObjectEntries(
+                                          item.proveedor
+                                        )
+                                      "
+                                    >
+                                      <ng-container
+                                        *ngIf="
+                                          getErrorMessage(
+                                            item.errores,
+                                            entry.key
+                                          ) !== undefined
+                                        "
+                                      >
+                                        <span
+                                          data-bs-toggle="tooltip"
+                                          data-bs-placement="top"
+                                          data-bs-custom-class="custom-tooltip"
+                                          [title]="
+                                            getErrorMessage(
+                                              item.errores,
+                                              entry.key
+                                            )
+                                          "
+                                          style="
+                                            background-color: rgba(
+                                              220,
+                                              20,
+                                              60,
+                                              0.425
+                                            );
+                                          "
+                                          >{{ entry.value }}</span
+                                        >
+                                      </ng-container>
+                                      <ng-container
+                                        *ngIf="
+                                          getErrorMessage(
+                                            item.errores,
+                                            entry.key
+                                          ) === undefined
+                                        "
+                                      >
+                                        <span>{{ entry.value }}</span>
+                                      </ng-container>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          >
+                            Cerrar
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-primary"
+                            (click)="cerrar_ventana()"
+                          >
+                            Guardar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
+                  <div
+                    class="modal fade"
+                    id="modalGuardar"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                      role="documentrubro"
+                    >
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <!-- Title -->
+                          <h4 class="card-header-title">
+                            Filas que coninciden: {{ proveedores.length }}
+                          </h4>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
+                        </div>
+                        <div class="modal-body">
+                          Deseas Guardar estos Estudiantes? ({{
+                            proveedores.length
+                          }})
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-primary"
+                            (click)="subir_estudiante()"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-primary"
+                            (click)="borrar_estudiante()"
+                          >
+                            Borrar Masivo
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-							</div>
-							<div class="card-body">
-								<div class="row">
-									<div class="col-md-6">
-										<div class="input-group input-group-merge">
-											<ng-container>
-												<button
-													class="btn btn-danger active"
-													*ngIf="load_eliminados == false"
-													(click)="mostrar_eliminado()"
-												>
-													⥂
-												</button>
-												<button
-													class="btn btn-success"
-													*ngIf="load_eliminados == true"
-													(click)="mostrar_normales()"
-												>
-													⥄
-												</button>
-											</ng-container>
-											<input
-												type="text"
-												class="form-control form-control-appended"
-												placeholder="Buscar estudiante"
-												name="filtro"
-												[(ngModel)]="filtro"
-											/>
-											<div class="input-group-append">
-												<button class="btn btn-primary" (click)="filtrar_estudiante()">Buscar</button>
-												<ng-container *ngIf="rol == 'admin' || rol == 'secrt'" style="text-align: right">
-													<a
-														class="btn btn-primary"
-														[routerLink]="['/estudiantes/create']"
-														routerLinkActive="router-link-active"
-														style="cursor: pointer"
-														>Nuevo Estudiante</a
-													>
-												</ng-container>
-
-
-											</div>
-										</div>
-									</div>
-									<div
-									class="modal fade"
-									id="modalAddProvMasivo"
-									style="display: none"
-									aria-hidden="true"
-								>
-									<div
-									class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
-									role="documentrubro"
-									>
-									<div class="modal-content">
-										<div class="modal-header">
-										<!-- Title -->
-										<h4 class="card-header-title">Adjunto tu archivo CSV</h4>
-										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-
-										</div>
-										<div class="modal-body">
-										<input
-											type="file"
-											class="form-control-file custom-file-input"
-											id="fileInput"
-											style="display: none"
-											accept=".csv,.xlsx"
-											(change)="onFileChange($event)"
-										/>
-										<div #dropZone ngx-file-drop class="ratio ratio-4x3">
-											<ngx-file-drop
-											(onFileDrop)="onFileDrop($event)"
-											[allowedFileTypes]="['csv', 'xlsx']"
-											[dragOverClass]="'file-drop-target'"
-											style="height: 100%"
-											>
-											<ng-template
-												ngx-file-drop-content-tmp
-												let-openFileSelector="openFileSelector"
-											>
-												<div class="row">
-												<div class="file-drop-container" style="height: 100%">
-													<div class="file-drop-message" style="height: 100%">
-													<div class="container">
-														<div
-														class="row align-items-center"
-														style="text-align: center"
-														>
-														<h2>Arrastra y suelta un archivo aquí</h2>
-														</div>
-
-														<div
-														class="row align-items-center"
-														style="text-align: center"
-														>
-														<div class="col"></div>
-														<div class="col">
-															<img
-															src="../../assets/img/df7da3c208654b4766e2.svg"
-															/>
-														</div>
-														<div class="col"></div>
-														</div>
-														<div class="row align-items-center">
-														<div
-															class="custom-file"
-															style="text-align: center"
-														>
-															<button
-															class="btn btn-primary"
-															(click)="seleccionarArchivo()"
-															>
-															Selecciona un archivo
-															</button>
-														</div>
-														</div>
-													</div>
-													</div>
-												</div>
-												</div>
-											</ng-template>
-											</ngx-file-drop>
-										</div>
-										</div>
-									</div>
-									</div>
-								</div>
-								<div
-								class="modal fade"
-								id="modalRevisionMasivo"
-								style="display: none"
-								aria-hidden="true"
-							>
-								<div
-								class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
-								role="documentrubro"
-								style="max-width: 98%;"
-								>
-								<div class="modal-content">
-									<div class="modal-header">
-									<!-- Title -->
-									<h4 class="card-header-title">Datos Errados</h4>
-									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-
-									</div>
-									<div class="modal-body">
-										<div class="container-fluid">
-											<div class="table-responsive" >
-												<!-- En tu componente HTML -->
-												<table class="table table-nowrap card-table table-hover">
-													<thead>
-													  <tr>
-														<th>N°</th>
-														<th *ngFor="let item of proveedor">{{ item.label }}</th>
-													  </tr>
-													</thead>
-													<tbody>
-														<tr *ngFor="let item of proveedores_erro; let i = index">
-														  <td>{{ item.index + 1 }}</td>
-														  <td *ngFor="let entry of getObjectEntries(item.proveedor)">
-															<ng-container *ngIf="getErrorMessage(item.errores, entry.key) !== undefined">
-															  <span data-bs-toggle="tooltip"
-															  data-bs-placement="top"
-															  data-bs-custom-class="custom-tooltip"
-															  [title]="getErrorMessage(item.errores, entry.key)"
-															  style="background-color: rgba(220, 20, 60, 0.425);">{{entry.value}}</span>
-															</ng-container>
-															<ng-container *ngIf="getErrorMessage(item.errores, entry.key) === undefined">
-															  <span>{{ entry.value }}</span>
-															</ng-container>
-														  </td>
-														</tr>
-													  </tbody>
-												  </table>
-											</div>
-										</div>
-
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cerrar</button>
-										<button type="button" class="btn btn-primary" (click)="cerrar_ventana()">Guardar</button>
-
-									  </div>
-								</div>
-								</div>
-								</div>
-
-								<div
-									class="modal fade"
-									id="modalGuardar"
-									style="display: none"
-									aria-hidden="true"
-								>
-									<div
-									class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-									role="documentrubro"
-									>
-									<div class="modal-content">
-										<div class="modal-header">
-										<!-- Title -->
-										<h4 class="card-header-title">
-											Filas que coninciden: {{ proveedores.length }}
-										</h4>
-										<button
-											type="button"
-											class="btn-close"
-											data-bs-dismiss="modal"
-											aria-label="Close"
-										></button>
-										</div>
-										<div class="modal-body">
-										Deseas Guardar estos Estudiantes? ({{ proveedores.length }})
-										</div>
-										<div class="modal-footer">
-											<button type="button" class="btn btn-primary" (click)="subir_estudiante()">Guardar</button>
-										</div>
-									</div>
-									</div>
-								</div>
-
-
-
-									<div class="col-md-6 text-right" *ngIf="rol == 'admin'">
-										<!--
+                  <div class="col-md-6 text-right" *ngIf="rol == 'admin'">
+                    <!--
 	<flatfile-button
 											*ngIf="rol == 'admin'"
 											[settings]="settings"
@@ -279,408 +374,606 @@
 											>Subida masiva
 										</flatfile-button>
 										-->
-										<div class="input-group input-group-merge">
-											<button
-												class="btn btn-primary"
-												type="button"
-												data-bs-toggle="modal"
-												[attr.data-bs-target]="'#modalAddProvMasivo'"
-												>
-												Añadir Masivo
-												</button>
-											<ng-container *ngIf="rol == 'admin'">
-												<button
-													class="btn btn-danger active"
-													*ngIf="load_eliminados == false"
-													data-bs-toggle="modal"
-													[attr.data-bs-target]="'#delete-todo'"
-												>
-													Eliminar
-												</button>
-												<button
-													class="btn btn-success"
-													*ngIf="load_eliminados == true"
-													data-bs-toggle="modal"
-													[attr.data-bs-target]="'#activar-todo'"
-												>
-													Activar
-												</button>
+                    <div class="input-group input-group-merge">
+                      <button
+                        class="btn btn-primary"
+                        type="button"
+                        data-bs-toggle="modal"
+                        [attr.data-bs-target]="'#modalAddProvMasivo'"
+                      >
+                        Añadir Masivo
+                      </button>
+                      <ng-container *ngIf="rol == 'admin'">
+                        <button
+                          class="btn btn-danger active"
+                          *ngIf="load_eliminados == false"
+                          data-bs-toggle="modal"
+                          [attr.data-bs-target]="'#delete-todo'"
+                        >
+                          Eliminar
+                        </button>
+                        <button
+                          class="btn btn-success"
+                          *ngIf="load_eliminados == true"
+                          data-bs-toggle="modal"
+                          [attr.data-bs-target]="'#activar-todo'"
+                        >
+                          Activar
+                        </button>
+                      </ng-container>
+                      <button
+                        class="btn btn-success"
+                        style="display: none"
+                        (click)="importdatos()"
+                      >
+                        Subida masiva
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-nowrap card-table table-hover">
+                    <thead>
+                      <tr>
+                        <th *ngIf="rol == 'admin'">
+                          <input
+                            type="checkbox"
+                            value="1"
+                            placeholder="total"
+                            [(ngModel)]="total"
+                            (click)="select_todo()"
+                          />
+                        </th>
+                        <th>Estudiante</th>
+                        <th>genero</th>
+                        <th>Correo</th>
+                        <th>Paralelo</th>
+                        <th>Telefono</th>
+                        <th>Fecha de creación</th>
+                        <th>Opciones</th>
+                      </tr>
+                    </thead>
+                    <tbody class="font-size-base">
+                      <ng-container
+                        *ngFor="
+                          let item of estudiantes
+                            | slice
+                              : (page - 1) * pageSize
+                              : (page - 1) * pageSize + pageSize
+                        "
+                      >
+                        <tr
+                          *ngIf="
+                            load_eliminados == false &&
+                            (item.element.estado == undefined ||
+                              item.element.estado != 'Desactivado')
+                          "
+                        >
+                          <td *ngIf="rol == 'admin'">
+                            <input
+                              type="checkbox"
+                              value="1"
+                              placeholder="item.ckechk"
+                              [(ngModel)]="item.ckechk"
+                            />
+                          </td>
+                          <td>
+                            <a
+                              class="text-primary"
+                              [routerLink]="[
+                                '/estudiantes/detalle',
+                                item.element._id
+                              ]"
+                              >{{ item.element.nombres }}
+                              {{ item.element.apellidos }}</a
+                            >
+                            <br />
+                            <span *ngIf="item.element.dni">{{
+                              item.element.dni
+                            }}</span>
+                            <span *ngIf="!item.element.dni">No registrado</span>
+                            <span *ngIf="item.element.estado == 'Desactivado'"
+                              >(Retirado)</span
+                            >
+                          </td>
 
-											</ng-container>
-											<button class="btn btn-success" style="display: none;" (click)="importdatos()">Subida masiva</button>
-										</div>
+                          <td>
+                            <span *ngIf="item.element.genero">
+                              <ng-container
+                                *ngIf="item.element.genero == 'Femenino'"
+                              >
+                                F
+                              </ng-container>
+                              <ng-container
+                                *ngIf="item.element.genero == 'Masculino'"
+                              >
+                                M
+                              </ng-container>
+                              <ng-container
+                                *ngIf="item.element.genero == 'No definido'"
+                              >
+                                n/a
+                              </ng-container></span
+                            >
+                            <span *ngIf="!item.element.genero"
+                              >No registrado</span
+                            >
+                          </td>
 
+                          <td>
+                            {{ item.element.email }}
+                          </td>
+                          <td>
+                            {{ item.element.curso }}{{ item.element.paralelo
+                            }}{{ item.element.especialidad }}
+                          </td>
+                          <td>
+                            <span *ngIf="item.element.telefono">{{
+                              item.element.telefono
+                            }}</span>
+                            <span *ngIf="!item.element.telefono"
+                              >No registrado</span
+                            >
+                          </td>
+                          <td>
+                            <span
+                              >{{ item.element.createdAt | date : "YYYY" }}-{{
+                                item.element.createdAt | date : "MM"
+                              }}-{{
+                                item.element.createdAt | date : "dd"
+                              }}</span
+                            >
+                          </td>
 
+                          <td>
+                            <div class="dropdown">
+                              <button
+                                class="btn btn-secondary"
+                                type="button"
+                                id="dropdownMenuButtonAlias"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                              >
+                                Opciones
+                                <i class="bi bi-caret-down-fill"></i>
+                              </button>
 
-									</div>
-								</div>
-							</div>
-							<div class="card-body" >
-								<div class="table-responsive" >
-									<table class="table  table-nowrap card-table table-hover">
-										<thead>
-											<tr>
-												<th *ngIf="rol == 'admin'">
-													<input
-														type="checkbox"
-														value="1"
-														placeholder="total"
-														[(ngModel)]="total"
-														(click)="select_todo()"
-													/>
-												</th>
-												<th>Estudiante</th>
-												<th>genero</th>
-												<th>Correo</th>
-												<th>Paralelo</th>
-												<th>Telefono</th>
-												<th>Fecha de creación</th>
-												<th>Opciones</th>
-											</tr>
-										</thead>
-										<tbody class="font-size-base">
-											<ng-container
-												*ngFor="
-													let item of estudiantes
-														| slice : (page - 1) * pageSize : (page - 1) * pageSize + pageSize
-												"
-											>
-												<tr
-													*ngIf="
-														load_eliminados == false &&
-														(item.element.estado == undefined || item.element.estado != 'Desactivado')
-													"
-												>
-													<td *ngIf="rol == 'admin'">
-														<input
-															type="checkbox"
-															value="1"
-															placeholder="item.ckechk"
-															[(ngModel)]="item.ckechk"
-														/>
-													</td>
-													<td>
-														<a class="text-primary" [routerLink]="['/estudiantes/detalle', item.element._id]"
-															>{{ item.element.nombres }} {{ item.element.apellidos }}</a
-														>
-														<br>
-														<span *ngIf="item.element.dni">{{ item.element.dni }}</span>
-														<span *ngIf="!item.element.dni">No registrado</span>
-														<span *ngIf="item.element.estado == 'Desactivado'">(Retirado)</span>
+                              <ul
+                                class="dropdown-menu"
+                                aria-labelledby="dropdownMenuButtonAlias"
+                              >
+                                <li>
+                                  <a
+                                    class="dropdown-item"
+                                    *ngIf="rol != 'delegado'"
+                                    [routerLink]="[
+                                      '/estudiantes/edit',
+                                      item.element._id
+                                    ]"
+                                    >Editar</a
+                                  >
+                                </li>
+                                <li>
+                                  <a
+                                    class="dropdown-item"
+                                    [routerLink]="[
+                                      '/estudiantes/detalle',
+                                      item.element._id
+                                    ]"
+                                    >Detalle</a
+                                  >
+                                </li>
 
-													</td>
-
-													<td>
-														<span *ngIf="item.element.genero">
-															<ng-container *ngIf="item.element.genero=='Femenino'"> F </ng-container>
-															<ng-container *ngIf="item.element.genero=='Masculino'"> M </ng-container>
-															<ng-container *ngIf="item.element.genero=='No definido'"> n/a </ng-container></span>
-														<span *ngIf="!item.element.genero">No registrado</span>
-													</td>
-
-													<td>
-														{{ item.element.email }}
-													</td>
-													<td>{{ item.element.curso }}{{ item.element.paralelo }}{{ item.element.especialidad }}</td>
-													<td>
-														<span *ngIf="item.element.telefono">{{ item.element.telefono }}</span>
-														<span *ngIf="!item.element.telefono">No registrado</span>
-													</td>
-													<td>
-														<span>{{item.element.createdAt|date:'YYYY'}}-{{item.element.createdAt|date:'MM'}}-{{item.element.createdAt|date:'dd'}}</span>
-													</td>
-
-													<td>
-														<div class="dropdown">
-															<button
-																class="btn btn-secondary"
-																type="button"
-																id="dropdownMenuButtonAlias"
-																data-bs-toggle="dropdown"
-																aria-haspopup="true"
-																aria-expanded="false"
-															>
-																Opciones
-																<i class="bi bi-caret-down-fill"></i>
-															</button>
-
-															<ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAlias">
-																<li>
-																	<a
-																		class="dropdown-item"
-																		*ngIf="rol != 'delegado'"
-																		[routerLink]="['/estudiantes/edit', item.element._id]"
-																		>Editar</a
-																	>
-																</li>
-																<li>
-																	<a
-																		class="dropdown-item"
-																		[routerLink]="['/estudiantes/detalle', item.element._id]"
-																		>Detalle</a
-																	>
-																</li>
-
-																<li>
-																	<a class="dropdown-item"
-																		style="cursor: pointer"
-																		data-bs-toggle="modal"
-																		[attr.data-bs-target]="'#delete-' + item.element._id">Eliminar</a>
-																</li>
-																<li><!--data-bs-toggle="modal"
+                                <li>
+                                  <a
+                                    class="dropdown-item"
+                                    style="cursor: pointer"
+                                    data-bs-toggle="modal"
+                                    [attr.data-bs-target]="
+                                      '#delete-' + item.element._id
+                                    "
+                                    >Eliminar</a
+                                  >
+                                </li>
+                                <li>
+                                  <!--data-bs-toggle="modal"
 																	[attr.data-bs-target]="'#suspend-' + item.element._id" -->
-																	<a class="dropdown-item"
-																		style="cursor: pointer"
+                                  <a
+                                    class="dropdown-item"
+                                    style="cursor: pointer"
+                                    (click)="
+                                      Googlefind(
+                                        item.element.email,
+                                        item.element._id
+                                      )
+                                    "
+                                    >Google Account</a
+                                  >
+                                </li>
+                              </ul>
+                            </div>
+                            <div
+                              class="modal fade"
+                              id="delete-{{ item.element._id }}"
+                              tabindex="-1"
+                              style="display: none"
+                              aria-hidden="true"
+                            >
+                              <div
+                                class="modal-dialog modal-dialog-centered"
+                                role="document"
+                              >
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h4 class="modal-title">
+                                      Eliminar, {{ item.element.nombres }}
+                                      {{ item.element.apellidos }}
+                                    </h4>
+                                    <button
+                                      class="close"
+                                      type="button"
+                                      data-bs-dismiss="modal"
+                                      aria-label="Close"
+                                    >
+                                      <span aria-hidden="true">×</span>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <p>
+                                      Desea eliminar este estudiante?
+                                      {{ item.element._id }}
+                                    </p>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button
+                                      class="btn btn-secondary btn-sm"
+                                      type="button"
+                                      data-bs-dismiss="modal"
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      class="btn btn-primary btn-shadow btn-sm"
+                                      (click)="eliminar(item.element._id)"
+                                      type="button"
+                                    >
+                                      Si, eliminar
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="modal fade"
+                              id="suspend-{{ item.element._id }}"
+                              tabindex="-1"
+                              style="display: none"
+                              aria-hidden="true"
+                            >
+                              <div
+                                class="modal-dialog modal-dialog-centered"
+                                role="document"
+                              >
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h4 class="modal-title">
+                                      INFO GOOGLE ACCOUNT:{{
+                                        item.element.nombres
+                                      }}
+                                      {{ item.element.apellidos }}
+                                    </h4>
+                                    <button
+                                      class="close"
+                                      type="button"
+                                      data-bs-dismiss="modal"
+                                      aria-label="Close"
+                                    >
+                                      <span aria-hidden="true">×</span>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <ng-container *ngIf="!loadinfouser"
+                                      ><p>
+                                        Desea
+                                        <ng-container *ngIf="infouser.suspended"
+                                          ><b>Reactivar</b> </ng-container
+                                        ><ng-container
+                                          *ngIf="!infouser.suspended"
+                                          ><b>Suspender</b></ng-container
+                                        >
+                                        a este estudiante?
+                                        {{ item.element.nombres }}
+                                        {{ item.element.apellidos }}
+                                      </p></ng-container
+                                    >
+                                    <ng-container *ngIf="loadinfouser"
+                                      >Este estudiante no cuenta con un correo
+                                      de tu organización</ng-container
+                                    >
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button
+                                      class="btn btn-secondary btn-sm"
+                                      type="button"
+                                      data-bs-dismiss="modal"
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      *ngIf="!loadinfouser"
+                                      class="btn btn-primary btn-shadow btn-sm"
+                                      (click)="
+                                        GoogleSuspend(
+                                          item.element.email,
+                                          item.element._id
+                                        )
+                                      "
+                                      type="button"
+                                    >
+                                      Si, Suspender
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr
+                          *ngIf="
+                            load_eliminados == true &&
+                            (item.element.estado == undefined ||
+                              item.element.estado == 'Desactivado')
+                          "
+                        >
+                          <td *ngIf="rol == 'admin'">
+                            <input
+                              type="checkbox"
+                              value="1"
+                              [(ngModel)]="item.ckechk"
+                            />
+                          </td>
+                          <td>
+                            <a class="text-primary"
+                              >{{ item.element.nombres }}
+                              {{ item.element.apellidos }}</a
+                            >
+                            <a>(Eliminado)</a>
+                          </td>
 
-																		(click)="Googlefind(item.element.email,item.element._id)">Google Account</a>
-																</li>
-															</ul>
-														</div>
-														<div
-															class="modal fade"
-															id="delete-{{ item.element._id }}"
-															tabindex="-1"
-															style="display: none"
-															aria-hidden="true"
-														>
-															<div class="modal-dialog modal-dialog-centered" role="document">
-																<div class="modal-content">
-																	<div class="modal-header">
-																		<h4 class="modal-title">
-																			Eliminar, {{ item.element.nombres }} {{ item.element.apellidos }}
-																		</h4>
-																		<button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
-																			<span aria-hidden="true">×</span>
-																		</button>
-																	</div>
-																	<div class="modal-body">
-																		<p>Desea eliminar este estudiante? {{ item.element._id }}</p>
-																	</div>
-																	<div class="modal-footer">
-																		<button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
-																			Cancelar
-																		</button>
-																		<button
-																			class="btn btn-primary btn-shadow btn-sm"
-																			(click)="eliminar(item.element._id)"
-																			type="button"
-																		>
-																			Si, eliminar
-																		</button>
-																	</div>
-																</div>
-															</div>
-														</div>
-														<div
-															class="modal fade"
-															id="suspend-{{ item.element._id }}"
-															tabindex="-1"
-															style="display: none"
-															aria-hidden="true"
-														>
-															<div class="modal-dialog modal-dialog-centered" role="document">
-																<div class="modal-content">
-																	<div class="modal-header">
-																		<h4 class="modal-title">
-																			INFO GOOGLE ACCOUNT:{{ item.element.nombres }} {{ item.element.apellidos }}
-																		</h4>
-																		<button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
-																			<span aria-hidden="true">×</span>
-																		</button>
-																	</div>
-																	<div class="modal-body">
-																		<ng-container *ngIf="!loadinfouser"><p>Desea <ng-container *ngIf="infouser.suspended"><b>Reactivar</b> </ng-container><ng-container *ngIf="!infouser.suspended"><b>Suspender</b></ng-container> a este estudiante? {{ item.element.nombres }} {{ item.element.apellidos }}</p></ng-container>
-																		<ng-container *ngIf="loadinfouser">Este estudiante no cuenta con un correo de tu organización</ng-container>
-																	</div>
-																	<div class="modal-footer">
-																		<button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
-																			Cancelar
-																		</button>
-																		<button *ngIf="!loadinfouser"
-																			class="btn btn-primary btn-shadow btn-sm"
-																			(click)="GoogleSuspend(item.element.email,item.element._id)"
-																			type="button"
-																		>
-																			Si, Suspender
-																		</button>
-																	</div>
-																</div>
-															</div>
-														</div>
-													</td>
-												</tr>
-												<tr
-													*ngIf="
-														load_eliminados == true &&
-														(item.element.estado == undefined || item.element.estado == 'Desactivado')
-													"
-												>
-													<td *ngIf="rol == 'admin'">
-														<input type="checkbox" value="1" [(ngModel)]="item.ckechk" />
-													</td>
-													<td>
-														<a class="text-primary">{{ item.element.nombres }} {{ item.element.apellidos }}</a>
-														<a>(Eliminado)</a>
-													</td>
+                          <td>
+                            <span *ngIf="item.element.dni">{{
+                              item.element.dni
+                            }}</span>
+                            <span *ngIf="!item.element.dni">No registrado</span>
+                          </td>
 
-													<td>
-														<span *ngIf="item.element.dni">{{ item.element.dni }}</span>
-														<span *ngIf="!item.element.dni">No registrado</span>
-													</td>
+                          <td>
+                            {{ item.element.email }}
+                          </td>
+                          <td>
+                            {{ item.element.curso }}{{ item.element.paralelo }}
+                            {{ item.element.especialidad }}
+                          </td>
+                          <td>
+                            <span *ngIf="item.element.telefono">{{
+                              item.element.telefono
+                            }}</span>
+                            <span *ngIf="!item.element.telefono"
+                              >No registrado</span
+                            >
+                          </td>
+                          <td>
+                            <span
+                              >{{ item.element.createdAt | date : "YYYY" }}-{{
+                                item.element.createdAt | date : "MM"
+                              }}-{{
+                                item.element.createdAt | date : "dd"
+                              }}</span
+                            >
+                          </td>
+                          <td>
+                            <div class="dropdown">
+                              <button
+                                class="btn btn-secondary"
+                                type="button"
+                                id="dropdownMenuButtonAlias"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                              >
+                                Opciones
+                                <i class="bi bi-caret-down-fill"></i>
+                              </button>
 
-													<td>
-														{{ item.element.email }}
-													</td>
-													<td>{{ item.element.curso }}{{ item.element.paralelo }} {{ item.element.especialidad }}</td>
-													<td>
-														<span *ngIf="item.element.telefono">{{ item.element.telefono }}</span>
-														<span *ngIf="!item.element.telefono">No registrado</span>
-													</td>
-													<td>
-														<span>{{item.element.createdAt|date:'YYYY'}}-{{item.element.createdAt|date:'MM'}}-{{item.element.createdAt|date:'dd'}}</span>
-													</td>
-													<td>
-														<div class="dropdown">
-															<button
-																class="btn btn-secondary"
-																type="button"
-																id="dropdownMenuButtonAlias"
-																data-bs-toggle="dropdown"
-																aria-haspopup="true"
-																aria-expanded="false"
-															>
-																Opciones
-																<i class="bi bi-caret-down-fill"></i>
-															</button>
+                              <ul
+                                class="dropdown-menu"
+                                aria-labelledby="dropdownMenuButtonAlias"
+                              >
+                                <li>
+                                  <a
+                                    class="dropdown-item"
+                                    [routerLink]="[
+                                      '/estudiantes/detalle',
+                                      item.element._id
+                                    ]"
+                                    >Detalle</a
+                                  >
+                                </li>
+                                <li>
+                                  <a
+                                    class="dropdown-item"
+                                    style="cursor: pointer"
+                                    data-bs-toggle="modal"
+                                    [attr.data-bs-target]="
+                                      '#delete-' + item.element._id
+                                    "
+                                    >Activar</a
+                                  >
+                                </li>
+                              </ul>
+                            </div>
+                            <div
+                              class="modal fade"
+                              id="delete-{{ item.element._id }}"
+                              tabindex="-1"
+                              style="display: none"
+                              aria-hidden="true"
+                            >
+                              <div
+                                class="modal-dialog modal-dialog-centered"
+                                role="document"
+                              >
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h4 class="modal-title">
+                                      Reactivar, {{ item.element.nombres }}
+                                      {{ item.element.apellidos }}
+                                    </h4>
+                                    <button
+                                      class="close"
+                                      type="button"
+                                      data-bs-dismiss="modal"
+                                      aria-label="Close"
+                                    >
+                                      <span aria-hidden="true">×</span>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <p>
+                                      Desea reactivar este estudiante?
+                                      {{ item.element._id }}
+                                    </p>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button
+                                      class="btn btn-secondary btn-sm"
+                                      type="button"
+                                      data-bs-dismiss="modal"
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      class="btn btn-primary btn-shadow btn-sm"
+                                      (click)="activar(item.element._id)"
+                                      type="button"
+                                    >
+                                      Si, activar
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <ngb-pagination
+                *ngIf="estudiantes.length >= 1"
+                [(page)]="page"
+                [pageSize]="pageSize"
+                [maxSize]="10"
+                [rotate]="true"
+                [boundaryLinks]="true"
+                [collectionSize]="estudiantes.length"
+              ></ngb-pagination>
+            </div>
 
-															<ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAlias">
-																<li>
-																	<a
-																		class="dropdown-item"
+            <br />
+            <div
+              class="modal fade"
+              id="delete-todo"
+              tabindex="-1"
+              style="display: none"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h4 class="modal-title">Eliminación masiva</h4>
+                    <button
+                      class="close"
+                      type="button"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">×</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Desea eliminar estos estudiante?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      class="btn btn-secondary btn-sm"
+                      type="button"
+                      data-bs-dismiss="modal"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      class="btn btn-primary btn-shadow btn-sm"
+                      (click)="eliminar_todo()"
+                      type="button"
+                    >
+                      Si, eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-																		[routerLink]="['/estudiantes/detalle', item.element._id]"
-																		>Detalle</a
-																	>
-																</li>
-																<li >
-																	<a
-																		class="dropdown-item"
-																		style="cursor: pointer"
-																		data-bs-toggle="modal"
-																		[attr.data-bs-target]="'#delete-' + item.element._id"
-																		>Activar</a
-																	>
-																</li>
-															</ul>
-														</div>
-														<div
-															class="modal fade"
-															id="delete-{{ item.element._id }}"
-															tabindex="-1"
-															style="display: none"
-															aria-hidden="true"
-														>
-															<div class="modal-dialog modal-dialog-centered" role="document">
-																<div class="modal-content">
-																	<div class="modal-header">
-																		<h4 class="modal-title">
-																			Reactivar, {{ item.element.nombres }} {{ item.element.apellidos }}
-																		</h4>
-																		<button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
-																			<span aria-hidden="true">×</span>
-																		</button>
-																	</div>
-																	<div class="modal-body">
-																		<p>Desea reactivar este estudiante? {{ item.element._id }}</p>
-																	</div>
-																	<div class="modal-footer">
-																		<button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
-																			Cancelar
-																		</button>
-																		<button
-																			class="btn btn-primary btn-shadow btn-sm"
-																			(click)="activar(item.element._id)"
-																			type="button"
-																		>
-																			Si, activar
-																		</button>
-																	</div>
-																</div>
-															</div>
-														</div>
-													</td>
-												</tr>
-											</ng-container>
-										</tbody>
-									</table>
-								</div>
-							</div>
-							<ngb-pagination
-							*ngIf="estudiantes.length >= 1"
-							[(page)]="page"
-							[pageSize]="pageSize"
-							[maxSize]="10"
-							[rotate]="true"
-							[boundaryLinks]="true"
-							[collectionSize]="estudiantes.length"
-						></ngb-pagination>
-						</div>
-
-
-						<br />
-						<div class="modal fade" id="delete-todo" tabindex="-1" style="display: none" aria-hidden="true">
-							<div class="modal-dialog modal-dialog-centered" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h4 class="modal-title">Eliminación masiva</h4>
-										<button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">×</span>
-										</button>
-									</div>
-									<div class="modal-body">
-										<p>Desea eliminar estos estudiante?</p>
-									</div>
-									<div class="modal-footer">
-										<button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
-											Cancelar
-										</button>
-										<button class="btn btn-primary btn-shadow btn-sm" (click)="eliminar_todo()" type="button">
-											Si, eliminar
-										</button>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="modal fade" id="activar-todo" tabindex="-1" style="display: none" aria-hidden="true">
-							<div class="modal-dialog modal-dialog-centered" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h4 class="modal-title">Reactivar</h4>
-										<button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">×</span>
-										</button>
-									</div>
-									<div class="modal-body">
-										<p>Desea reactivar este estudiante?</p>
-									</div>
-									<div class="modal-footer">
-										<button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">
-											Cancelar
-										</button>
-										<button class="btn btn-primary btn-shadow btn-sm" (click)="activar_todo()" type="button">
-											Si, activar
-										</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</ng-container>
-				</div>
-			</div>
-			<!-- / .row -->
-		</div>
-
-	</div>
+            <div
+              class="modal fade"
+              id="activar-todo"
+              tabindex="-1"
+              style="display: none"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h4 class="modal-title">Reactivar</h4>
+                    <button
+                      class="close"
+                      type="button"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">×</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Desea reactivar este estudiante?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      class="btn btn-secondary btn-sm"
+                      type="button"
+                      data-bs-dismiss="modal"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      class="btn btn-primary btn-shadow btn-sm"
+                      (click)="activar_todo()"
+                      type="button"
+                    >
+                      Si, activar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+      <!-- / .row -->
+    </div>
+  </div>
 </div>
-
