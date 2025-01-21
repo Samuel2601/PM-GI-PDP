@@ -544,17 +544,17 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
               this._adminService
                 .listar_pensiones_estudiantes_tienda(
                   this.token,
-                  this.config[val].anio_lectivo
+                  this.config[val]._id
                 )
                 .subscribe((response) => {
                   if (response.data) {
-                    //console.log(response.data[0]);
+                    console.log(response.data);
                     this.penest = response.data.map((item: any) => {
                       //console.log(item);
                       return {
                         curso: item.curso,
                         paralelo: item.paralelo,
-                        especialidad: item.especialidad,
+                        especialidad: item.especialidad || 'EGB',
                         anio_lectivo: item.anio_lectivo,
                         condicion_beca: item.condicion_beca,
                         idestudiante: {
@@ -578,31 +578,28 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                         num_mes_res: item.num_mes_res,
                       };
                     });
-
+                    console.log(this.penest.length);
                     this._configService.setProgress(
                       this._configService.getProgress() + 5
                     );
 
                     if (this.penest != undefined) {
                       this.penest.forEach((element: any) => {
-                        var con = -1;
-                        for (var i = 0; i < this.pagospension.length; i++) {
-                          if (
-                            this.pagospension[i].curso +
-                              this.pagospension[i].paralelo +
-                              this.pagospension[i].especialidad ==
-                            element.curso +
-                              element.paralelo +
-                              element.especialidad
-                          ) {
-                            con = i;
-                          }
-                        }
-                        if (con == -1) {
+                        // Busca si ya existe un elemento en `pagospension` que coincida con el curso, paralelo y especialidad
+                        const existingIndex = this.pagospension.findIndex(
+                          (pago: any) =>
+                            pago.curso === element.curso &&
+                            pago.paralelo === element.paralelo &&
+                            pago.especialidad === element.especialidad
+                        );
+
+                        if (existingIndex === -1) {
+                          // Si el curso no está en `this.cursos`, lo añadimos
                           if (!this.cursos.includes(element.curso)) {
                             this.cursos.push(element.curso);
                           }
 
+                          // Añadimos un nuevo objeto a `pagospension`
                           this.pagospension.push({
                             curso: element.curso,
                             paralelo: element.paralelo,
@@ -877,6 +874,11 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                         }
                       });
                       console.log(this.pagos_estudiante);
+                      const totalPensiones = this.pagospension.reduce(
+                        (sum: any, item: any) => sum + item.num,
+                        0
+                      );
+                      console.log(totalPensiones);
                       this._configService.setProgress(
                         this._configService.getProgress() + 5
                       );

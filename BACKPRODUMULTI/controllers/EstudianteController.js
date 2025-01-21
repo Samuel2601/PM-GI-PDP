@@ -74,29 +74,82 @@ listar_estudiantes_tienda = async function (req, res) {
     res.status(500).send({ message: "NoAccess" });
   }
 };
-listar_pensiones_estudiantes_tienda = async function (req, res) {
-  if (req.user) {
+const listar_pensiones_estudiantes_tienda = async function (req, res) {
+  if (!req.user) {
+    return res.status(403).send({ message: "NoAccess" });
+  }
+
+  try {
     let id = req.params["id"];
     let conn = mongoose.connection.useDb(req.user.base);
-    Pension = conn.model("pension", PensionSchema);
-    Estudiante = conn.model("estudiante", EstudianteSchema);
-    var estudiantes = await Pension.find().populate("idestudiante");
-    //console.log(estudiantes[0]);
-    let pen = [];
-    if (id != "null") {
-      estudiantes.forEach((element) => {
-        if (
-          new Date(element.anio_lectivo).getTime() == new Date(id).getTime()
-        ) {
-          pen.push(element);
-        }
+
+    // Definir modelos
+    const Pension = conn.model("pension", PensionSchema);
+    const Estudiante = conn.model("estudiante", EstudianteSchema);
+    const Config = conn.model("config", ConfigSchema);
+
+    // Obtener estudiantes y pensiones
+    const estudiantes = await Estudiante.find().lean();
+    const pensiones = await Pension.find().populate("idestudiante").lean();
+
+    // Crear un Set con los IDs de estudiantes que tienen pensión
+    const estudiantesConPension = new Set(
+      pensiones
+        .filter((p) => p.idestudiante) // Filtrar pensiones con estudiante válido
+        .map((p) => p.idestudiante._id.toString())
+    );
+
+    // Encontrar estudiantes sin pensión
+    const estudiantesSinPension = estudiantes.filter(
+      (est) => !estudiantesConPension.has(est._id.toString())
+    );
+
+    // Mostrar información detallada de estudiantes sin pensión
+    if (estudiantesSinPension.length > 0) {
+      console.log("=============== ESTUDIANTES SIN PENSIÓN ===============");
+      estudiantesSinPension.forEach((est) => {
+        console.log({
+          _id: est._id,
+          nombres: est.nombres,
+          dni: est.dni,
+          curso: est.curso,
+          paralelo: est.paralelo,
+          estado: est.estado,
+          createdAt: est.createdAt,
+        });
       });
-      res.status(200).send({ data: pen });
-    } else {
-      res.status(200).send({ data: estudiantes });
+      console.log("====================================================");
+      console.log(
+        `Total estudiantes sin pensión: ${estudiantesSinPension.length}`
+      );
+      console.log(`Total estudiantes: ${estudiantes.length}`);
+      console.log(`Total pensiones: ${pensiones.length}`);
     }
-  } else {
-    res.status(500).send({ message: "NoAccess" });
+
+    // Proceder con el resto de la lógica original...
+    const config = await Config.findById(id);
+    if (!config) {
+      return res.status(200).send({
+        data: pensiones,
+        estudiantes_sin_pension: estudiantesSinPension,
+      });
+    }
+
+    let pen = pensiones.filter((element) => {
+      return (
+        new Date(element.anio_lectivo).getTime() ===
+          new Date(config.anio_lectivo).getTime() ||
+        element.idanio_lectivo.toString() === config._id.toString()
+      );
+    });
+
+    res.status(200).send({
+      data: pen,
+      estudiantes_sin_pension: estudiantesSinPension,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ message: "Error en el servidor" });
   }
 };
 
@@ -596,171 +649,127 @@ const obtener_config_admin = async (res) => {
 };
 
 const actualizar_estudiante_admin = async function (req, res) {
-  if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Estudiante = conn.model("estudiante", EstudianteSchema);
-    Config = conn.model("config", ConfigSchema);
-    Pension = conn.model("pension", PensionSchema);
-    Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
-    var id = req.params["id"];
-    let data = req.body;
-    //////console.log(data);
-    var reg = await Estudiante.updateOne(
-      { _id: id },
-      {
-        nombres: data.nombres,
-        apellidos: data.apellidos,
-        telefono: data.telefono,
-        genero: data.genero,
-        email: data.email,
-        dni: data.dni,
-        curso: data.curso,
-        paralelo: data.paralelo,
-        especialidad: data.especialidad || "EGB",
-        nombres_padre: data.nombres_padre,
-        email_padre: data.email_padre,
-        dni_padre: data.dni_padre,
-        nombres_factura: data.nombres_factura,
-        dni_factura: data.dni_factura,
-        id_contifico_persona: data.id_contifico_persona,
-        direccion: data.direccion,
-      }
-    );
+  if (!req.user) {
+    res.status(403).send({ message: "NoAccess" });
+  }
 
-    if (data.password) {
-      bcrypt.hash(data.password, null, null, async function (err, hash) {
-        if (hash) {
-          data.password = hash;
-          var reg = await Estudiante.updateOne(
-            { _id: id },
-            {
-              password: data.password,
-            }
-          );
-        }
-      });
+  let conn = mongoose.connection.useDb(req.user.base);
+  Estudiante = conn.model("estudiante", EstudianteSchema);
+  Config = conn.model("config", ConfigSchema);
+  Pension = conn.model("pension", PensionSchema);
+  Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
+
+  var id = req.params["id"];
+  let data = req.body;
+  //////console.log(data);
+  await Estudiante.updateOne(
+    { _id: id },
+    {
+      nombres: data.nombres,
+      apellidos: data.apellidos,
+      telefono: data.telefono,
+      genero: data.genero,
+      email: data.email,
+      dni: data.dni,
+      curso: data.curso,
+      paralelo: data.paralelo,
+      especialidad: data.especialidad || "EGB",
+      nombres_padre: data.nombres_padre,
+      email_padre: data.email_padre,
+      dni_padre: data.dni_padre,
+      nombres_factura: data.nombres_factura,
+      dni_factura: data.dni_factura,
+      id_contifico_persona: data.id_contifico_persona,
+      direccion: data.direccion,
     }
+  );
+  var reg = await Estudiante.findOne({ _id: id });
+  console.log(reg);
+  if (data.password) {
+    bcrypt.hash(data.password, null, null, async function (err, hash) {
+      if (hash) {
+        data.password = hash;
+        var reg = await Estudiante.updateOne(
+          { _id: id },
+          {
+            password: data.password,
+          }
+        );
+      }
+    });
+  }
 
-    var cn = await Config.find().sort({ createdAt: -1 }); //await Config.findById({_id:'61abe55d2dce63583086f108'});
-    let config = cn[0];
-    var reg2 = await Pension.find({
+  const config = await Config.findOne().sort({ createdAt: -1 });
+  if (!config) {
+    return res.status(400).send({ message: "No hay configuración disponible" });
+  }
+
+  let reg2 = await Pension.findOne({
+    idestudiante: id,
+    idanio_lectivo: config._id,
+  });
+  if (!reg2) {
+    await Pension.create({
+      idestudiante: reg._id,
+      anio_lectivo: config.anio_lectivo,
+      idanio_lectivo: config._id,
+      paga_mat: data.paga_mat,
+      condicion_beca: data.condicion_beca,
+      val_beca: data.val_beca,
+      num_mes_beca: data.num_mes_beca,
+      num_mes_res: data.num_mes_beca,
+      desc_beca: data.desc_beca,
+      matricula: data.matricula,
+      curso: data.curso,
+      paralelo: data.paralelo,
+      especialidad: data.especialidad,
+    });
+
+    reg2 = await Pension.findOne({
       idestudiante: id,
       idanio_lectivo: config._id,
     });
-    ////console.log(reg2);
-    try {
-      if (reg2.length == 1) {
-        var i = 0;
-        var fecha2 = [],
-          meses;
-        if (data.desc_beca == 100) {
-          for (let j = 0; j < 10; j++) {
-            fecha2.push({
-              date: new Date(reg2[i].anio_lectivo).setMonth(
-                new Date(reg2[i].anio_lectivo).getMonth() + j
-              ),
-            });
-          }
-          var des = 0;
-          fecha2.forEach((element) => {
-            if (new Date(element.date).getMonth() == 11) {
-              des = 1;
-            }
+  }
+
+  try {
+    if (reg2) {
+      var fecha2 = [],
+        meses;
+      if (data.desc_beca == 100) {
+        for (let j = 0; j < 10; j++) {
+          fecha2.push({
+            date: new Date(reg2.anio_lectivo).setMonth(
+              new Date(reg2.anio_lectivo).getMonth() + j
+            ),
           });
-          if (des == 1) {
-            if (data.num_mes_beca <= 9) {
-              meses = data.num_mes_beca;
-            } else {
-              meses = 9;
-            }
-          } else {
+        }
+        var des = 0;
+        fecha2.forEach((element) => {
+          if (new Date(element.date).getMonth() == 11) {
+            des = 1;
+          }
+        });
+        if (des == 1) {
+          if (data.num_mes_beca <= 9) {
             meses = data.num_mes_beca;
+          } else {
+            meses = 9;
           }
         } else {
-          meses = reg2[i].meses;
+          meses = data.num_mes_beca;
         }
-        if (data.condicion_beca == "Si") {
-          ////console.log(data);
+      } else {
+        meses = reg2.meses;
+      }
+      if (data.condicion_beca == "Si") {
+        ////console.log(data);
 
-          if (reg2[i].num_mes_beca != undefined) {
-            var aux = reg2[i].num_mes_beca - data.num_mes_beca;
-            //////console.log(aux);
-            if (aux <= 0) {
-              var reg3 = await Pension.updateOne(
-                { _id: reg2[i]._id },
-                {
-                  paga_mat: data.paga_mat,
-                  //meses:meses,
-                  matricula: data.matricula,
-                  condicion_beca: data.condicion_beca,
-                  desc_beca: data.desc_beca,
-                  val_beca: data.val_beca,
-                  num_mes_beca: data.num_mes_beca,
-                  num_mes_res:
-                    reg2[i].num_mes_res +
-                    (data.num_mes_beca - reg2[i].num_mes_beca),
-                  curso: data.curso,
-                  paralelo: data.paralelo,
-                  especialidad: data.especialidad || "EGB",
-                }
-              );
-
-              var el = await Pension_Beca.deleteMany({ idpension: data._id });
-              // //console.log(el);
-              //console.log(data.pension_beca);
-              var detalles = data.pension_beca;
-              for (var element of detalles) {
-                var an = await Pension_Beca.create(element);
-              }
-
-              res
-                .status(200)
-                .send({ message: "Actualizado con exito", data: reg3 });
-            } else {
-              if (
-                reg2[i].num_mes_res -
-                  (reg2[i].num_mes_beca - data.num_mes_beca) >=
-                0
-              ) {
-                var reg3 = await Pension.updateOne(
-                  { _id: reg2[i]._id },
-                  {
-                    paga_mat: data.paga_mat,
-                    // meses:meses,
-                    matricula: data.matricula,
-                    condicion_beca: data.condicion_beca,
-                    desc_beca: data.desc_beca,
-                    val_beca: data.val_beca,
-                    num_mes_beca: data.num_mes_beca,
-                    num_mes_res:
-                      reg2[i].num_mes_res -
-                      (reg2[i].num_mes_beca - data.num_mes_beca),
-                    curso: data.curso,
-                    paralelo: data.paralelo,
-                    especialidad: data.especialidad || "EGB",
-                  }
-                );
-                var el = await Pension_Beca.deleteMany({ idpension: data._id });
-                // //console.log(el);
-                //console.log(data.pension_beca);
-                var detalles = data.pension_beca;
-                for (var element of detalles) {
-                  var an = await Pension_Beca.create(element);
-                }
-
-                res
-                  .status(200)
-                  .send({ message: "Actualizado con exito", data: reg3 });
-              } else {
-                res.status(200).send({
-                  message:
-                    "Error de consistencia el número de meses con becas usados es mayor a los meses asignados",
-                });
-              }
-            }
-          } else {
+        if (reg2.num_mes_beca != undefined) {
+          var aux = reg2.num_mes_beca - data.num_mes_beca;
+          //////console.log(aux);
+          if (aux <= 0) {
             var reg3 = await Pension.updateOne(
-              { _id: reg2[i]._id },
+              { _id: reg2._id },
               {
                 paga_mat: data.paga_mat,
                 //meses:meses,
@@ -769,7 +778,8 @@ const actualizar_estudiante_admin = async function (req, res) {
                 desc_beca: data.desc_beca,
                 val_beca: data.val_beca,
                 num_mes_beca: data.num_mes_beca,
-                num_mes_res: data.num_mes_beca,
+                num_mes_res:
+                  reg2.num_mes_res + (data.num_mes_beca - reg2.num_mes_beca),
                 curso: data.curso,
                 paralelo: data.paralelo,
                 especialidad: data.especialidad || "EGB",
@@ -783,41 +793,100 @@ const actualizar_estudiante_admin = async function (req, res) {
             for (var element of detalles) {
               var an = await Pension_Beca.create(element);
             }
+
             res
               .status(200)
               .send({ message: "Actualizado con exito", data: reg3 });
+          } else {
+            if (
+              reg2.num_mes_res - (reg2.num_mes_beca - data.num_mes_beca) >=
+              0
+            ) {
+              var reg3 = await Pension.updateOne(
+                { _id: reg2._id },
+                {
+                  paga_mat: data.paga_mat,
+                  // meses:meses,
+                  matricula: data.matricula,
+                  condicion_beca: data.condicion_beca,
+                  desc_beca: data.desc_beca,
+                  val_beca: data.val_beca,
+                  num_mes_beca: data.num_mes_beca,
+                  num_mes_res:
+                    reg2.num_mes_res - (reg2.num_mes_beca - data.num_mes_beca),
+                  curso: data.curso,
+                  paralelo: data.paralelo,
+                  especialidad: data.especialidad || "EGB",
+                }
+              );
+              var el = await Pension_Beca.deleteMany({ idpension: data._id });
+              // //console.log(el);
+              //console.log(data.pension_beca);
+              var detalles = data.pension_beca;
+              for (var element of detalles) {
+                var an = await Pension_Beca.create(element);
+              }
+
+              res
+                .status(200)
+                .send({ message: "Actualizado con exito", data: reg3 });
+            } else {
+              res.status(200).send({
+                message:
+                  "Error de consistencia el número de meses con becas usados es mayor a los meses asignados",
+              });
+            }
           }
         } else {
           var reg3 = await Pension.updateOne(
-            { _id: reg2[i]._id },
+            { _id: reg2._id },
             {
-              /*condicion_beca: 'No',
-                                desc_beca :'',
-                                val_beca:'',
-                                num_mes_beca:'',
-                                num_mes_res:'',*/
+              paga_mat: data.paga_mat,
+              //meses:meses,
+              matricula: data.matricula,
+              condicion_beca: data.condicion_beca,
+              desc_beca: data.desc_beca,
+              val_beca: data.val_beca,
+              num_mes_beca: data.num_mes_beca,
+              num_mes_res: data.num_mes_beca,
               curso: data.curso,
               paralelo: data.paralelo,
               especialidad: data.especialidad || "EGB",
             }
           );
-          //var el = await Pension_Beca.deleteMany({idpension:data._id});
-          //////console.log(reg3);
+
+          var el = await Pension_Beca.deleteMany({ idpension: data._id });
+          // //console.log(el);
+          //console.log(data.pension_beca);
+          var detalles = data.pension_beca;
+          for (var element of detalles) {
+            var an = await Pension_Beca.create(element);
+          }
           res
             .status(200)
             .send({ message: "Actualizado con exito", data: reg3 });
         }
       } else {
-        res
-          .status(200)
-          .send({ message: "Pension no encontrada, algo salió mal" });
+        var reg3 = await Pension.updateOne(
+          { _id: reg2._id },
+          {
+            curso: data.curso,
+            paralelo: data.paralelo,
+            especialidad: data.especialidad || "EGB",
+          }
+        );
+        //var el = await Pension_Beca.deleteMany({idpension:data._id});
+        //////console.log(reg3);
+        res.status(200).send({ message: "Actualizado con exito", data: reg3 });
       }
-    } catch (error) {
-      //console.log(error);
-      res.status(200).send({ message: "Algo salió mal" });
+    } else {
+      res
+        .status(200)
+        .send({ message: "Pension no encontrada, algo salió mal" });
     }
-  } else {
-    res.status(500).send({ message: "NoAccess" });
+  } catch (error) {
+    //console.log(error);
+    res.status(200).send({ message: "Algo salió mal" });
   }
 };
 

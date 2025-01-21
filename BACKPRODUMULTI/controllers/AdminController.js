@@ -1531,16 +1531,18 @@ const obtener_detallespagos_admin = async function (req, res) {
           .populate("idpension")
           .populate("pago")
           .lean();
+        console.log(detalle);
         pagosd = detalle.filter(
           (element) =>
             element.idpension &&
             element.idpension.anio_lectivo &&
             element.idpension.idanio_lectivo &&
-            (element.idpension.idanio_lectivo == config._id ||
+            (element.idpension.idanio_lectivo.toString() === config._id.toString() ||
               new Date(element.idpension.anio_lectivo).getTime() ===
                 new Date(config.anio_lectivo).getTime())
         );
-        console.error(detalle.filter((elment) => !elment.idpension).length);
+        const error_arr = detalle.filter((elment) => !elment.idpension);
+        console.error("DATOS ERRONEOS: ", error_arr[0], error_arr.length);
         res.status(200).send({ data: pagosd });
       } else {
         detalle = await Dpago.find().populate("idpension");

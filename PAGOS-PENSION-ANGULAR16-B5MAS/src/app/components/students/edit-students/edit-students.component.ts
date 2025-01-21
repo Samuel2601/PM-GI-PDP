@@ -141,7 +141,7 @@ export class EditStudentsComponent implements OnInit {
                     this._estudianteService
                       .obtener_pension_estudiante_guest(this.id, this.token)
                       .subscribe((response) => {
-                        //console.log(response.data);
+                        console.log(response.data);
                         if (response.data) {
                           var pen = response.data;
                           console.log(response.data);
