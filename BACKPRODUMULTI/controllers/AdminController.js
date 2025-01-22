@@ -1510,9 +1510,599 @@ const obtener_pagos_dash = async function (req, res) {
     res.status(500).send({ message: "NoAccess" });
   }
 };
+
+const listado_detalles_erroneos = [
+  "6419c3dc0e697d207ca405b1",
+  "6419c3dc0e697d207ca405b9",
+  "641a1710a6292f408f2470cd",
+  "641a1710a6292f408f2470d6",
+  "641b072cfbc4fb68123733c3",
+  "641b072cfbc4fb68123733cb",
+  "641b8679fbc4fb681237522a",
+  "641b8679fbc4fb6812375232",
+  "641cbd7afbc4fb6812376600",
+  "641cbd7afbc4fb6812376608",
+  "641cbfcffbc4fb6812376694",
+  "641cbfcffbc4fb681237669c",
+  "641dc1effbc4fb6812376e8d",
+  "641dc1effbc4fb6812376e95",
+  "641e0799fbc4fb68123776eb",
+  "641e14e2fbc4fb6812377c79",
+  "641e14e2fbc4fb6812377c81",
+  "6421a10ab35d2ea135b6c100",
+  "6421a10ab35d2ea135b6c108",
+  "6421ffccb35d2ea135b6dcc2",
+  "6421ffccb35d2ea135b6dcca",
+  "6421ffe3b35d2ea135b6dcfc",
+  "642203e0b35d2ea135b6deb5",
+  "642203e0b35d2ea135b6debd",
+  "642203f6b35d2ea135b6deef",
+  "64220416b35d2ea135b6df19",
+  "64220416b35d2ea135b6df21",
+  "64220470b35d2ea135b6df5e",
+  "64221194b35d2ea135b6e61c",
+  "64221194b35d2ea135b6e624",
+  "642211a9b35d2ea135b6e656",
+  "642440957f9f72d18f472553",
+  "642440957f9f72d18f47255b",
+  "642440ba7f9f72d18f47258d",
+  "642452957f9f72d18f472fcc",
+  "642452957f9f72d18f472fd4",
+  "642452b37f9f72d18f473004",
+  "6425928f82c4331fb8674f45",
+  "6425928f82c4331fb8674f4d",
+  "642592a482c4331fb8674f7f",
+  "6425eecb82c4331fb8676c54",
+  "6425eecb82c4331fb8676c5c",
+  "6425eee182c4331fb8676c8e",
+  "642af9174c780d65b0551bce",
+  "642af92f4c780d65b0551bfe",
+  "642af92f4c780d65b0551c06",
+  "642af92f4c780d65b0551c0f",
+  "642b06b54c780d65b055205c",
+  "642b06b54c780d65b0552064",
+  "642b07134c780d65b055209c",
+  "642b2ff84c780d65b05526e1",
+  "642b301d4c780d65b055270b",
+  "642c67bb4c780d65b055415e",
+  "642c80aa4c780d65b0554376",
+  "642c86754c780d65b0554652",
+  "642d8c4f938854637e9c6bd4",
+  "642d8c61938854637e9c6bfe",
+  "642d8c61938854637e9c6c06",
+  "642d8efa938854637e9c6c8a",
+  "642d8f16938854637e9c6cbb",
+  "642d8f16938854637e9c6cc3",
+  "642ddfbc938854637e9c7e3d",
+  "642ddfce938854637e9c7e67",
+  "642ddfce938854637e9c7e6f",
+  "642e0027938854637e9c8589",
+  "64340e52938854637e9c8b0c",
+  "64347dfc938854637e9ca561",
+  "64347dfc938854637e9ca56a",
+  "64359266774b2ea0593e06c4",
+  "64359278774b2ea0593e06ee",
+  "64359278774b2ea0593e06f6",
+  "643592cf774b2ea0593e0734",
+  "643592e0774b2ea0593e075e",
+  "643592e0774b2ea0593e0766",
+  "6435d4a1774b2ea0593e120f",
+  "64371e40774b2ea0593e212d",
+  "643832bd774b2ea0593e2c37",
+  "64387e3a94491f2477bb9362",
+  "64387e5394491f2477bb9386",
+  "64397b3f94491f2477bb97d5",
+  "64397b5594491f2477bb97ff",
+  "64397b5594491f2477bb9808",
+  "64397eab94491f2477bb9848",
+  "64397eab94491f2477bb9851",
+  "64526115b593e4c48ff46d21",
+  "64526136b593e4c48ff46d4b",
+  "64526136b593e4c48ff46d53",
+  "645261a9b593e4c48ff46daa",
+  "645261a9b593e4c48ff46db2",
+  "645261a9b593e4c48ff46dbb",
+  "645ab36e6c36432ce5903cc6",
+  "645abfff6c36432ce5903dfd",
+  "645ac0176c36432ce5903e27",
+  "645ac0176c36432ce5903e2f",
+  "64623fa06c36432ce590591a",
+  "6467df0d6c36432ce59082dd",
+  "646b676d6c36432ce590874a",
+  "646b6bba6c36432ce59088bc",
+  "646f9d4e53ab48ca5c5cabf8",
+  "6474cf0c53ab48ca5c5cccba",
+  "6474cf0c53ab48ca5c5cccc2",
+  "6474cf0c53ab48ca5c5ccccb",
+  "6477707f929d2869d26abf0c",
+  "6478fcf0929d2869d26ad3a4",
+  "6479f2d7929d2869d26adec3",
+  "647a6648929d2869d26af33a",
+  "647a6f2d929d2869d26af4b1",
+  "647a6f2d929d2869d26af4ba",
+  "647de863929d2869d26afe2c",
+  "647e01f2929d2869d26b046a",
+  "647e17cc929d2869d26b0e13",
+  "647f4cbfe15b7563f886ff1b",
+  "647f4cbfe15b7563f886ff24",
+  "647f52f9e15b7563f886ffef",
+  "647f56e1e15b7563f8870208",
+  "647f5f9ae15b7563f88704c3",
+  "647f5f9ae15b7563f88704cb",
+  "6481e490e15b7563f88715d5",
+  "6481e4cce15b7563f887160e",
+  "64823a80e15b7563f8872384",
+  "6487264ce15b7563f887437d",
+  "64878046e15b7563f8875af6",
+  "64878046e15b7563f8875afe",
+  "64878249e15b7563f8875b3e",
+  "64878249e15b7563f8875b47",
+  "6493166fa43b3230a1555d58",
+  "6499af35a43b3230a15578bf",
+  "6499af62a43b3230a15578f6",
+  "649ae97397f8de5bde8ed6e5",
+  "649ae9ae97f8de5bde8ed71b",
+  "64a490bf97f8de5bde8f0e1e",
+  "64a5739f97f8de5bde8f125c",
+  "64a6e93597f8de5bde8f251f",
+  "64ac0a3843a3c4b9be6efc13",
+  "64ac0a7643a3c4b9be6efc4c",
+  "64ac1fe543a3c4b9be6f0125",
+  "64ac39fc43a3c4b9be6f07e6",
+  "64ac7d8f43a3c4b9be6f11ce",
+  "64ac7d8f43a3c4b9be6f11d7",
+  "64aeb2a343a3c4b9be6f26dd",
+  "64aeb2a343a3c4b9be6f26e5",
+  "64af154a43a3c4b9be6f303c",
+  "64af154a43a3c4b9be6f3046",
+  "64b161d543a3c4b9be6f441b",
+  "64b1770543a3c4b9be6f469a",
+  "64b86447092713c1186af84f",
+  "64b86447092713c1186af858",
+  "64b9b457092713c1186b0596",
+  "64bea885c325c4166f3ebaa7",
+  "64beab7fc325c4166f3ebaec",
+  "64bfd174c325c4166f3ec47c",
+  "64bfd1bec325c4166f3ec4bb",
+  "64bfe5e4c325c4166f3ecd59",
+  "64bfe60dc325c4166f3ecd92",
+  "64bfe60ec325c4166f3ecd9b",
+  "64c27e92c325c4166f3ed1e3",
+  "64c7b63ac325c4166f3ed814",
+  "64c80181c325c4166f3eec93",
+  "64c90947c325c4166f3ef64d",
+  "64c929a5c325c4166f3efa67",
+  "64c93e05c325c4166f3f00fd",
+  "64c93e05c325c4166f3f0105",
+  "64c93e2cc325c4166f3f013f",
+  "64c93e2cc325c4166f3f0148",
+  "64c94b68c325c4166f3f066a",
+  "64c94b68c325c4166f3f0673",
+  "64cab8d945b34db6d271cf7b",
+  "64cab8d945b34db6d271cf84",
+  "64d130e2a11dc935fc4f3b61",
+  "64d130e2a11dc935fc4f3b6a",
+  "64d3ca78a11dc935fc4f522e",
+  "64dba10ca11dc935fc4f7e38",
+  "64dba10ca11dc935fc4f7e40",
+  "64dba10ca11dc935fc4f7e48",
+  "64dbb9bfa11dc935fc4f8840",
+  "64dbb9dba11dc935fc4f8873",
+  "64dbe710a11dc935fc4f8a3a",
+  "64dbf607a11dc935fc4f8d6d",
+  "64dcdcf909d12d415bdc22c5",
+  "64dce44609d12d415bdc2402",
+  "64dce47809d12d415bdc243c",
+  "64dce47809d12d415bdc2445",
+  "64de339009d12d415bdc34c9",
+  "64de339009d12d415bdc34d2",
+  "64e757e809d12d415bdc580e",
+  "64e757e809d12d415bdc5816",
+  "64e90e2d09d12d415bdc667c",
+  "64e90e2e09d12d415bdc6686",
+  "64eca65e1b40414e7243c1ba",
+  "64ed0ea81b40414e7243c4f0",
+  "64f5ce371b40414e7243e2ea",
+  "64f613321b40414e7243f452",
+  "64f7904b1b40414e724403bb",
+  "64f7904b1b40414e724403c4",
+  "64f87d051b40414e72440bae",
+  "64ff3f87855dc03e079b085e",
+  "64ff3f87855dc03e079b0867",
+  "64ff4a24855dc03e079b0c55",
+  "64ff4a24855dc03e079b0c5e",
+  "64ff4be9855dc03e079b0d27",
+  "64ff4be9855dc03e079b0d30",
+  "64ff4c18855dc03e079b0d67",
+  "64ff4c18855dc03e079b0d6f",
+  "64ff8d34855dc03e079b1b80",
+  "64ff8d34855dc03e079b1b89",
+  "6500df93855dc03e079b33e0",
+  "6500dfca855dc03e079b340b",
+  "6500dfca855dc03e079b3413",
+  "6500e193855dc03e079b34e1",
+  "65048ee889aae1a99f569693",
+  "65048ee889aae1a99f56969c",
+  "6508cc1689aae1a99f56a542",
+  "6508cc1689aae1a99f56a54a",
+  "6508cc1689aae1a99f56a553",
+  "6511994278e923840084ec76",
+  "6513496978e923840085066d",
+  "6513496978e9238400850675",
+  "65134a8478e92384008506fc",
+  "65134a8478e9238400850704",
+  "65147802bccfc0052da82df4",
+  "65147802bccfc0052da82dfd",
+  "65147802bccfc0052da82e05",
+  "651ada14ef15dc45abf4aef9",
+  "651ada14ef15dc45abf4af02",
+  "651adf64ef15dc45abf4af98",
+  "652068da1b69b82f8c7c6239",
+  "6525c66e092b2e102f1c5051",
+  "6525c66e092b2e102f1c505b",
+  "652e9041092b2e102f1cca23",
+  "652ef7bd6c311c99f409190e",
+  "652ef7d96c311c99f4091ae1",
+  "652ef7d96c311c99f4091aea",
+  "652ef7d96c311c99f4091af4",
+  "652f0e3e6c311c99f4094a84",
+  "652f0e3e6c311c99f4094a8e",
+  "65319695480747f33b3facc4",
+  "65319695480747f33b3faccd",
+  "6531ad23480747f33b3fb9b1",
+  "6532f549480747f33b402198",
+  "6532f549480747f33b4021a2",
+  "6533e474480747f33b404182",
+  "6533ed8171b6d088fe56ae53",
+  "653678bd71b6d088fe56dab3",
+  "653678bd71b6d088fe56dabe",
+  "65367abc71b6d088fe56deb6",
+  "65367abc71b6d088fe56dec0",
+  "65367abc71b6d088fe56deca",
+  "65367b8e71b6d088fe56e014",
+  "65367bb271b6d088fe56e158",
+  "6537bc0242cc0529f2f579a7",
+  "6537bc2b42cc0529f2f583d7",
+  "6537c01442cc0529f2f59dce",
+  "6537e07c3beaaf31d7cbd275",
+  "6537e07c3beaaf31d7cbd27e",
+  "6537e0ae3beaaf31d7cbd777",
+  "6537e0ae3beaaf31d7cbd780",
+  "6537e0ae3beaaf31d7cbd78a",
+  "6537e92a3beaaf31d7cbf03a",
+  "6537e92a3beaaf31d7cbf043",
+  "6539373f74c60a5ef5db3cbe",
+  "6539373f74c60a5ef5db3cc7",
+  "6539376d74c60a5ef5db3f4c",
+  "6539376d74c60a5ef5db3f56",
+  "6541612efa0246c2b37060f1",
+  "6541612efa0246c2b37060fb",
+  "654a365ffa0246c2b37096ca",
+  "654a365ffa0246c2b37096d4",
+  "654a365ffa0246c2b37096de",
+  "654a9998fa0246c2b370d416",
+  "654a99bbfa0246c2b370d57f",
+  "654a99bbfa0246c2b370d589",
+  "654c0b0e2e26c869925d726f",
+  "6553e72721389ee0785628a7",
+  "6553e72721389ee0785628b0",
+  "6553ecb521389ee078563c7c",
+  "6553ecb521389ee078563c86",
+  "6554f9f1a261000e2a554705",
+  "6554fa3aa261000e2a5548c8",
+  "6554fa3aa261000e2a5548d2",
+  "65553cf6a261000e2a555e46",
+  "65553cf6a261000e2a555e50",
+  "655ce152a261000e2a55c258",
+  "655e621630416deb1cddd433",
+  "655e621630416deb1cddd43e",
+  "655e630230416deb1cddd722",
+  "655e630230416deb1cddd72b",
+  "655e7e6630416deb1cddf519",
+  "655e7e6630416deb1cddf523",
+  "655e7e6630416deb1cddf52d",
+  "656111d230416deb1cde16c4",
+  "656111d230416deb1cde16cd",
+  "656123d130416deb1cde27b5",
+  "65665c2230416deb1cde7487",
+  "65665c2230416deb1cde7491",
+  "65665c2230416deb1cde749b",
+  "65665c2230416deb1cde74a5",
+  "65665c2230416deb1cde74af",
+  "65665c2230416deb1cde74b9",
+  "656e0618191a4dd437186f32",
+  "656e0618191a4dd437186f3b",
+  "656e366a191a4dd437188810",
+  "656e366a191a4dd437188819",
+  "656e369d191a4dd4371889d0",
+  "6570f0cabfe5a0191805a05b",
+  "6570f0cabfe5a0191805a065",
+  "657a201c12f52f9fcae1bf50",
+  "657a201c12f52f9fcae1bf5a",
+  "657a391512f52f9fcae1e51b",
+  "657a391512f52f9fcae1e524",
+  "657a39ec12f52f9fcae1e9de",
+  "657a3b0712f52f9fcae1ee0d",
+  "657a3b0712f52f9fcae1ee18",
+  "657a3b0712f52f9fcae1ee22",
+  "657a3b3f12f52f9fcae1efa2",
+  "657a3b3f12f52f9fcae1efad",
+  "657a4e3412f52f9fcae28ca9",
+  "657a502e12f52f9fcae2a9ab",
+  "657a514a12f52f9fcae2bab3",
+  "657a514a12f52f9fcae2babc",
+  "657a514a12f52f9fcae2bac6",
+  "657a554612f52f9fcae30907",
+  "657a6667717be10ef46a6bb9",
+  "657a6667717be10ef46a6bc3",
+  "657a75de0204331078240492",
+  "657b0872dc49c71e268e02cb",
+  "657b0872dc49c71e268e02d6",
+  "657b1b5cdc49c71e268ed9fe",
+  "657b1b5cdc49c71e268eda08",
+  "657b1cf7dc49c71e268ef4aa",
+  "6582078c78a03c3399c7d569",
+  "65845d7378a03c3399c82b0f",
+  "65845d7378a03c3399c82b19",
+  "65845d7378a03c3399c82b23",
+  "6585ac0678a03c3399c830de",
+  "6585ac0678a03c3399c830e8",
+  "6585ac0678a03c3399c830f2",
+  "6585b70178a03c3399c83602",
+  "6585b70178a03c3399c8360c",
+  "6585b81678a03c3399c836a2",
+  "6585c68078a03c3399c83ec0",
+  "6585c68078a03c3399c83ec9",
+  "6585c76078a03c3399c83fc0",
+  "6585c76178a03c3399c83fc9",
+  "6585d09b78a03c3399c844d3",
+  "65958d451d23f363e9f12059",
+  "65958d451d23f363e9f12062",
+  "65958d451d23f363e9f1206b",
+  "6597143f1d23f363e9f1c823",
+  "6597143f1d23f363e9f1c82c",
+  "659714841d23f363e9f1ca12",
+  "659ff564ac32287a4cca7eba",
+  "659ff564ac32287a4cca7ec3",
+  "659ff564ac32287a4cca7ecd",
+  "65a044bfac32287a4cca836d",
+  "65a044bfac32287a4cca8376",
+  "65a18842ac32287a4cca8f03",
+  "65a1a1e8ac32287a4cca95bf",
+  "65a1a1e8ac32287a4cca95c9",
+  "65a53639ac32287a4cca9be2",
+  "65aa9102ac32287a4ccb31ff",
+  "65aaa8e7ac32287a4ccb51d4",
+  "65aaa8e7ac32287a4ccb51dd",
+  "65aaa925ac32287a4ccb5399",
+  "65ae7269ac32287a4ccb5b9e",
+  "65ae7294ac32287a4ccb5c47",
+  "65afd055ac32287a4ccb8ec8",
+  "65afd453ac32287a4ccb9a09",
+  "65afd453ac32287a4ccb9a12",
+  "65b1408eb67f36b1bc9c6159",
+  "65b1408eb67f36b1bc9c6162",
+  "65b1408eb67f36b1bc9c616c",
+  "65b140bab67f36b1bc9c63f7",
+  "65b140bab67f36b1bc9c6401",
+  "65b142b5b67f36b1bc9c7172",
+  "65b142b5b67f36b1bc9c717b",
+  "65b14c8fb67f36b1bc9ca354",
+  "65b19a655d113fe84e0d1da2",
+  "65b3a9335d113fe84e0e4498",
+  "65b3a9335d113fe84e0e44a2",
+  "65b3b5e05d113fe84e0e5a68",
+  "65b7b9405d113fe84e0ef840",
+  "65b7b9405d113fe84e0ef84a",
+  "65b83546bb28e4039cd1be43",
+  "65b9b08fbb28e4039cd2046a",
+  "65b9b0d9bb28e4039cd20599",
+  "65ba7c34bb28e4039cd26305",
+  "65ba7c34bb28e4039cd2630f",
+  "65ba7cc1bb28e4039cd264f4",
+  "65ba7cc1bb28e4039cd264fe",
+  "65ba7cc1bb28e4039cd26509",
+  "65bb94d0bb28e4039cd26a16",
+  "65bb94d0bb28e4039cd26a21",
+  "65bba611bb28e4039cd275d5",
+  "65bba611bb28e4039cd275df",
+  "65bbab17bb28e4039cd27ea8",
+  "65bbabacbb28e4039cd27fec",
+  "65bbabacbb28e4039cd27ff5",
+  "65bbc749bb28e4039cd2ad66",
+  "65bbc749bb28e4039cd2ad6f",
+  "65bbc785bb28e4039cd2aef2",
+  "65c0f40ed5a41a7958cae86b",
+  "65c0f69dd5a41a7958caf935",
+  "65c0fff2d5a41a7958cb3870",
+  "65c0fff2d5a41a7958cb3879",
+  "65c0fff2d5a41a7958cb3883",
+  "65c119b6b3917f027e9d2540",
+  "65c119b6b3917f027e9d2549",
+  "65c119b6b3917f027e9d2552",
+  "65c119b6b3917f027e9d255b",
+  "65c119b6b3917f027e9d2564",
+  "65c119b6b3917f027e9d256d",
+  "65c11f3eb3917f027e9d96ab",
+  "65c1912c4b6ef50819cec9ed",
+  "65c1912c4b6ef50819cec9f7",
+  "65c2428f4b6ef50819cf9058",
+  "65c2428f4b6ef50819cf9061",
+  "65c2428f4b6ef50819cf906a",
+  "65c2428f4b6ef50819cf9073",
+  "65c2428f4b6ef50819cf907c",
+  "65c2428f4b6ef50819cf9085",
+  "65c2428f4b6ef50819cf908e",
+  "65c2428f4b6ef50819cf9097",
+  "65c293fc6d074138cddf2cfb",
+  "65c293fd6d074138cddf2d04",
+  "65c293fd6d074138cddf2d0e",
+  "65c4e6b49cde0c433455cda5",
+  "65c4e6b49cde0c433455cdae",
+  "65c4e6b49cde0c433455cdb7",
+  "65c653586a7889cb61aba0fa",
+  "65cf6b746a7889cb61ac6178",
+  "65cf6b746a7889cb61ac6182",
+  "65cf6b746a7889cb61ac618b",
+  "65cf6b746a7889cb61ac6194",
+  "65cf6b746a7889cb61ac619d",
+  "65cf6b746a7889cb61ac61a7",
+  "65d34daf6a7889cb61acad6f",
+  "65d34daf6a7889cb61acad7a",
+  "65d366346a7889cb61acb180",
+  "65d39eb86a7889cb61ace3b9",
+  "65d3bac06a7889cb61acfd23",
+  "65d4480c6a7889cb61ad33d4",
+  "65d44b1f6a7889cb61ad3413",
+  "65dcc4fb25f9a944396942a1",
+  "65dcc4fb25f9a944396942ab",
+  "65dcc4fb25f9a944396942b5",
+  "65dcc53725f9a94439694409",
+  "65dcc53725f9a94439694414",
+  "65dd063a25f9a944396981ce",
+  "65dd127325f9a9443969b9d3",
+  "65de4bb625f9a944396a14a7",
+  "65de4bb625f9a944396a14b2",
+  "65f1aae623712cdd535c2b6b",
+  "65f1aae623712cdd535c2b74",
+  "65f1aae623712cdd535c2b7e",
+  "65f1aae623712cdd535c2b89",
+  "65f846e523712cdd535c7c73",
+  "65f846e523712cdd535c7c7c",
+  "65f846e523712cdd535c7c86",
+  "65f85af023712cdd535c7df1",
+  "65f85af023712cdd535c7dfa",
+  "65f85af023712cdd535c7e03",
+  "65f8671523712cdd535c7fc5",
+  "65f869be23712cdd535c80d1",
+  "65f869be23712cdd535c80db",
+  "65f86b2a23712cdd535c815a",
+  "65f9a62b23712cdd535c8934",
+  "65fc4c22705290eae5211604",
+  "65fc4c22705290eae521160e",
+  "65fd9966705290eae5211b18",
+  "660efd4fbacf521d5e15b582",
+  "660efd4fbacf521d5e15b58c",
+  "660efd4fbacf521d5e15b595",
+  "660efd4fbacf521d5e15b59e",
+  "660efd4fbacf521d5e15b5a7",
+  "660efd4fbacf521d5e15b5b0",
+  "660efd4fbacf521d5e15b5b9",
+  "660efd4fbacf521d5e15b5c2",
+  "660efd4fbacf521d5e15b5cc",
+  "66bf5f3d1b5979d54e65f333",
+  "66bf5f3d1b5979d54e65f33d",
+  "66bf5f3d1b5979d54e65f345",
+  "66bf5f3d1b5979d54e65f34e",
+  "66c6193ab6af2c3ebd370036",
+  "66c6193ab6af2c3ebd370040",
+  "66c6193ab6af2c3ebd370048",
+  "66c6193ab6af2c3ebd370051",
+  "66db0d49060e0e157a2c6357",
+  "66db0d49060e0e157a2c6361",
+  "66db0d49060e0e157a2c6369",
+  "66db0d4a060e0e157a2c6372",
+  "66db0d4a060e0e157a2c637c",
+  "66e2031c060e0e157a2d0733",
+  "66e98593060e0e157a2d4f5e",
+  "66f1c5170cc6780554401265",
+  "6708290da5e76bef363b2059",
+  "672a2b0a6c44040538b44447",
+  "672a3d3f6c44040538b4878f",
+  "672a9e6f5ccc5ffc5c373acb",
+  "672a9f025ccc5ffc5c37460d",
+  "672bf1ee3a6ae4586263f4f9",
+  "673cd73830ef8a431eff1aaa",
+  "6751b59778c91bac9c6b2ca4",
+  "6758ba5a3284452c83d1833f",
+  "6759ef763284452c83d23fd0",
+  "676d7b82620ddc1b15f23787",
+  "676d7dee620ddc1b15f246e8",
+  "676ed1d9cb58319608330e81",
+  "676ed272cb583196083315d8",
+  "677ee2a787a450facefdb690",
+  "6780425223112099ba3379a3",
+  "6786cc767eeee6335abd7af0",
+  "6786cc767eeee6335abd7af1",
+];
+
+consultarPension_Estudiante = async function (req) {
+  try {
+    let conn = mongoose.connection.useDb(req.user.base);
+    Pension = conn.model("pension", PensionSchema);
+    Estudiante = conn.model("estudiante", EstudianteSchema);
+    Dpago = conn.model("dpago", DpagoSchema);
+
+    // Reemplazar forEach por Promise.all
+    let dpagos = await Promise.all(
+      listado_detalles_erroneos.map(async (element) => {
+        const aux = await Dpago.findById(element)
+          .populate("idpension")
+          .populate("estudiante");
+        if (!aux) {
+          console.error("Error al obtener detalles de pagos", aux);
+          return null;
+        }
+        return aux;
+      })
+    );
+
+    console.log("Listado de pagos: ", dpagos.length);
+
+    // Filtrar los valores null y obtener valores únicos
+    // Obtener objetos únicos usando un Map para mantener solo una instancia por ID
+    const estudiantesMap = new Map();
+    const pensionesMap = new Map();
+
+    dpagos
+      .filter((dpago) => dpago && dpago.estudiante)
+      .forEach((dpago) => {
+        estudiantesMap.set(dpago.estudiante._id.toString(), dpago.estudiante);
+      });
+
+    dpagos
+      .filter((dpago) => dpago && dpago.idpension)
+      .forEach((dpago) => {
+        pensionesMap.set(dpago.idpension._id.toString(), dpago.idpension);
+      });
+
+    // Convertir los Maps a arrays de objetos
+    const estudiantes_unicos = Array.from(estudiantesMap.values());
+    const pensiones_unicas = Array.from(pensionesMap.values());
+    // Guardar en archivo JSON
+    const fs = require("fs");
+    await fs.promises.writeFile(
+      "estudiantes.json",
+      JSON.stringify(estudiantes_unicos, null, 2)
+    );
+    await fs.promises.writeFile(
+      "pension.json",
+      JSON.stringify(pensiones_unicas, null, 2)
+    );
+    const detalles = dpagos.map((element) => ({
+      _id: element._id,
+      idpension: element.idpension._id,
+      estudiante: element.estudiante._id,
+    }));
+    await fs.promises.writeFile(
+      "detallespagos.json",
+      JSON.stringify(detalles, null, 2)
+    );
+
+    console.log("Estudiantes únicos: ", estudiantes_unicos[0]);
+    console.log("Pensiones únicas: ", pensiones_unicas[0]);
+
+    return { estudiantes_unicos, pensiones_unicas };
+  } catch (error) {
+    console.error("Error al consultar pensiones", error);
+    throw error;
+  }
+};
+
 const obtener_detallespagos_admin = async function (req, res) {
   if (req.user) {
     try {
+      //await consultarPension_Estudiante(req);
       var id = req.params["id"];
       let conn = mongoose.connection.useDb(req.user.base);
       Pago = conn.model("pago", VentaSchema);
@@ -1525,24 +2115,29 @@ const obtener_detallespagos_admin = async function (req, res) {
       let pagosd = [];
 
       const config = await Config.findById(id);
-      console.log("Configuración buscada: ", config);
+      //console.log("Configuración buscada: ", config);
       if (config) {
         detalle = await Dpago.find()
           .populate("idpension")
           .populate("pago")
           .lean();
-        console.log(detalle);
+        //console.log(detalle);
         pagosd = detalle.filter(
           (element) =>
             element.idpension &&
             element.idpension.anio_lectivo &&
             element.idpension.idanio_lectivo &&
-            (element.idpension.idanio_lectivo.toString() === config._id.toString() ||
+            (element.idpension.idanio_lectivo.toString() ===
+              config._id.toString() ||
               new Date(element.idpension.anio_lectivo).getTime() ===
                 new Date(config.anio_lectivo).getTime())
         );
         const error_arr = detalle.filter((elment) => !elment.idpension);
-        console.error("DATOS ERRONEOS: ", error_arr[0], error_arr.length);
+        console.log("Listado de pagos sin pensiones");
+        /*error_arr.forEach((element) => {
+          console.log("'" + element._id + "',");
+        });
+        console.error("DATOS ERRONEOS: ", error_arr.length);*/
         res.status(200).send({ data: pagosd });
       } else {
         detalle = await Dpago.find().populate("idpension");
@@ -2215,7 +2810,15 @@ const registro_compra_manual_estudiante = async function (req, res) {
 
     // Obtener valores únicos de `documento` en los `dpagosValidos`
     documentosIds = [...new Set(dpagosValidos.map((dpago) => dpago.documento))];
-
+    // Ejecutar `actualizarStockInterno` una vez finalizado todo el proceso
+    if (documentosIds.length > 0) {
+      try {
+        await actualizarStockInterno(documentosIds, conn, session);
+        console.log("Stock actualizado correctamente.");
+      } catch (err) {
+        console.error("Error al actualizar el stock de documentos:", err);
+      }
+    }
     // Confirmar transacción
     await session.commitTransaction();
     console.log("Transacción confirmada");
@@ -2223,6 +2826,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
       pago: pago[0],
       message: "Registrado correctamente",
     });
+
   } catch (error) {
     // Manejar cualquier error durante el proceso
     console.error("Error en registro de compra:", error);
@@ -2240,16 +2844,6 @@ const registro_compra_manual_estudiante = async function (req, res) {
     // Cerrar sesión
     if (session) {
       session.endSession();
-    }
-    // Ejecutar `actualizarStockInterno` una vez finalizado todo el proceso
-    if (documentosIds.length > 0) {
-      try {
-        const conn = mongoose.connection.useDb(req.user.base); // Reutilizar conexión
-        await actualizarStockInterno(documentosIds, conn);
-        console.log("Stock actualizado correctamente.");
-      } catch (err) {
-        console.error("Error al actualizar el stock de documentos:", err);
-      }
     }
   }
 };
@@ -2599,10 +3193,10 @@ async function actualizarStockDocumento(element, conn, session) {
   }
 }
 
-async function actualizarStockInterno(documentos, conn) {
-  const Documento = conn.model("document", DocumentoSchema);
-  const Dpago = conn.model("dpago", DpagoSchema);
-  const Registro = conn.model("registro", RegistroSchema);
+async function actualizarStockInterno(documentos, conn, session) {
+  const Documento = conn.model("document", DocumentoSchema, session);
+  const Dpago = conn.model("dpago", DpagoSchema, session);
+  const Registro = conn.model("registro", RegistroSchema, session);
   // Array para almacenar resultados de actualización
   const resultados = [];
   try {

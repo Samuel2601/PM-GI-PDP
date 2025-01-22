@@ -33,5 +33,7 @@ var EstudianteSchema = Schema({
   createdAt: { type: Date, default: Date.now, require: true },
 });
 
-//module.exports =  mongoose.model('estudiante',EstudianteSchema);
 module.exports = EstudianteSchema;
+
+
+//module.exports =  mongoose.model('estudiante',EstudianteSchema);

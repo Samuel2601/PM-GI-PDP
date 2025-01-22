@@ -85,13 +85,13 @@ export class DetailStudentsComponent implements OnInit {
 
 			this._estudianteService.obtener_estudiante_guest(this.id, this.token).subscribe(
 				(response) => {
-					//////console.log(response);
+					//console.log(response);
 					if (response.data == undefined) {
 						this.estudiante = undefined;
 						this.load_data = false;
 					} else {
 						this.estudiante = response.data;
-						////console.log("estudiante",this.estudiante);
+						console.log("estudiante",this.estudiante);
 						this.load_data = false;
 
 						this.init_data();
@@ -104,13 +104,13 @@ export class DetailStudentsComponent implements OnInit {
 	init_data() {
 		this.load_todapension = false;
 		this._adminService.obtener_config_admin(this.token).subscribe((response) => {
-			//////console.log(response);
+			console.log(response);
 			this.config = response.data[0];
 			//////console.log(this.config);
 			this._estudianteService.obtener_pension_estudiante_guest(this.id, this.token).subscribe((response) => {
 				this.pensionesestudiante = response.data;
 				this.load_todapension = true;
-				////console.log("pensionesestudiante",this.pensionesestudiante);
+				console.log("pensionesestudiante",this.pensionesestudiante);
 				this.detalle_data(this.pensionesestudiante.length - 1);
 			});
 		});

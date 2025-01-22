@@ -28,5 +28,7 @@ var PensionSchema = Schema({
   createdAt: { type: Date, default: Date.now, require: true },
 });
 
-//module.exports =  mongoose.model('pension',PensionSchema);
 module.exports = PensionSchema;
+
+
+//module.exports =  mongoose.model('pension',PensionSchema);

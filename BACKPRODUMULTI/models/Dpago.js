@@ -21,5 +21,5 @@ var DpagoSchema = Schema({
     createdAt: {type:Date, default: Date.now, require: true}
 });
 
-//module.exports =  mongoose.model('dpago',DpagoSchema);
 module.exports=DpagoSchema;
+//module.exports =  mongoose.model('dpago',DpagoSchema);

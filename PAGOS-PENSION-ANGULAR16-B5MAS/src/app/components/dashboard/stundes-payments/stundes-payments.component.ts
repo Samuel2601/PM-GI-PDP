@@ -551,32 +551,38 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                     console.log(response.data);
                     this.penest = response.data.map((item: any) => {
                       //console.log(item);
-                      return {
-                        curso: item.curso,
-                        paralelo: item.paralelo,
-                        especialidad: item.especialidad || 'EGB',
-                        anio_lectivo: item.anio_lectivo,
-                        condicion_beca: item.condicion_beca,
-                        idestudiante: {
-                          apellidos: item.idestudiante.apellidos,
-                          nombres: item.idestudiante.nombres,
-                          f_desac: item.idestudiante.f_desac,
-                          estado: item.idestudiante.estado,
-                          genero: item.idestudiante.genero,
-                          dni: item.idestudiante.dni,
-                          _id: item.idestudiante._id,
-                          anio_desac: item.idestudiante.anio_desac,
-                          email: item.idestudiante.email,
-                        },
-                        _id: item._id,
-                        val_beca: item.val_beca,
-                        desc_beca: item.desc_beca,
-                        paga_mat: item.paga_mat,
-                        matricula: item.matricula,
-                        meses: item.meses,
-                        num_mes_beca: item.num_mes_beca,
-                        num_mes_res: item.num_mes_res,
-                      };
+                      try {
+                        return {
+                          curso: item.curso,
+                          paralelo: item.paralelo,
+                          especialidad: item.especialidad || 'EGB',
+                          anio_lectivo: item.anio_lectivo,
+                          condicion_beca: item.condicion_beca,
+                          idestudiante: {
+                            apellidos: item.idestudiante.apellidos,
+                            nombres: item.idestudiante.nombres,
+                            f_desac: item.idestudiante.f_desac,
+                            estado: item.idestudiante.estado,
+                            genero: item.idestudiante.genero,
+                            dni: item.idestudiante.dni,
+                            _id: item.idestudiante._id,
+                            anio_desac: item.idestudiante.anio_desac,
+                            email: item.idestudiante.email,
+                          },
+                          _id: item._id,
+                          val_beca: item.val_beca,
+                          desc_beca: item.desc_beca,
+                          paga_mat: item.paga_mat,
+                          matricula: item.matricula,
+                          meses: item.meses,
+                          num_mes_beca: item.num_mes_beca,
+                          num_mes_res: item.num_mes_res,
+                        };
+                      } catch (error) {
+                        console.error(error, item);
+                        return null;
+                      }
+
                     });
                     console.log(this.penest.length);
                     this._configService.setProgress(

@@ -106,7 +106,7 @@ const listar_pensiones_estudiantes_tienda = async function (req, res) {
 
     // Mostrar información detallada de estudiantes sin pensión
     if (estudiantesSinPension.length > 0) {
-      console.log("=============== ESTUDIANTES SIN PENSIÓN ===============");
+     /* console.log("=============== ESTUDIANTES SIN PENSIÓN ===============");
       estudiantesSinPension.forEach((est) => {
         console.log({
           _id: est._id,
@@ -123,7 +123,7 @@ const listar_pensiones_estudiantes_tienda = async function (req, res) {
         `Total estudiantes sin pensión: ${estudiantesSinPension.length}`
       );
       console.log(`Total estudiantes: ${estudiantes.length}`);
-      console.log(`Total pensiones: ${pensiones.length}`);
+      console.log(`Total pensiones: ${pensiones.length}`);*/
     }
 
     // Proceder con el resto de la lógica original...
