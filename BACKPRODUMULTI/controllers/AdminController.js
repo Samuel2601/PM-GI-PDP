@@ -2710,15 +2710,17 @@ const registro_compra_manual_estudiante = async function (req, res) {
   if (!req.user) {
     return res.status(401).send({ message: "No autorizado" });
   }
+  console.log("CONECTANDO A LA BASE DE DATOS: ", req.user.base);
+  const conn = mongoose.connection.useDb(req.user.base);
 
   const session = await mongoose.startSession();
-  let documentosIds = [];
+  console.log("Iniciando sesión");
+  // Iniciar transacción para asegurar atomicidad
+  session.startTransaction();
+
+  //let documentosIds = [];
 
   try {
-    // Iniciar transacción para asegurar atomicidad
-    await session.startTransaction();
-
-    const conn = mongoose.connection.useDb(req.user.base);
     const Config = conn.model("config", ConfigSchema);
     const Registro = conn.model("registro", RegistroSchema);
     const Pago = conn.model("pago", VentaSchema);
@@ -2739,7 +2741,6 @@ const registro_compra_manual_estudiante = async function (req, res) {
 
     // Crear pago
     const pago = await Pago.create([data], { session });
-
     // Registrar la creación del pago
     const registro = {
       admin: req.user.sub,
@@ -2808,7 +2809,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
       { session }
     );
 
-    // Obtener valores únicos de `documento` en los `dpagosValidos`
+    /*// Obtener valores únicos de `documento` en los `dpagosValidos`
     documentosIds = [...new Set(dpagosValidos.map((dpago) => dpago.documento))];
     // Ejecutar `actualizarStockInterno` una vez finalizado todo el proceso
     if (documentosIds.length > 0) {
@@ -2818,7 +2819,8 @@ const registro_compra_manual_estudiante = async function (req, res) {
       } catch (err) {
         console.error("Error al actualizar el stock de documentos:", err);
       }
-    }
+    }*/
+
     // Confirmar transacción
     await session.commitTransaction();
     console.log("Transacción confirmada");
@@ -2826,7 +2828,6 @@ const registro_compra_manual_estudiante = async function (req, res) {
       pago: pago[0],
       message: "Registrado correctamente",
     });
-
   } catch (error) {
     // Manejar cualquier error durante el proceso
     console.error("Error en registro de compra:", error);
@@ -2909,7 +2910,7 @@ async function procesarPagoMatricula(element, config, pago, conn, session) {
       { matricula: mat },
       { session }
     );
-    return true;
+
     // Actualizar stock del documento
     const resultadoStock = await actualizarStockDocumento(
       element,
@@ -3030,7 +3031,7 @@ async function procesarPagoPension(element, config, pago, conn, session) {
         { session }
       );
     }
-    return true;
+
     // Actualizar stock del documento
     const resultadoStock = await actualizarStockDocumento(
       element,
@@ -3099,7 +3100,7 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
         );
       }
     }
-    return true;
+
     // Actualizar stock del documento
     const resultadoStock = await actualizarStockDocumento(
       element,
@@ -3134,56 +3135,72 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
 async function actualizarStockDocumento(element, conn, session) {
   const Documento = conn.model("document", DocumentoSchema);
   const Dpago = conn.model("dpago", DpagoSchema);
+  const Registro = conn.model("registro", RegistroSchema);
 
   try {
-    // Obtener el documento actual
-    const element_documento = await Documento.findById({
-      _id: element.documento,
-    });
+    // Obtener el documento actual (usando la sesión)
+    const element_documento = await Documento.findById(
+      element.documento
+    ).session(session);
 
-    // Convertir valores a números decimales con dos decimales
-    const valorDocumento = Number(element_documento.valor);
-    const valorActual = Number(element.valor);
+    if (!element_documento) {
+      throw new Error("El documento no existe");
+    }
+
+    // Obtener el valor original del documento desde `Registro`
+    const registro = await Registro.findOne({
+      tipo: "creo",
+      descripcion: { $regex: element_documento.documento.toString() }, // Buscar `documentoId` en `descripcion`
+    }).session(session);
+
+    if (!registro) {
+      throw new Error("Registro original no encontrado");
+    }
+
+    let valorDocumento = parseFloat(
+      element_documento.valor_origen || 0
+    ).toFixed(2);
+    if (valorDocumento == 0) {
+      try {
+        const descripcionParseada = JSON.parse(registro.descripcion);
+        valorDocumento = parseFloat(descripcionParseada.valor).toFixed(2);
+      } catch (error) {
+        throw new Error("Error al parsear la descripción del registro");
+      }
+    }
+
+    // Convertir valores a números decimales
+    const valorActual = 0; //parseFloat(element.valor).toFixed(2);
 
     // Calcular el total de pagos previos para este documento
     const pagosPrevios = await Dpago.find({
       documento: element.documento,
-    });
+    }).session(session);
 
-    // Sumar todos los valores de pagos previos más el valor actual
     const totalPagadoPrevio = pagosPrevios.reduce(
       (total, pago) => total + parseFloat(pago.valor),
-      parseFloat(element.valor)
+      0
     );
 
     // Calcular el nuevo stock
-    const new_stock = Number(
-      (valorDocumento - (totalPagadoPrevio + valorActual)).toFixed(2)
-    );
-
+    const totalPagado = (
+      parseFloat(totalPagadoPrevio) + parseFloat(valorActual)
+    ).toFixed(2);
+    const new_stock = (valorDocumento - totalPagado).toFixed(2);
+    console.log("Documento", element.documento);
+    console.log("VALOR ORIGINAL", valorDocumento);
+    console.log("PAGOS HECHOS", totalPagadoPrevio);
+    console.log("PAGO ACTUAL", valorActual);
+    console.log("totalPagado", totalPagado);
+    console.log("NUEVO VALOR", new_stock);
     // Verificar si el stock es válido
-    if (new_stock >= 0) {
-      // Actualizar documento
-      const resultado = await Documento.updateOne(
-        { _id: element.documento },
-        {
-          valor: new_stock,
-          npagos: pagosPrevios.length + 1,
-        },
-        { session }
-      );
-
-      return {
-        success: true,
-        newStock: new_stock,
-        result: resultado,
-      };
-    }
-
-    return {
-      success: false,
-      message: "Stock insuficiente",
-    };
+    return await updateDocumentWithRetry(
+      element_documento._id,
+      parseFloat(new_stock),
+      parseInt(pagosPrevios.length),
+      session,
+      conn
+    );
   } catch (error) {
     console.error("Error en actualización de stock de documento:", error);
     return {
@@ -3191,6 +3208,106 @@ async function actualizarStockDocumento(element, conn, session) {
       message: error.message,
     };
   }
+}
+
+async function updateDocumentWithRetry(
+  id,
+  new_stock,
+  pagosPrevios,
+  session,
+  conn,
+  maxRetries = 3,
+  writeConcern = { w: 1 }
+) {
+  const Documento = conn.model("document", DocumentoSchema);
+  console.log("Session", session);
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Validate session
+      if (!session || session.hasEnded) {
+        throw new Error("Invalid or ended transaction session");
+      }
+
+      // Validate stock value
+      const stockValue = parseFloat(new_stock);
+      if (isNaN(stockValue) || stockValue < 0) {
+        return {
+          success: false,
+          message: "Invalid stock value",
+        };
+      }
+
+      // Find document within the session
+      const documento = await Documento.findById(id).session(session);
+      if (!documento) {
+        throw new Error("Document not found");
+      }
+
+      // Perform update
+      const resultado = await Documento.updateOne(
+        { _id: id },
+        {
+          $set: {
+            valor: stockValue,
+            npagos: parseInt(pagosPrevios + 1),
+          },
+        },
+        {
+          new: true,
+          runValidators: true,
+          session,
+          writeConcern,
+          // Add upsert: false to prevent creating new document
+          upsert: false,
+        }
+      );
+
+      // Verify update
+      if (!resultado) {
+        throw new Error("No document found or updated");
+      }
+
+      console.log("Update Result", resultado);
+      return {
+        success: true,
+        newStock: stockValue,
+        result: resultado,
+      };
+    } catch (error) {
+      // Categorize and handle different types of errors
+      const transientErrorCodes = [251, 112, 24];
+      const isTransientError =
+        transientErrorCodes.includes(error.code) ||
+        error.name === "TransientTransactionError";
+
+      if (isTransientError && attempt < maxRetries) {
+        console.warn(
+          `Attempt ${attempt}: Transient error, retrying...`,
+          error.message
+        );
+
+        // Exponential backoff with jitter
+        const baseDelay = 200;
+        const jitter = Math.random() * 100;
+        const delay = Math.pow(2, attempt) * baseDelay + jitter;
+
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      // Log and rethrow non-transient errors or if max retries reached
+      console.error(`Update error on attempt ${attempt}:`, error);
+
+      if (attempt === maxRetries) {
+        throw new Error(
+          `Failed to update document after ${maxRetries} attempts: ${error.message}`
+        );
+      }
+    }
+  }
+
+  // Fallback error in case of unexpected flow
+  throw new Error("Unexpected error in document update process");
 }
 
 async function actualizarStockInterno(documentos, conn, session) {
