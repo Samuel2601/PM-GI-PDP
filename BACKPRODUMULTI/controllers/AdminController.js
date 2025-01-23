@@ -2704,7 +2704,12 @@ const actualizar_pago_id_contifico = async function (req, res) {
     res.status(200).send({ message: "Algo salió mal" + error });
   }
 };
-
+/*const result = await actualizarStockTOTALES(conn);
+  const fs = require("fs");
+    await fs.promises.writeFile(
+      "documentos_p.json",
+      JSON.stringify(result, null, 2)
+    );*/
 const registro_compra_manual_estudiante = async function (req, res) {
   //console.log(req.body);
   if (!req.user) {
@@ -2712,27 +2717,16 @@ const registro_compra_manual_estudiante = async function (req, res) {
   }
   console.log("CONECTANDO A LA BASE DE DATOS: ", req.user.base);
   const conn = mongoose.connection.useDb(req.user.base);
-  /*const result = await actualizarStockTOTALES(conn);
-  const fs = require("fs");
-    await fs.promises.writeFile(
-      "documentos_p.json",
-      JSON.stringify(result, null, 2)
-    );*/
-  //const session = await mongoose.startSession();
+
   const session = await mongoose.startSession();
   console.log("Iniciando sesión");
   // Iniciar transacción para asegurar atomicidad
-
   try {
     session.startTransaction();
     const Config = conn.model("config", ConfigSchema);
     const Registro = conn.model("registro", RegistroSchema);
     const Pago = conn.model("pago", VentaSchema);
     const Dpago = conn.model("dpago", DpagoSchema);
-    //var cn = await Config.find().sort({ createdAt: -1 }); //await Config.findById({_id:'61abe55d2dce63583086f108'});
-
-    //let config = cn[0];
-    //let config = await Config.findById({_id:'61abe55d2dce63583086f108'});
 
     const data = req.body;
     //console.log(data);
@@ -2808,18 +2802,6 @@ const registro_compra_manual_estudiante = async function (req, res) {
       { total_pagar: sumaValores },
       { session }
     );
-
-    /*// Obtener valores únicos de `documento` en los `dpagosValidos`
-    documentosIds = [...new Set(dpagosValidos.map((dpago) => dpago.documento))];
-    // Ejecutar `actualizarStockInterno` una vez finalizado todo el proceso
-    if (documentosIds.length > 0) {
-      try {
-        await actualizarStockInterno(documentosIds, conn, session);
-        console.log("Stock actualizado correctamente.");
-      } catch (err) {
-        console.error("Error al actualizar el stock de documentos:", err);
-      }
-    }*/
 
     await session.commitTransaction();
     console.log("Transacción confirmada");
@@ -3211,6 +3193,7 @@ async function actualizarStockDocumento(element, conn, session) {
       {
         new: true, // Devolver el documento actualizado
         runValidators: true, // Ejecutar validadores del esquema
+        //session: session,
       }
     );
     console.log("Actualizado el documento:", documentoActualizado);
