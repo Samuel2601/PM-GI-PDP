@@ -463,6 +463,7 @@ export class CreatePaymentsComponent implements OnInit {
     this._adminService
       .obtener_detalles_ordenes_estudiante_abono(this.idpension, this.token)
       .subscribe((response) => {
+        console.log("RESPONSE:", response);
         this.fecha = [];
         const becas = response?.becas;
         let auxmeses;
@@ -497,13 +498,14 @@ export class CreatePaymentsComponent implements OnInit {
             beca: 0,
           });
         }
-
+        console.log("Fechas:",this.fecha);
+        console.log("Becas:", becas);
         if (becas !== undefined) {
           becas.forEach((element: any) => {
             const matchingDate = this.fecha.find(
               (elme) =>
-                new Date(elme.date).getTime() ==
-                new Date(element.titulo).getTime()
+                new Date(elme.date).getMonth() ==
+                new Date(element.titulo).getMonth()
             );
 
             if (matchingDate) {
@@ -512,8 +514,8 @@ export class CreatePaymentsComponent implements OnInit {
 
             const matchingDate2 = this.fecha2.find(
               (elme1) =>
-                new Date(elme1.date).getTime() ==
-                new Date(element.titulo).getTime()
+                new Date(elme1.date).getMonth() ==
+                new Date(element.titulo).getMonth()
             );
 
             if (matchingDate2) {
@@ -559,6 +561,7 @@ export class CreatePaymentsComponent implements OnInit {
             this.fecha[y.tipo - 1] = '';
           }
         }
+
         console.log(this.selec_est.estado);
         /*if (this.selec_est.estado === 'Desactivado') {
 			  const con = this.fecha.filter((element) => element !== '').length;

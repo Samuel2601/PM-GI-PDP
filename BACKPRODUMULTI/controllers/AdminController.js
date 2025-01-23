@@ -2712,21 +2712,22 @@ const registro_compra_manual_estudiante = async function (req, res) {
   }
   console.log("CONECTANDO A LA BASE DE DATOS: ", req.user.base);
   const conn = mongoose.connection.useDb(req.user.base);
-
+  /*const result = await actualizarStockTOTALES(conn);
+  const fs = require("fs");
+    await fs.promises.writeFile(
+      "documentos_p.json",
+      JSON.stringify(result, null, 2)
+    );*/
+  //const session = await mongoose.startSession();
   const session = await mongoose.startSession();
   console.log("Iniciando sesión");
   // Iniciar transacción para asegurar atomicidad
-  session.startTransaction();
-
-  //let documentosIds = [];
 
   try {
+    session.startTransaction();
     const Config = conn.model("config", ConfigSchema);
     const Registro = conn.model("registro", RegistroSchema);
     const Pago = conn.model("pago", VentaSchema);
-    const Pension = conn.model("pension", PensionSchema);
-    const Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
-    const Documento = conn.model("document", DocumentoSchema);
     const Dpago = conn.model("dpago", DpagoSchema);
     //var cn = await Config.find().sort({ createdAt: -1 }); //await Config.findById({_id:'61abe55d2dce63583086f108'});
 
@@ -2792,7 +2793,6 @@ const registro_compra_manual_estudiante = async function (req, res) {
         message: "No se pudieron registrar los pagos",
       });
     }
-
     // Insertar d_pagos válidos
     await Dpago.create(dpagosValidos, { session });
 
@@ -2821,7 +2821,6 @@ const registro_compra_manual_estudiante = async function (req, res) {
       }
     }*/
 
-    // Confirmar transacción
     await session.commitTransaction();
     console.log("Transacción confirmada");
     res.status(200).send({
@@ -2833,7 +2832,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
     console.error("Error en registro de compra:", error);
 
     // Abortar transacción si existe
-    if (session) {
+    if (session.inTransaction()) {
       await session.abortTransaction();
     }
 
@@ -2842,9 +2841,9 @@ const registro_compra_manual_estudiante = async function (req, res) {
       detalles: error.message,
     });
   } finally {
-    // Cerrar sesión
-    if (session) {
-      session.endSession();
+    // Cerrar la sesión
+    if (session && session.inTransaction()) {
+      await session.endSession();
     }
   }
 };
@@ -2875,13 +2874,45 @@ async function procesarDetallePago(element, config, pago, conn, session) {
     return false;
   }
 }
+const processCreateRegisterDPago = async function (
+  element,
+  pago,
+  conn,
+  session
+) {
+  const Registro = conn.model("registro", RegistroSchema);
 
-// Funciones de procesamiento específicas
-// (implementar con la lógica existente de tu código original)
+  console.log("Registrando pago", element, pago);
+
+  try {
+    // Preparar datos del registro
+    const registroData = {
+      admin: pago.encargado, // Verifica que este valor exista y sea válido
+      estudiante: element.estudiante,
+      pago: element.pago,
+      documento: element.documento,
+      tipo: "creo",
+      descripcion: JSON.stringify(element),
+    };
+
+    // Validar que todos los campos requeridos estén presentes
+    if (!registroData.admin) {
+      throw new Error("El campo 'admin' es requerido pero no está definido.");
+    }
+
+    // Usar un array como primer argumento y pasar la sesión correctamente
+    await Registro.create([registroData], { session });
+
+    return true;
+  } catch (error) {
+    console.error("Error procesando detalle de pago:", error);
+    throw new Error("Error procesando detalle de pago");
+  }
+};
+
 async function procesarPagoMatricula(element, config, pago, conn, session) {
   const Pension = conn.model("pension", PensionSchema);
   const Dpago = conn.model("dpago", DpagoSchema);
-  const Registro = conn.model("registro", RegistroSchema);
 
   try {
     let mat = 0;
@@ -2918,20 +2949,11 @@ async function procesarPagoMatricula(element, config, pago, conn, session) {
       session
     );
 
-    if (resultadoStock.success) {
-      // Preparar registro
-      const registr = new Registro(
-        {
-          admin: pago.encargado,
-          estudiante: element.estudiante,
-          pago: element.pago,
-          documento: element.documento,
-          tipo: "creo",
-          descripcion: JSON.stringify(element),
-        },
-        { session }
-      );
-
+    if (
+      resultadoStock.success &&
+      resultadoStock.success == true &&
+      (await processCreateRegisterDPago(element, pago, conn, session))
+    ) {
       return true;
     }
 
@@ -3039,19 +3061,12 @@ async function procesarPagoPension(element, config, pago, conn, session) {
       session
     );
 
-    if (resultadoStock.success) {
-      // Preparar registro
-      const registr = new Registro(
-        {
-          admin: pago.encargado,
-          estudiante: element.estudiante,
-          pago: element.pago,
-          documento: element.documento,
-          tipo: "creo",
-          descripcion: JSON.stringify(element),
-        },
-        { session }
-      );
+    if (
+      resultadoStock.success &&
+      resultadoStock.success == true &&
+      (await processCreateRegisterDPago(element, pago, conn, session))
+    ) {
+      return true;
     }
 
     return false;
@@ -3108,20 +3123,11 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
       session
     );
 
-    if (resultadoStock.success) {
-      // Preparar registro
-      const registr = new Registro(
-        {
-          admin: pago.encargado,
-          estudiante: element.estudiante,
-          pago: element.pago,
-          documento: element.documento,
-          tipo: "creo",
-          descripcion: JSON.stringify(element),
-        },
-        { session }
-      );
-
+    if (
+      resultadoStock.success &&
+      resultadoStock.success == true &&
+      (await processCreateRegisterDPago(element, pago, conn, session))
+    ) {
       return true;
     }
 
@@ -3138,10 +3144,8 @@ async function actualizarStockDocumento(element, conn, session) {
   const Registro = conn.model("registro", RegistroSchema);
 
   try {
-    // Obtener el documento actual (usando la sesión)
-    const element_documento = await Documento.findById(
-      element.documento
-    ).session(session);
+    // Obtener el documento actual
+    const element_documento = await Documento.findById(element.documento);
 
     if (!element_documento) {
       throw new Error("El documento no existe");
@@ -3150,13 +3154,14 @@ async function actualizarStockDocumento(element, conn, session) {
     // Obtener el valor original del documento desde `Registro`
     const registro = await Registro.findOne({
       tipo: "creo",
-      descripcion: { $regex: element_documento.documento.toString() }, // Buscar `documentoId` en `descripcion`
-    }).session(session);
+      descripcion: { $regex: element_documento.documento.toString() },
+    });
 
     if (!registro) {
       throw new Error("Registro original no encontrado");
     }
 
+    // Determinar el valor del documento
     let valorDocumento = parseFloat(
       element_documento.valor_origen || 0
     ).toFixed(2);
@@ -3169,13 +3174,10 @@ async function actualizarStockDocumento(element, conn, session) {
       }
     }
 
-    // Convertir valores a números decimales
-    const valorActual = 0; //parseFloat(element.valor).toFixed(2);
-
     // Calcular el total de pagos previos para este documento
     const pagosPrevios = await Dpago.find({
       documento: element.documento,
-    }).session(session);
+    });
 
     const totalPagadoPrevio = pagosPrevios.reduce(
       (total, pago) => total + parseFloat(pago.valor),
@@ -3184,262 +3186,154 @@ async function actualizarStockDocumento(element, conn, session) {
 
     // Calcular el nuevo stock
     const totalPagado = (
-      parseFloat(totalPagadoPrevio) + parseFloat(valorActual)
+      parseFloat(totalPagadoPrevio) + parseFloat(element.valor)
     ).toFixed(2);
     const new_stock = (valorDocumento - totalPagado).toFixed(2);
-    console.log("Documento", element.documento);
-    console.log("VALOR ORIGINAL", valorDocumento);
-    console.log("PAGOS HECHOS", totalPagadoPrevio);
-    console.log("PAGO ACTUAL", valorActual);
-    console.log("totalPagado", totalPagado);
-    console.log("NUEVO VALOR", new_stock);
-    // Verificar si el stock es válido
-    return await updateDocumentWithRetry(
-      element_documento._id,
-      parseFloat(new_stock),
-      parseInt(pagosPrevios.length),
-      session,
-      conn
+
+    console.log("Valor del documento original:", valorDocumento);
+    console.log("Total de pagos previos:", pagosPrevios.length);
+    console.log("Total de pagos actuales:", totalPagado);
+    console.log("Valor del pago actual:", element.valor);
+
+    // Validar el valor del stock
+    const stockValue = Number(new_stock);
+    if (isNaN(stockValue) || stockValue < 0) {
+      throw new Error("Invalid stock value");
+    }
+    console.log("Valor del documento actualizado:", stockValue);
+    // Usar findOneAndUpdate con la opción de transacción
+    const documentoActualizado = await Documento.updateOne(
+      { _id: element_documento._id },
+      {
+        valor: Number(stockValue),
+        npagos: Number(pagosPrevios.length + 1),
+      },
+      {
+        new: true, // Devolver el documento actualizado
+        runValidators: true, // Ejecutar validadores del esquema
+      }
     );
-  } catch (error) {
-    console.error("Error en actualización de stock de documento:", error);
+    console.log("Actualizado el documento:", documentoActualizado);
+    if (!documentoActualizado) {
+      throw new Error("No se pudo actualizar el documento");
+    }
+
     return {
-      success: false,
-      message: error.message,
+      success: true,
+      message: "Documento actualizado correctamente",
+      nuevoStock: stockValue,
     };
-  }
-}
+  } catch (error) {
+    console.error("Error en actualización del saldo de documento:", error);
 
-async function updateDocumentWithRetry(
-  id,
-  new_stock,
-  pagosPrevios,
-  session,
-  conn,
-  maxRetries = 3,
-  writeConcern = { w: 1 }
-) {
-  const Documento = conn.model("document", DocumentoSchema);
-  console.log("Session", session);
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      // Validate session
-      if (!session || session.hasEnded) {
-        throw new Error("Invalid or ended transaction session");
-      }
-
-      // Validate stock value
-      const stockValue = parseFloat(new_stock);
-      if (isNaN(stockValue) || stockValue < 0) {
-        return {
-          success: false,
-          message: "Invalid stock value",
-        };
-      }
-
-      // Find document within the session
-      const documento = await Documento.findById(id).session(session);
-      if (!documento) {
-        throw new Error("Document not found");
-      }
-
-      // Perform update
-      const resultado = await Documento.updateOne(
-        { _id: id },
-        {
-          $set: {
-            valor: stockValue,
-            npagos: parseInt(pagosPrevios + 1),
-          },
-        },
-        {
-          new: true,
-          runValidators: true,
-          session,
-          writeConcern,
-          // Add upsert: false to prevent creating new document
-          upsert: false,
-        }
-      );
-
-      // Verify update
-      if (!resultado) {
-        throw new Error("No document found or updated");
-      }
-
-      console.log("Update Result", resultado);
-      return {
-        success: true,
-        newStock: stockValue,
-        result: resultado,
-      };
-    } catch (error) {
-      // Categorize and handle different types of errors
-      const transientErrorCodes = [251, 112, 24];
-      const isTransientError =
-        transientErrorCodes.includes(error.code) ||
-        error.name === "TransientTransactionError";
-
-      if (isTransientError && attempt < maxRetries) {
-        console.warn(
-          `Attempt ${attempt}: Transient error, retrying...`,
-          error.message
-        );
-
-        // Exponential backoff with jitter
-        const baseDelay = 200;
-        const jitter = Math.random() * 100;
-        const delay = Math.pow(2, attempt) * baseDelay + jitter;
-
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        continue;
-      }
-
-      // Log and rethrow non-transient errors or if max retries reached
-      console.error(`Update error on attempt ${attempt}:`, error);
-
-      if (attempt === maxRetries) {
-        throw new Error(
-          `Failed to update document after ${maxRetries} attempts: ${error.message}`
-        );
+    // Manejar errores de transacción
+    if (session && session.inTransaction()) {
+      try {
+        await session.abortTransaction();
+      } catch (abortError) {
+        console.error("Error al abortar la transacción:", abortError);
       }
     }
-  }
 
-  // Fallback error in case of unexpected flow
-  throw new Error("Unexpected error in document update process");
+    throw new Error(
+      `Error en actualización del saldo de documento: ${error.message}`
+    );
+  }
 }
 
-async function actualizarStockInterno(documentos, conn, session) {
-  const Documento = conn.model("document", DocumentoSchema, session);
-  const Dpago = conn.model("dpago", DpagoSchema, session);
-  const Registro = conn.model("registro", RegistroSchema, session);
+async function actualizarStockTOTALES(conn) {
+  const session1 = await mongoose.startSession();
+  session1.startTransaction();
+  const Documento = conn.model("document", DocumentoSchema);
+  const Dpago = conn.model("dpago", DpagoSchema);
+  const Registro = conn.model("registro", RegistroSchema);
   // Array para almacenar resultados de actualización
   const resultados = [];
   try {
-    // Comprobar si `documentos` es una cadena
-    if (typeof documentos === "string") {
-      console.log("Convirtiendo 'documentos' de cadena a arreglo...");
-      documentos = JSON.parse(documentos);
-    }
-    console.log("documentos: ", documentos);
-    // Validar que documentos sea un arreglo
-    if (!Array.isArray(documentos)) {
-      return res
-        .status(400)
-        .send({ message: "El campo 'documentos' debe ser un arreglo." });
-    }
+    // Obtener documentos
+    const documentos = await Documento.find();
+    await Promise.all(
+      documentos.map(async (documento) => {
+        // Obtener el valor original del documento desde `Registro`
+        const registro = await Registro.findOne({
+          tipo: "creo",
+          descripcion: { $regex: documento.documento.toString() },
+        });
+        if (!registro) {
+          resultados.push({
+            documento,
+            success: false,
+            message: "Registro original no encontrado",
+          });
+          return;
+        }
 
-    // Validar y convertir IDs
-    const documentosIds = documentos;
-    /*.map((id) => {
-        try {
-          return Types.ObjectId(id); // Convertir a ObjectId
-        } catch (err) {
-          return null; // Devolver null si no es válido
+        let valorOriginal = parseFloat(documento.valor_origen || 0).toFixed(2);
+        if (valorOriginal == 0) {
+          try {
+            const descripcionParseada = JSON.parse(registro.descripcion);
+            valorOriginal = parseFloat(descripcionParseada.valor).toFixed(2);
+          } catch (error) {
+            resultados.push({
+              documento,
+              success: false,
+              message: "Error al parsear la descripción del registro",
+            });
+            return;
+          }
+        }
+
+        // Encontrar todos los pagos relacionados con este documento
+        const pagosPrevios = await Dpago.find({ documento: documento._id });
+
+        // Calcular el total pagado
+        const totalPagado = pagosPrevios.reduce(
+          (total, pago) => total + Number(pago.valor),
+          0
+        );
+
+        // Calcular nuevo stock
+        const new_stock = Number((valorOriginal - totalPagado).toFixed(2));
+        if (new_stock >= 0) {
+          const resultado = await Documento.updateOne(
+            { _id: documento._id },
+            {
+              valor: new_stock,
+              npagos: pagosPrevios.length,
+            },
+            { session1 }
+          );
+
+          resultados.push({
+            documento,
+            success: true,
+            newStock: new_stock,
+            totalPagado: totalPagado,
+            valorOriginal: valorOriginal,
+            result: resultado,
+          });
+        } else {
+          resultados.push({
+            documento,
+            success: false,
+            message: "Stock insuficiente",
+            newStock: new_stock,
+            totalPagado: totalPagado,
+            valorOriginal: valorOriginal,
+          });
         }
       })
-      .filter((id) => id !== null);*/ // Eliminar valores nulos
-
-    if (documentosIds.length === 0) {
-      return res
-        .status(400)
-        .send({ message: "No se recibieron documentos válidos." });
-    }
-
-    for (const documentoId of documentosIds) {
-      // Obtener el documento actual
-      const documento = await Documento.findById(documentoId);
-
-      if (!documento) {
-        resultados.push({
-          documentoId,
-          success: false,
-          message: "Documento no encontrado",
-        });
-        continue;
-      }
-
-      // Encontrar el valor original del documento desde `Registro`
-      const registro = await Registro.findOne({
-        tipo: "creo",
-        descripcion: { $regex: documento.documento.toString() }, // Buscar `documentoId` en `descripcion`
-      });
-
-      if (!registro) {
-        resultados.push({
-          documentoId,
-          success: false,
-          message: "Registro original no encontrado",
-        });
-        continue;
-      }
-
-      let valorOriginal;
-      try {
-        const descripcionParseada = JSON.parse(registro.descripcion);
-        valorOriginal = Number(descripcionParseada.valor);
-      } catch (error) {
-        resultados.push({
-          documentoId,
-          success: false,
-          message: "Error al parsear la descripción del registro",
-        });
-        continue;
-      }
-
-      // Encontrar todos los pagos relacionados con este documento
-      const pagosPrevios = await Dpago.find({ documento: documentoId });
-
-      // Calcular el total pagado
-      const totalPagado = pagosPrevios.reduce(
-        (total, pago) => total + Number(pago.valor),
-        0
-      );
-
-      // Calcular nuevo stock
-      const valorDocumento = Number(documento.valor);
-      const new_stock = Number((valorOriginal - totalPagado).toFixed(2));
-      if (new_stock != valorDocumento) {
-        console.log(
-          "ERROR: valor original no coincide con el nuevo stock",
-          documento,
-          valorDocumento,
-          valorOriginal
-        );
-      }
-      // Verificar si el stock es válido
-      if (new_stock >= 0) {
-        const resultado = await Documento.updateOne(
-          { _id: documentoId },
-          {
-            valor: new_stock,
-            npagos: pagosPrevios.length,
-          }
-        );
-
-        resultados.push({
-          documentoId,
-          success: true,
-          newStock: new_stock,
-          totalPagado: totalPagado,
-          valorOriginal: valorOriginal,
-          // result: resultado,
-        });
-      } else {
-        resultados.push({
-          documentoId,
-          success: false,
-          message: "Stock insuficiente",
-          newStock: new_stock,
-          totalPagado: totalPagado,
-          valorOriginal: valorOriginal,
-        });
-      }
-    }
+    );
 
     return resultados;
   } catch (error) {
+    if (session1.inTransaction()) {
+      try {
+        await session1.abortTransaction();
+      } catch (abortError) {
+        console.error("Error al abortar la transacción:", abortError);
+      }
+    }
     console.error("Error en actualización de stock de documentos:", error);
     throw error;
   }
@@ -3458,7 +3352,7 @@ const actualizarStockDocumentos = async function (req, res) {
         .send({ message: "El campo 'documentos' debe ser un arreglo." });
     }
 
-    const resultados = await actualizarStockInterno(req.body.documentos, conn);
+    const resultados = null; //await actualizarStockInterno(req.body.documentos, conn);
     res.status(200).send({ resultados });
   } catch (error) {
     console.error("Error en actualización de stock de documentos:", error);
