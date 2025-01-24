@@ -62,4 +62,5 @@ export interface Cobro {
   monto: number;
   numero_comprobante?: string | null;
   tipo_ping?: string;
+  cuenta_bancaria_id?: string | null;
 }

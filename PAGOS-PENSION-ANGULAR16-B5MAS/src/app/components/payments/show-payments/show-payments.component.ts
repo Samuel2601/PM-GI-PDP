@@ -6,7 +6,7 @@ import { GLOBAL } from 'src/app/service/GLOBAL';
 import { TableUtil, TableUtil2 } from '../show-payments/tableUtil';
 //import {createClient} from 'soap';
 import iziToast from 'izitoast';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { InstitucionServiceService } from 'src/app/service/institucion.service.service';
 import { PersonService } from 'src/app/service/confitico/person.service';
 import { InventoryService } from 'src/app/service/confitico/inventory.service';
@@ -15,6 +15,7 @@ import { DatePipe } from '@angular/common';
 import { PRODUCTOS_BASE } from './seedproductos';
 import { TransactionService } from 'src/app/service/confitico/transaction.service';
 import { Cliente, Cobro, Documento, Vendedor } from './document.interface';
+import { BankingService } from 'src/app/service/confitico/banking.service';
 declare var $: any;
 
 @Component({
@@ -84,6 +85,7 @@ export class ShowPaymentsComponent implements OnInit {
     private _personService: PersonService,
     private _invetarioService: InventoryService,
     private _transactionService: TransactionService,
+    private _bankingService: BankingService,
     private datePipe: DatePipe
   ) {
     this.token = localStorage.getItem('token');
@@ -253,101 +255,132 @@ export class ShowPaymentsComponent implements OnInit {
     return `${day}/${month}/${year}`;
   };
 
-  armado_Documento_envio_Contifico(pago: any, detalles: any[]): Documento {
-    const cliente: Cliente = {
-      cedula: pago.estudiante.dni_factura.substr(0, 10),
-      razon_social: pago.estudiante.nombres_factura,
-      telefonos: pago.estudiante.telefono,
-      direccion: pago.estudiante.direccion,
-      tipo: 'N',
-      email: pago.estudiante.email_padre,
-      es_extranjero: false,
-      ruc: null,
-    };
+  async armado_Documento_envio_Contifico(
+    pago: any,
+    detalles: any[]
+  ): Promise<Documento> {
+    // Componente
+    try {
+      // Obtener cuentas bancarias
+      const accounts = await firstValueFrom(
+        this._bankingService.getBankAccounts()
+      );
+      if (!accounts || accounts.length === 0) {
+        iziToast.error({
+          title: 'ERROR',
+          position: 'topRight',
+          message: 'No se encontraron cuentas bancarias',
+        });
+        throw new Error('No se encontraron cuentas bancarias');
+      }
 
-    if (pago.estudiante.dni_factura.length > 10) {
-      cliente.ruc = pago.estudiante.dni_factura;
+      const account = accounts[0]; // Usar la primera cuenta bancaria disponible
+      const cliente: Cliente = {
+        cedula: pago.estudiante.dni_factura.substr(0, 10),
+        razon_social: pago.estudiante.nombres_factura,
+        telefonos: pago.estudiante.telefono,
+        direccion: pago.estudiante.direccion,
+        tipo: 'N',
+        email: pago.estudiante.email_padre,
+        es_extranjero: false,
+        ruc: null,
+      };
+
+      if (pago.estudiante.dni_factura.length > 10) {
+        cliente.ruc = pago.estudiante.dni_factura;
+      }
+
+      const vendedor: Vendedor = {
+        cedula: pago.encargado.dni,
+        razon_social: `${pago.encargado.nombres} ${pago.encargado.apellidos}`,
+        telefonos: pago.encargado.telefono,
+        direccion: '',
+        tipo: 'N',
+        email: pago.encargado.email,
+        es_extranjero: false,
+      };
+
+      const cobros: Cobro[] = Object.values(
+        detalles.reduce((acc, detalle) => {
+          const { documento } = detalle;
+          const docKey = documento.documento || 'Sin comprobante';
+
+          if (!acc[docKey]) {
+            acc[docKey] = {
+              forma_cobro: documento.cuenta === 'Efectivo' ? 'EF' : 'TRA',
+              monto: documento.valor_original || 0,
+              numero_comprobante: docKey,
+              fecha: this.getEcuadorDate(documento.f_deposito),
+              cuenta_bancaria_id:
+                documento.cuenta === 'Efectivo' ? null : account.id,
+            };
+          }
+
+          // Sumar los valores si el documento ya existe en el acumulador
+          acc[docKey].monto +=
+            !documento.valor_original && documento.documento === docKey
+              ? detalle.valor
+              : 0;
+
+          return acc;
+        }, {})
+      );
+
+      return {
+        //pos: 'ceaa9097-1d76-4eb8-0000-6f412fa0297b', // Token fijo o dinámico
+        fecha_emision: this.getEcuadorDate(), // Fecha actual
+        tipo_documento: 'FAC',
+        electronico: true,
+        servicio: 0.0,
+        //documento: pago._id,
+        estado: 'P',
+        //autorizacion: '0123456789',
+        caja_id: null,
+        cliente: cliente,
+        //vendedor: vendedor,
+        descripcion: `VENTA DESDE PUNTO DE VENTA`,
+        subtotal_12: 0.0,
+        subtotal_0: detalles.reduce((sum, det) => sum + det.valor, 0),
+        iva: 0.0, //detalles.reduce((sum, det) => sum + det.valor, 0),
+        ice: 0.0,
+        total: detalles.reduce((sum, det) => sum + det.valor, 0),
+        adicional1:
+          'Estudiante: ' +
+          pago.estudiante.nombres +
+          ' ' +
+          pago.estudiante.apellidos,
+        adicional2: detalles
+          .reduce(
+            (sum, det) => sum + (det.descripcion ? det.descripcion + '/ ' : ''),
+            ''
+          )
+          .slice(0, -2),
+        detalles: detalles.map((detalle) => ({
+          adicional1: detalle.descripcion + ' ' + detalle.estado,
+          producto_id: detalle.id_contifico_producto,
+          cantidad: 1.0,
+          precio: detalle.valor,
+          porcentaje_iva: 0,
+          base_cero: detalle.valor,
+          base_gravable: 0.0,
+          base_no_gravable: 0.0,
+          valor_ice: 0.0,
+          porcentaje_ice: 0.0,
+          porcentaje_descuento: 0.0,
+          tipo: detalle.tipo,
+        })),
+        cobros: cobros,
+      };
+    } catch (error) {
+      console.error('Error al armar documento:', error);
+      // Manejo de error
+      iziToast.error({
+        title: 'ERROR',
+        position: 'topRight',
+        message: 'Error al armar documento',
+      });
+      throw new Error('Error al armar documento');
     }
-
-    const vendedor: Vendedor = {
-      cedula: pago.encargado.dni,
-      razon_social: `${pago.encargado.nombres} ${pago.encargado.apellidos}`,
-      telefonos: pago.encargado.telefono,
-      direccion: '',
-      tipo: 'N',
-      email: pago.encargado.email,
-      es_extranjero: false,
-    };
-
-    const cobros: Cobro[] = Object.values(
-      detalles.reduce((acc, detalle) => {
-        const { documento } = detalle;
-        const docKey = documento.documento || 'Sin comprobante';
-
-        if (!acc[docKey]) {
-          acc[docKey] = {
-            forma_cobro: 'EF', //documento.cuenta === 'Efectivo' ? 'EF' : 'TRA',
-            monto: documento.valor_original || 0,
-            numero_comprobante: docKey,
-            fecha: this.getEcuadorDate(documento.f_deposito),
-          };
-        }
-
-        // Sumar los valores si el documento ya existe en el acumulador
-        acc[docKey].monto +=
-          !documento.valor_original && documento.documento === docKey
-            ? detalle.valor
-            : 0;
-
-        return acc;
-      }, {})
-    );
-
-    return {
-      //pos: 'ceaa9097-1d76-4eb8-0000-6f412fa0297b', // Token fijo o dinámico
-      fecha_emision: this.getEcuadorDate(), // Fecha actual
-      tipo_documento: 'FAC',
-      electronico: true,
-      servicio: 0.0,
-      //documento: pago._id,
-      estado: 'P',
-      //autorizacion: '0123456789',
-      caja_id: null,
-      cliente: cliente,
-      //vendedor: vendedor,
-      descripcion: `VENTA DESDE PUNTO DE VENTA`,
-      subtotal_12: 0.0,
-      subtotal_0: detalles.reduce((sum, det) => sum + det.valor, 0),
-      iva: 0.0, //detalles.reduce((sum, det) => sum + det.valor, 0),
-      ice: 0.0,
-      total: detalles.reduce((sum, det) => sum + det.valor, 0),
-      adicional1:
-        'Estudiante: ' +
-        pago.estudiante.nombres +
-        ' ' +
-        pago.estudiante.apellidos,
-      adicional2: detalles
-        .reduce(
-          (sum, det) => sum + (det.descripcion ? det.descripcion + '/ ' : ''),
-          ''
-        )
-        .slice(0, -2),
-      detalles: detalles.map((detalle) => ({
-        adicional1: detalle.descripcion + ' ' + detalle.estado,
-        producto_id: detalle.id_contifico_producto,
-        cantidad: 1.0,
-        precio: detalle.valor,
-        porcentaje_iva: 0,
-        base_cero: detalle.valor,
-        base_gravable: 0.0,
-        base_no_gravable: 0.0,
-        valor_ice: 0.0,
-        porcentaje_ice: 0.0,
-        porcentaje_descuento: 0.0,
-        tipo: detalle.tipo,
-      })),
-      cobros: cobros,
-    };
   }
 
   async crear_documento(documento: Documento) {
@@ -419,7 +452,7 @@ export class ShowPaymentsComponent implements OnInit {
   async generarDocumento() {
     this.habilitar_boton_generar = false;
     if (this.apikey && !this.pago.id_contifico) {
-      const pre_factura = this.armado_Documento_envio_Contifico(
+      const pre_factura = await this.armado_Documento_envio_Contifico(
         this.pago,
         this.detalles
       );

@@ -18,7 +18,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const bankAccounts = await bankingService.getBankAccounts();
+    const bankAccounts = await bankingService.getBankAccounts(req);
     res.json(bankAccounts);
   })
 );
@@ -29,7 +29,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const movements = await bankingService.getBankMovements();
+    const movements = await bankingService.getBankMovements(req);
     res.json(movements);
   })
 );

@@ -18,7 +18,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const costCenters = await accountingService.getCostCenters();
+    const costCenters = await accountingService.getCostCenters(req);
     res.json(costCenters);
   })
 );
@@ -29,7 +29,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const accounts = await accountingService.getAccountingAccounts();
+    const accounts = await accountingService.getAccountingAccounts(req);
     res.json(accounts);
   })
 );
@@ -51,7 +51,7 @@ router.get(
   auth,
   loadInstitutionConfig,
   asyncHandler(async (req, res) => {
-    const journalEntry = await accountingService.getJournalEntryById(
+    const journalEntry = await accountingService.getJournalEntryById(req,
       req.params.id
     );
     if (!journalEntry) {

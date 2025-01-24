@@ -7,7 +7,7 @@ import { GLOBAL } from '../GLOBAL';
   providedIn: 'root',
 })
 export class BankingService {
-  private readonly baseUrl = GLOBAL.url + '/banco'; // Base URL para las rutas de banco
+  private readonly baseUrl = GLOBAL.url + 'banco'; // Base URL para las rutas de banco
 
   constructor(private http: HttpClient) {}
 
