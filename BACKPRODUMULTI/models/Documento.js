@@ -8,7 +8,7 @@ const DocumentoSchema = new Schema({
   cuenta: { type: String, required: true },
   valor: { type: Number, required: true },
   valor_origen: { type: Number }, // Se establece en el middleware
-  contenido: { type: String, required: true },
+  contenido: { type: String, required: false, default: "" },
   f_deposito: { type: String, required: true },
   npagos: { type: Number, default: 0, required: true },
   createdAt: { type: Date, default: Date.now, required: true },
