@@ -494,33 +494,42 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
         .subscribe((response) => {
           console.log(response);
           this.estudiantes = response.data.map((item: any) => {
-            return {
-              abono: item.abono,
-              documento: item.documento,
-              estado: item.estado,
-              estudiante: item.estudiante,
-              idpension: {
-                anio_lectivo: item.idpension.anio_lectivo,
-                condicion_beca: item.idpension.condicion_beca,
-                curso: item.idpension.curso,
-                extrapagos: item.idpension.extrapagos,
-                idanio_lectivo: item.idpension.idanio_lectivo,
-                idestudiante: item.idpension.idestudiante,
-                matricula: item.idpension.matricula,
-                meses: item.idpension.meses,
-                paga_mat: item.idpension.paga_mat,
-                paralelo: item.idpension.paralelo,
-                especialidad: item.idpension.especialidad,
-                _id: item.idpension._id,
-              },
-              pago: {
-                estado: item.pago.estado,
-                _id: item.pago._id,
-              },
-              tipo: item.tipo,
-              valor: item.valor,
-            };
-          });
+            try {
+              if (item.tipo == null) {
+                console.error(item);
+                return null;
+              }
+              return {
+                abono: item.abono,
+                documento: item.documento,
+                estado: item.estado,
+                estudiante: item.estudiante,
+                idpension: {
+                  anio_lectivo: item.idpension.anio_lectivo,
+                  condicion_beca: item.idpension.condicion_beca,
+                  curso: item.idpension.curso,
+                  extrapagos: item.idpension.extrapagos,
+                  idanio_lectivo: item.idpension.idanio_lectivo,
+                  idestudiante: item.idpension.idestudiante,
+                  matricula: item.idpension.matricula,
+                  meses: item.idpension.meses,
+                  paga_mat: item.idpension.paga_mat,
+                  paralelo: item.idpension.paralelo,
+                  especialidad: item.idpension.especialidad,
+                  _id: item.idpension._id,
+                },
+                pago: {
+                  estado: item.pago.estado || '',
+                  _id: item.pago._id,
+                },
+                tipo: item.tipo,
+                valor: item.valor,
+              };
+            } catch (error) {
+              console.error(error, item);
+              return null;
+            }
+          }).filter((item:any) => item !== null);
           this._configService.setProgress(
             this._configService.getProgress() + 5
           );
@@ -549,41 +558,46 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                 .subscribe((response) => {
                   if (response.data) {
                     console.log(response.data);
-                    this.penest = response.data.map((item: any) => {
-                      //console.log(item);
-                      try {
-                        return {
-                          curso: item.curso,
-                          paralelo: item.paralelo,
-                          especialidad: item.especialidad || 'EGB',
-                          anio_lectivo: item.anio_lectivo,
-                          condicion_beca: item.condicion_beca,
-                          idestudiante: {
-                            apellidos: item.idestudiante.apellidos,
-                            nombres: item.idestudiante.nombres,
-                            f_desac: item.idestudiante.f_desac,
-                            estado: item.idestudiante.estado,
-                            genero: item.idestudiante.genero,
-                            dni: item.idestudiante.dni,
-                            _id: item.idestudiante._id,
-                            anio_desac: item.idestudiante.anio_desac,
-                            email: item.idestudiante.email,
-                          },
-                          _id: item._id,
-                          val_beca: item.val_beca,
-                          desc_beca: item.desc_beca,
-                          paga_mat: item.paga_mat,
-                          matricula: item.matricula,
-                          meses: item.meses,
-                          num_mes_beca: item.num_mes_beca,
-                          num_mes_res: item.num_mes_res,
-                        };
-                      } catch (error) {
-                        console.error(error, item);
-                        return null;
-                      }
+                    this.penest = response.data
+                      .map((item: any) => {
+                        try {
+                          return {
+                            curso: item.curso,
+                            paralelo: item.paralelo,
+                            especialidad: item.especialidad || 'EGB',
+                            anio_lectivo: item.anio_lectivo,
+                            condicion_beca: item.condicion_beca,
+                            idestudiante: {
+                              apellidos: item.idestudiante?.apellidos,
+                              nombres: item.idestudiante?.nombres,
+                              f_desac: item.idestudiante?.f_desac,
+                              estado: item.idestudiante?.estado,
+                              genero: item.idestudiante?.genero,
+                              dni: item.idestudiante?.dni,
+                              _id: item.idestudiante?._id,
+                              anio_desac: item.idestudiante?.anio_desac,
+                              email: item.idestudiante?.email,
+                            },
+                            _id: item._id,
+                            val_beca: item.val_beca,
+                            desc_beca: item.desc_beca,
+                            paga_mat: item.paga_mat,
+                            matricula: item.matricula,
+                            meses: item.meses,
+                            num_mes_beca: item.num_mes_beca,
+                            num_mes_res: item.num_mes_res,
+                          };
+                        } catch (error) {
+                          console.error(
+                            'Error al procesar el elemento:',
+                            error,
+                            item
+                          );
+                          return null; // Devuelve `null` para evitar romper la cadena `map`.
+                        }
+                      })
+                      .filter((item: any) => item !== null); // Filtra elementos nulos en caso de error.
 
-                    });
                     console.log(this.penest.length);
                     this._configService.setProgress(
                       this._configService.getProgress() + 5
@@ -694,12 +708,17 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                                   porpagar = this.config[this.active].matricula;
                                   tipo = i;
                                   this.detalles.find((element: any) => {
-                                    if (
-                                      element.tipo == 0 &&
-                                      element.idpension._id == elementpent._id
-                                    ) {
-                                      valor = valor + element.valor;
-                                      porpagar = porpagar - element.valor;
+                                    try {
+                                      if (
+                                        element.tipo == 0 &&
+                                        element.idpension._id == elementpent._id
+                                      ) {
+                                        valor = valor + element.valor;
+                                        porpagar = porpagar - element.valor;
+                                      }
+                                    } catch (error) {
+                                      console.error(error, element);
+                                      return;
                                     }
                                   });
                                   this.pagopension.push({

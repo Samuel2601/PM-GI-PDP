@@ -191,6 +191,8 @@ export class ShowPaymentsComponent implements OnInit {
         'MMMM'
       );
       periodoText = `${element.tipo} ${mes}`;
+    } else if (element.tipo > 10) {
+      return element.descripcion;
     }
 
     return [
@@ -367,7 +369,7 @@ export class ShowPaymentsComponent implements OnInit {
           valor_ice: 0.0,
           porcentaje_ice: 0.0,
           porcentaje_descuento: 0.0,
-          tipo: detalle.tipo,
+          tipo: detalle.tipo == 0 ? 11 : detalle.tipo,
         })),
         cobros: cobros,
       };

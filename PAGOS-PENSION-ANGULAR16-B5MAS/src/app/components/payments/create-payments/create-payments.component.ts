@@ -463,7 +463,7 @@ export class CreatePaymentsComponent implements OnInit {
     this._adminService
       .obtener_detalles_ordenes_estudiante_abono(this.idpension, this.token)
       .subscribe((response) => {
-        console.log("RESPONSE:", response);
+        console.log('RESPONSE:', response);
         this.fecha = [];
         const becas = response?.becas;
         let auxmeses;
@@ -498,8 +498,8 @@ export class CreatePaymentsComponent implements OnInit {
             beca: 0,
           });
         }
-        console.log("Fechas:",this.fecha);
-        console.log("Becas:", becas);
+        console.log('Fechas:', this.fecha);
+        console.log('Becas:', becas);
         if (becas !== undefined) {
           becas.forEach((element: any) => {
             const matchingDate = this.fecha.find(
