@@ -564,7 +564,7 @@ export class ShowPaymentsComponent implements OnInit {
     try {
       if (!this.pago.id_contifico) {
         // Si no hay ID Contífico, generar documento
-        await this.generarDocumento();
+        //await this.generarDocumento();
       } else {
         // Si hay ID Contífico, obtener documento
         this.loading = { ...this.loading, consultaDoc: true };

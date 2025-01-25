@@ -2729,7 +2729,7 @@ const registro_compra_manual_estudiante = async function (req, res) {
     const Dpago = conn.model("dpago", DpagoSchema);
 
     const data = req.body;
-    //console.log(data);
+    console.log("Datos que recibo: ",data);
     const { config, detalles } = data;
 
     data.estado = "Registrado";
