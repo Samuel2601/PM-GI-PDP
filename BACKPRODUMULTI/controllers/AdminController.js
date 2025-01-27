@@ -2992,7 +2992,7 @@ async function procesarPagoPension(element, config, pago, conn, session) {
 async function procesarPagoExtra(element, config, pago, conn, session) {
   const Pension = conn.model("pension", PensionSchema);
   const Registro = conn.model("registro", RegistroSchema);
-
+  const Config = conn.model("config", ConfigSchema);
   try {
     // Buscar pensión con configuración de año lectivo
     const pension_config = await Pension.findById({
