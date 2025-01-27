@@ -2710,133 +2710,134 @@ const actualizar_pago_id_contifico = async function (req, res) {
       "documentos_p.json",
       JSON.stringify(result, null, 2)
     );*/
-const registro_compra_manual_estudiante = async function (req, res) {
-  //console.log(req.body);
+const registroCompraManualEstudiante = async function (req, res) {
   if (!req.user) {
     return res.status(401).send({ message: "No autorizado" });
   }
-  console.log("CONECTANDO A LA BASE DE DATOS: ", req.user.base);
-  const conn = mongoose.connection.useDb(req.user.base);
 
+  const conn = mongoose.connection.useDb(req.user.base);
   const session = await mongoose.startSession();
-  console.log("Iniciando sesión");
-  // Iniciar transacción para asegurar atomicidad
+
   try {
     session.startTransaction();
-    const Config = conn.model("config", ConfigSchema);
-    const Registro = conn.model("registro", RegistroSchema);
-    const Pago = conn.model("pago", VentaSchema);
-    const Dpago = conn.model("dpago", DpagoSchema);
 
-    const data = req.body;
-    console.log("Datos que recibo: ",data);
-    const { config, detalles } = data;
+    const { pago, detalles, config } = await crearPagoYRegistro(
+      req,
+      conn,
+      session
+    );
 
-    data.estado = "Registrado";
+    const dpagosValidos = await procesarDetallesPagos(
+      detalles,
+      config,
+      pago,
+      conn,
+      session
+    );
 
-    // Crear pago
-    const pago = await Pago.create([data], { session });
-    // Registrar la creación del pago
-    const registro = {
-      admin: req.user.sub,
-      estudiante: data.estudiante,
-      tipo: "creo",
-      descripcion: JSON.stringify(data),
-    };
-    await Registro.create([registro], { session });
-
-    // Array para almacenar d_pagos válidos
-    const dpagosValidos = [];
-
-    // Procesar detalles de pago
-    for (const element of detalles) {
-      // Clonar el elemento para evitar modificaciones directas
-      const elementoProcesado = { ...element };
-      elementoProcesado.pago = pago[0]._id;
-      elementoProcesado.estudiante = pago[0].estudiante;
-
-      // Validar si el d_pago ya existe
-      const validExistente = await Dpago.find({
-        idpension: element.idpension,
-        tipo: element.tipo,
-        estado: { $not: /Abono/ },
-      });
-
-      if (validExistente.length === 0) {
-        // console.log("Pago", pago[0]);
-        // Lógica de procesamiento según el tipo de pago
-        const resultadoProcesamiento = await procesarDetallePago(
-          element,
-          config,
-          pago[0],
-          conn,
-          session
-        );
-        console.log("resultadoProcesamiento", resultadoProcesamiento);
-        if (resultadoProcesamiento) {
-          dpagosValidos.push(elementoProcesado);
-        }
-      }
-    }
-
-    // Verificar si hay d_pagos válidos
     if (dpagosValidos.length === 0) {
-      // Rollback si no hay pagos válidos
-      await session.abortTransaction();
-      return res.status(400).send({
-        message: "No se pudieron registrar los pagos",
-      });
+      throw new Error("No se pudieron registrar los pagos");
     }
-    // Insertar d_pagos válidos
-    await Dpago.create(dpagosValidos, { session });
 
-    // Calcular total a pagar
-    const sumaValores = dpagosValidos.reduce(
-      (total, elemento) => total + elemento.valor,
-      0
-    );
-
-    // Actualizar total del pago
-    await Pago.updateOne(
-      { _id: pago[0]._id },
-      { total_pagar: sumaValores },
-      { session }
-    );
+    await actualizarPagoTotal(pago, dpagosValidos, conn, session);
 
     await session.commitTransaction();
-    console.log("Transacción confirmada");
-    res.status(200).send({
-      pago: pago[0],
-      message: "Registrado correctamente",
-    });
+    res.status(200).send({ pago, message: "Registrado correctamente" });
   } catch (error) {
-    // Manejar cualquier error durante el proceso
     console.error("Error en registro de compra:", error);
-
-    // Abortar transacción si existe
     if (session.inTransaction()) {
       await session.abortTransaction();
     }
-
-    res.status(500).send({
-      message: "Error en el registro",
-      detalles: error.message,
-    });
+    res
+      .status(500)
+      .send({ message: "Error en el registro", detalles: error.message });
   } finally {
-    // Cerrar la sesión
-    if (session && session.inTransaction()) {
-      await session.endSession();
-    }
+    session.endSession();
   }
 };
 
-// Función auxiliar para procesar detalles de pago
+async function crearPagoYRegistro(req, conn, session) {
+  const Pago = conn.model("pago", VentaSchema);
+  const Registro = conn.model("registro", RegistroSchema);
+
+  const { config, detalles, ...data } = req.body;
+  data.estado = "Registrado";
+
+  const [pago] = await Pago.create([data], { session });
+
+  await Registro.create(
+    [
+      {
+        admin: req.user.sub,
+        estudiante: data.estudiante,
+        tipo: "creo",
+        descripcion: JSON.stringify(data),
+      },
+    ],
+    { session }
+  );
+
+  return { pago, detalles, config };
+}
+
+async function procesarDetallesPagos(detalles, config, pago, conn, session) {
+  const Dpago = conn.model("dpago", DpagoSchema);
+  const dpagosValidos = [];
+
+  for (const element of detalles) {
+    const elementoProcesado = {
+      ...element,
+      pago: pago._id,
+      estudiante: pago.estudiante,
+    };
+
+    const validExistente = await Dpago.find({
+      idpension: element.idpension,
+      tipo: element.tipo,
+      estado: { $not: /Abono/ },
+    });
+
+    if (validExistente.length === 0) {
+      const resultadoProcesamiento = await procesarDetallePago(
+        element,
+        config,
+        pago,
+        conn,
+        session
+      );
+      console.log("Resultado procesamiento: ", resultadoProcesamiento);
+      if (resultadoProcesamiento) {
+        const [dpago] = await Dpago.create([elementoProcesado], { session });
+        dpagosValidos.push(dpago);
+      }
+    }
+  }
+
+  /*if (dpagosValidos.length > 0) {
+    await Dpago.create(dpagosValidos, { session });
+  }*/
+
+  return dpagosValidos;
+}
+
+async function actualizarPagoTotal(pago, dpagosValidos, conn, session) {
+  const Pago = conn.model("pago", VentaSchema);
+  const sumaValores = dpagosValidos.reduce(
+    (total, elemento) => total + elemento.valor,
+    0
+  );
+
+  await Pago.updateOne(
+    { _id: pago._id },
+    { total_pagar: sumaValores },
+    { session }
+  );
+}
+
 async function procesarDetallePago(element, config, pago, conn, session) {
   try {
-    console.log("TIPO", element.tipo);
-    // Lógica de procesamiento de pago según tipo
     switch (true) {
-      case element.tipo === 0: // Matrícula
+      case element.tipo === 0:
         return await procesarPagoMatricula(
           element,
           config,
@@ -2844,11 +2845,9 @@ async function procesarDetallePago(element, config, pago, conn, session) {
           conn,
           session
         );
-
-      case element.tipo > 0 && element.tipo <= 10: // Pensiones
+      case element.tipo > 0 && element.tipo <= 10:
         return await procesarPagoPension(element, config, pago, conn, session);
-
-      default: // Pagos extra
+      default:
         return await procesarPagoExtra(element, config, pago, conn, session);
     }
   } catch (error) {
@@ -2856,90 +2855,33 @@ async function procesarDetallePago(element, config, pago, conn, session) {
     return false;
   }
 }
-const processCreateRegisterDPago = async function (
-  element,
-  pago,
-  conn,
-  session
-) {
-  const Registro = conn.model("registro", RegistroSchema);
-
-  console.log("Registrando pago", element, pago);
-
-  try {
-    // Preparar datos del registro
-    const registroData = {
-      admin: pago.encargado, // Verifica que este valor exista y sea válido
-      estudiante: element.estudiante,
-      pago: element.pago,
-      documento: element.documento,
-      tipo: "creo",
-      descripcion: JSON.stringify(element),
-    };
-
-    // Validar que todos los campos requeridos estén presentes
-    if (!registroData.admin) {
-      throw new Error("El campo 'admin' es requerido pero no está definido.");
-    }
-
-    // Usar un array como primer argumento y pasar la sesión correctamente
-    await Registro.create([registroData], { session });
-
-    return true;
-  } catch (error) {
-    console.error("Error procesando detalle de pago:", error);
-    throw new Error("Error procesando detalle de pago");
-  }
-};
 
 async function procesarPagoMatricula(element, config, pago, conn, session) {
   const Pension = conn.model("pension", PensionSchema);
-  const Dpago = conn.model("dpago", DpagoSchema);
 
   try {
     let mat = 0;
-
-    // Verificar si el valor de la matrícula es exacto
     if (element.valor === config.matricula) {
       mat = 1;
     } else {
-      // Calcular abonos previos
+      const Dpago = conn.model("dpago", DpagoSchema);
       const abonos = await Dpago.find({
         estudiante: pago.estudiante,
         tipo: element.tipo,
       });
+      const acu = abonos.reduce((total, abono) => total + abono.valor, 0);
 
-      const acu = abonos.reduce((total, abonoaux) => total + abonoaux.valor, 0);
-
-      // Verificar si la suma de abonos completa la matrícula
       if (acu + element.valor === config.matricula) {
         mat = 1;
       }
     }
 
-    // Actualizar estado de la pensión
     await Pension.updateOne(
       { _id: element.idpension },
       { matricula: mat },
       { session }
     );
-
-    // Actualizar stock del documento
-    const resultadoStock = await actualizarStockDocumento(
-      element,
-      conn,
-      session
-    );
-
-    if (
-      resultadoStock.success &&
-      resultadoStock.success == true &&
-      (await processCreateRegisterDPago(element, pago, conn, session))
-    ) {
-      return true;
-    }
-
-    return false;
+    return await actualizarStockDocumento(element, conn, session);
   } catch (error) {
     console.error("Error en procesamiento de matrícula:", error);
     return false;
@@ -3036,22 +2978,7 @@ async function procesarPagoPension(element, config, pago, conn, session) {
       );
     }
 
-    // Actualizar stock del documento
-    const resultadoStock = await actualizarStockDocumento(
-      element,
-      conn,
-      session
-    );
-
-    if (
-      resultadoStock.success &&
-      resultadoStock.success == true &&
-      (await processCreateRegisterDPago(element, pago, conn, session))
-    ) {
-      return true;
-    }
-
-    return false;
+    return await actualizarStockDocumento(element, conn, session);
   } catch (error) {
     console.error("Error en procesamiento de pensión:", error);
     return false;
@@ -3098,22 +3025,7 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
       }
     }
 
-    // Actualizar stock del documento
-    const resultadoStock = await actualizarStockDocumento(
-      element,
-      conn,
-      session
-    );
-
-    if (
-      resultadoStock.success &&
-      resultadoStock.success == true &&
-      (await processCreateRegisterDPago(element, pago, conn, session))
-    ) {
-      return true;
-    }
-
-    return false;
+    return await actualizarStockDocumento(element, conn, session);
   } catch (error) {
     console.error("Error en procesamiento de pago extra:", error);
     return false;
@@ -3122,105 +3034,63 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
 
 async function actualizarStockDocumento(element, conn, session) {
   const Documento = conn.model("document", DocumentoSchema);
-  const Dpago = conn.model("dpago", DpagoSchema);
-  const Registro = conn.model("registro", RegistroSchema);
-
+  //console.log("Elemento del documento: ", element);
   try {
-    // Obtener el documento actual
-    const element_documento = await Documento.findById(element.documento);
-
-    if (!element_documento) {
-      throw new Error("El documento no existe");
+    const documento = await Documento.findById(element.documento);
+    if (!documento) {
+      throw new Error("Documento no encontrado");
     }
 
-    // Obtener el valor original del documento desde `Registro`
-    const registro = await Registro.findOne({
-      tipo: "creo",
-      descripcion: { $regex: element_documento.documento.toString() },
+    const Dpago = conn.model("dpago", DpagoSchema);
+    const pagosPrevios = await Dpago.find({ documento: documento._id }, null, {
+      session,
     });
-
-    if (!registro) {
-      throw new Error("Registro original no encontrado");
-    }
+    //console.log("Pagos previos: ", pagosPrevios);
+    const totalPagado =
+      pagosPrevios.reduce((total, pago) => total + pago.valor, 0) +
+      element.valor;
 
     // Determinar el valor del documento
-    let valorDocumento = parseFloat(
-      element_documento.valor_origen || 0
-    ).toFixed(2);
-    if (valorDocumento == 0) {
+    let valorOriginal = parseFloat(documento.valor_origen || 0).toFixed(2);
+    if (valorOriginal == 0) {
       try {
+        const Registro = conn.model("registro", RegistroSchema);
+        // Obtener el valor original del documento desde `Registro`
+        const registro = await Registro.findOne({
+          tipo: "creo",
+          descripcion: { $regex: documento.documento.toString() },
+        });
+
+        if (!registro) {
+          throw new Error("Registro original no encontrado");
+        }
+
         const descripcionParseada = JSON.parse(registro.descripcion);
-        valorDocumento = parseFloat(descripcionParseada.valor).toFixed(2);
+        valorOriginal = parseFloat(descripcionParseada.valor).toFixed(2);
       } catch (error) {
         throw new Error("Error al parsear la descripción del registro");
       }
     }
 
-    // Calcular el total de pagos previos para este documento
-    const pagosPrevios = await Dpago.find({
-      documento: element.documento,
-    });
-
-    const totalPagadoPrevio = pagosPrevios.reduce(
-      (total, pago) => total + parseFloat(pago.valor),
-      0
-    );
-
-    // Calcular el nuevo stock
-    const totalPagado = (
-      parseFloat(totalPagadoPrevio) + parseFloat(element.valor)
-    ).toFixed(2);
-    const new_stock = (valorDocumento - totalPagado).toFixed(2);
-
-    console.log("Valor del documento original:", valorDocumento);
-    console.log("Total de pagos previos:", pagosPrevios.length);
-    console.log("Total de pagos actuales:", totalPagado);
-    console.log("Valor del pago actual:", element.valor);
-
-    // Validar el valor del stock
-    const stockValue = Number(new_stock);
-    if (isNaN(stockValue) || stockValue < 0) {
-      throw new Error("Invalid stock value");
-    }
-    console.log("Valor del documento actualizado:", stockValue);
-    // Usar findOneAndUpdate con la opción de transacción
-    const documentoActualizado = await Documento.updateOne(
-      { _id: element_documento._id },
-      {
-        valor: Number(stockValue),
-        npagos: Number(pagosPrevios.length + 1),
-      },
-      {
-        new: true, // Devolver el documento actualizado
-        runValidators: true, // Ejecutar validadores del esquema
-        //session: session,
-      }
-    );
-    console.log("Actualizado el documento:", documentoActualizado);
-    if (!documentoActualizado) {
-      throw new Error("No se pudo actualizar el documento");
+    const nuevoStock = parseFloat((valorOriginal - totalPagado).toFixed(2));
+    //console.log("Nuevo stock: ", nuevoStock, pagosPrevios.length);
+    if (nuevoStock < 0) {
+      throw new Error("El pago excede el stock disponible");
     }
 
-    return {
-      success: true,
-      message: "Documento actualizado correctamente",
-      nuevoStock: stockValue,
-    };
+    const result = await Documento.updateOne(
+      { _id: documento._id },
+      { valor: nuevoStock, npagos: pagosPrevios.length + 1 },
+      { session }
+    );
+    //console.log(result);
+    if (result.nModified == 1) {
+      return true;
+    }
+    return false;
   } catch (error) {
-    console.error("Error en actualización del saldo de documento:", error);
-
-    // Manejar errores de transacción
-    if (session && session.inTransaction()) {
-      try {
-        await session.abortTransaction();
-      } catch (abortError) {
-        console.error("Error al abortar la transacción:", abortError);
-      }
-    }
-
-    throw new Error(
-      `Error en actualización del saldo de documento: ${error.message}`
-    );
+    console.error("Error actualizando stock del documento:", error);
+    return false;
   }
 }
 
@@ -3598,7 +3468,7 @@ module.exports = {
   obtener_becas_conf,
   marcar_finalizado_orden,
   eliminar_orden_admin,
-  registro_compra_manual_estudiante,
+  registroCompraManualEstudiante,
   registro_admin,
   listar_admin,
   actualizar_admin,

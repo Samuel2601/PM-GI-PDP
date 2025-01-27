@@ -139,7 +139,7 @@ api.delete(
 api.post(
   "/registro_compra_manual_estudiante",
   auth.auth,
-  AdminController.registro_compra_manual_estudiante
+  AdminController.registroCompraManualEstudiante
 );
 
 api.get("/listar_admin", auth.auth, AdminController.listar_admin);
@@ -200,6 +200,5 @@ api.put(
   auth.auth,
   AdminController.actualizar_pago_id_contifico
 );
-
 
 module.exports = api;
