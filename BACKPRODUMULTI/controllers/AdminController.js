@@ -2719,7 +2719,7 @@ const registroCompraManualEstudiante = async function (req, res) {
   const session = ""; // await mongoose.startSession();
 
   try {
-   // session.startTransaction();
+    // session.startTransaction();
 
     const { pago, detalles, config } = await crearPagoYRegistro(
       req,
@@ -2746,13 +2746,15 @@ const registroCompraManualEstudiante = async function (req, res) {
   } catch (error) {
     console.error("Error en registro de compra:", error);
     if (session.inTransaction()) {
-    //  await session.abortTransaction();
+      //  await session.abortTransaction();
     }
     res
       .status(500)
       .send({ message: "Error en el registro", detalles: error.message });
   } finally {
-    session.endSession();
+    if (session) {
+      session.endSession();
+    }
   }
 };
 
@@ -2763,8 +2765,9 @@ async function crearPagoYRegistro(req, conn, session) {
   const { config, detalles, ...data } = req.body;
   data.estado = "Registrado";
 
-  const [pago] = await Pago.create([data], 
-   // { session }
+  const [pago] = await Pago.create(
+    [data]
+    // { session }
   );
 
   await Registro.create(
@@ -2775,8 +2778,8 @@ async function crearPagoYRegistro(req, conn, session) {
         tipo: "creo",
         descripcion: JSON.stringify(req.body),
       },
-    ],
-   // { session }
+    ]
+    // { session }
   );
 
   return { pago, detalles, config };
@@ -2809,9 +2812,10 @@ async function procesarDetallesPagos(detalles, config, pago, conn, session) {
       );
       console.log("Resultado procesamiento: ", resultadoProcesamiento);
       if (resultadoProcesamiento) {
-        const [dpago] = await Dpago.create([elementoProcesado],
-         //  { session }
-          );
+        const [dpago] = await Dpago.create(
+          [elementoProcesado]
+          //  { session }
+        );
         dpagosValidos.push(dpago);
       }
     }
@@ -2833,8 +2837,8 @@ async function actualizarPagoTotal(pago, dpagosValidos, conn, session) {
 
   await Pago.updateOne(
     { _id: pago._id },
-    { total_pagar: sumaValores },
-   // { session }
+    { total_pagar: sumaValores }
+    // { session }
   );
 }
 
@@ -2882,7 +2886,7 @@ async function procesarPagoMatricula(element, config, pago, conn, session) {
 
     await Pension.updateOne(
       { _id: element.idpension },
-      { matricula: mat },
+      { matricula: mat }
       //{ session }
     );
     return await actualizarStockDocumento(element, conn, session);
@@ -2942,15 +2946,15 @@ async function procesarPagoPension(element, config, pago, conn, session) {
         {
           meses: mes,
           num_mes_res: res_beca,
-        },
-       // { session }
+        }
+        // { session }
       );
 
       // Marcar beca como usada
       await Pension_Beca.updateOne(
         { idpension: element.idpension, etiqueta: element.tipo },
-        { usado: 1 },
-       // { session }
+        { usado: 1 }
+        // { session }
       );
     } else {
       // Lógica de procesamiento sin beca
@@ -2977,8 +2981,8 @@ async function procesarPagoPension(element, config, pago, conn, session) {
       // Actualizar pensión
       await Pension.updateOne(
         { _id: element.idpension },
-        { meses: mes },
-       // { session }
+        { meses: mes }
+        // { session }
       );
     }
 
@@ -3023,8 +3027,8 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
         // Actualizar pensión con nuevos pagos extra
         await Pension.updateOne(
           { _id: element.idpension },
-          { extrapagos: JSON.stringify(pagospen) },
-         // { session }
+          { extrapagos: JSON.stringify(pagospen) }
+          // { session }
         );
       }
     }
@@ -3082,7 +3086,7 @@ async function actualizarStockDocumento(element, conn, session) {
 
     const result = await Documento.updateOne(
       { _id: documento._id },
-      { valor: nuevoStock, npagos: pagosPrevios.length + 1 },
+      { valor: nuevoStock, npagos: pagosPrevios.length + 1 }
       //{ session }
     );
     //console.log(result);
