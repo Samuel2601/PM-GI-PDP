@@ -2773,7 +2773,7 @@ async function crearPagoYRegistro(req, conn, session) {
         admin: req.user.sub,
         estudiante: data.estudiante,
         tipo: "creo",
-        descripcion: JSON.stringify(data),
+        descripcion: JSON.stringify(req.body),
       },
     ],
    // { session }
