@@ -2716,10 +2716,10 @@ const registroCompraManualEstudiante = async function (req, res) {
   }
 
   const conn = mongoose.connection.useDb(req.user.base);
-  const session = await mongoose.startSession();
+  const session = ""; // await mongoose.startSession();
 
   try {
-    session.startTransaction();
+   // session.startTransaction();
 
     const { pago, detalles, config } = await crearPagoYRegistro(
       req,
@@ -2741,12 +2741,12 @@ const registroCompraManualEstudiante = async function (req, res) {
 
     await actualizarPagoTotal(pago, dpagosValidos, conn, session);
 
-    await session.commitTransaction();
+    //await session.commitTransaction();
     res.status(200).send({ pago, message: "Registrado correctamente" });
   } catch (error) {
     console.error("Error en registro de compra:", error);
     if (session.inTransaction()) {
-      await session.abortTransaction();
+    //  await session.abortTransaction();
     }
     res
       .status(500)
@@ -2763,7 +2763,9 @@ async function crearPagoYRegistro(req, conn, session) {
   const { config, detalles, ...data } = req.body;
   data.estado = "Registrado";
 
-  const [pago] = await Pago.create([data], { session });
+  const [pago] = await Pago.create([data], 
+   // { session }
+  );
 
   await Registro.create(
     [
@@ -2774,7 +2776,7 @@ async function crearPagoYRegistro(req, conn, session) {
         descripcion: JSON.stringify(data),
       },
     ],
-    { session }
+   // { session }
   );
 
   return { pago, detalles, config };
@@ -2807,7 +2809,9 @@ async function procesarDetallesPagos(detalles, config, pago, conn, session) {
       );
       console.log("Resultado procesamiento: ", resultadoProcesamiento);
       if (resultadoProcesamiento) {
-        const [dpago] = await Dpago.create([elementoProcesado], { session });
+        const [dpago] = await Dpago.create([elementoProcesado],
+         //  { session }
+          );
         dpagosValidos.push(dpago);
       }
     }
@@ -2830,7 +2834,7 @@ async function actualizarPagoTotal(pago, dpagosValidos, conn, session) {
   await Pago.updateOne(
     { _id: pago._id },
     { total_pagar: sumaValores },
-    { session }
+   // { session }
   );
 }
 
@@ -2879,7 +2883,7 @@ async function procesarPagoMatricula(element, config, pago, conn, session) {
     await Pension.updateOne(
       { _id: element.idpension },
       { matricula: mat },
-      { session }
+      //{ session }
     );
     return await actualizarStockDocumento(element, conn, session);
   } catch (error) {
@@ -2939,14 +2943,14 @@ async function procesarPagoPension(element, config, pago, conn, session) {
           meses: mes,
           num_mes_res: res_beca,
         },
-        { session }
+       // { session }
       );
 
       // Marcar beca como usada
       await Pension_Beca.updateOne(
         { idpension: element.idpension, etiqueta: element.tipo },
         { usado: 1 },
-        { session }
+       // { session }
       );
     } else {
       // Lógica de procesamiento sin beca
@@ -2974,7 +2978,7 @@ async function procesarPagoPension(element, config, pago, conn, session) {
       await Pension.updateOne(
         { _id: element.idpension },
         { meses: mes },
-        { session }
+       // { session }
       );
     }
 
@@ -3020,7 +3024,7 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
         await Pension.updateOne(
           { _id: element.idpension },
           { extrapagos: JSON.stringify(pagospen) },
-          { session }
+         // { session }
         );
       }
     }
@@ -3042,9 +3046,7 @@ async function actualizarStockDocumento(element, conn, session) {
     }
 
     const Dpago = conn.model("dpago", DpagoSchema);
-    const pagosPrevios = await Dpago.find({ documento: documento._id }, null, {
-      session,
-    });
+    const pagosPrevios = await Dpago.find({ documento: documento._id });
     //console.log("Pagos previos: ", pagosPrevios);
     const totalPagado =
       pagosPrevios.reduce((total, pago) => total + pago.valor, 0) +
@@ -3081,7 +3083,7 @@ async function actualizarStockDocumento(element, conn, session) {
     const result = await Documento.updateOne(
       { _id: documento._id },
       { valor: nuevoStock, npagos: pagosPrevios.length + 1 },
-      { session }
+      //{ session }
     );
     //console.log(result);
     if (result.nModified == 1) {
