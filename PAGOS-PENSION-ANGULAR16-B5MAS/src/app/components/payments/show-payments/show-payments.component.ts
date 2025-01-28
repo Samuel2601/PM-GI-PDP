@@ -560,9 +560,10 @@ export class ShowPaymentsComponent implements OnInit {
       console.log('No hay API key configurada');
       return;
     }
-
+    console.log('Manjejar documento Contifico',this.pago.id_contifico);
     try {
-      if (!this.pago.id_contifico) {
+      if (this.pago.id_contifico===undefined||this.pago.id_contifico===null) {
+        this.habilitar_boton_generar = true;
         // Si no hay ID Contífico, generar documento
         //await this.generarDocumento();
       } else {
