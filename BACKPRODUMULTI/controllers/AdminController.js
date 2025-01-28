@@ -2716,7 +2716,7 @@ const registroCompraManualEstudiante = async function (req, res) {
   }
 
   const conn = mongoose.connection.useDb(req.user.base);
-  const session = ""; // await mongoose.startSession();
+  const session = null; // await mongoose.startSession();
 
   try {
     // session.startTransaction();
