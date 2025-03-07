@@ -403,12 +403,13 @@
                   *ngIf="apikey && !pago.id_contifico"
                   id="tbnfacturar"
                   mat-raised-button
-                  disabled="{{!habilitar_boton_generar}}"
+                  [disabled]="habilitar_boton_generar"
                   class="btn btn-primary btn-sm"
                   (click)="generarDocumento()"
                 >
                   Crear Factura
                 </button>
+
                 <button
                   *ngIf="
                     apikey &&
@@ -418,6 +419,7 @@
                   "
                   id="tbnfacturar"
                   mat-raised-button
+                  [disabled]="loading.emision"
                   class="btn btn-primary btn-sm"
                   (click)="emitirSRI()"
                 >

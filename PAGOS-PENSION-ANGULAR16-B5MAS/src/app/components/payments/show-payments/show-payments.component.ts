@@ -302,6 +302,7 @@ export class ShowPaymentsComponent implements OnInit {
         es_extranjero: false,
       };
 
+      // Se agrupa por número de comprobante y se acumula el monto
       const cobros: Cobro[] = Object.values(
         detalles.reduce((acc, detalle) => {
           const { documento } = detalle;
@@ -328,6 +329,16 @@ export class ShowPaymentsComponent implements OnInit {
         }, {})
       );
 
+      // Calcular subtotal y total con redondeo a 2 decimales
+      const subtotal = Number(
+        detalles.reduce((sum, det) => sum + det.valor, 0).toFixed(2)
+      );
+
+      // Redondear los montos de cobros a 2 decimales
+      cobros.forEach((cobro) => {
+        cobro.monto = Number(cobro.monto.toFixed(2));
+      });
+
       return {
         //pos: 'ceaa9097-1d76-4eb8-0000-6f412fa0297b', // Token fijo o dinámico
         fecha_emision: this.getEcuadorDate(), // Fecha actual
@@ -342,10 +353,10 @@ export class ShowPaymentsComponent implements OnInit {
         //vendedor: vendedor,
         descripcion: `VENTA DESDE PUNTO DE VENTA`,
         subtotal_12: 0.0,
-        subtotal_0: detalles.reduce((sum, det) => sum + det.valor, 0),
-        iva: 0.0, //detalles.reduce((sum, det) => sum + det.valor, 0),
+        subtotal_0: subtotal,
+        iva: 0.0,
         ice: 0.0,
-        total: detalles.reduce((sum, det) => sum + det.valor, 0),
+        total: subtotal, // Usar el mismo valor redondeado
         adicional1:
           'Estudiante: ' +
           pago.estudiante.nombres +
@@ -361,9 +372,9 @@ export class ShowPaymentsComponent implements OnInit {
           adicional1: detalle.descripcion + ' ' + detalle.estado,
           producto_id: detalle.id_contifico_producto,
           cantidad: 1.0,
-          precio: detalle.valor,
+          precio: Number(detalle.valor.toFixed(2)), // Redondear precio a 2 decimales
           porcentaje_iva: 0,
-          base_cero: detalle.valor,
+          base_cero: Number(detalle.valor.toFixed(2)), // Redondear base_cero a 2 decimales
           base_gravable: 0.0,
           base_no_gravable: 0.0,
           valor_ice: 0.0,
@@ -452,7 +463,7 @@ export class ShowPaymentsComponent implements OnInit {
   };
   habilitar_boton_generar: boolean = false;
   async generarDocumento() {
-    this.habilitar_boton_generar = false;
+    this.habilitar_boton_generar = true;
     if (this.apikey && !this.pago.id_contifico) {
       const pre_factura = await this.armado_Documento_envio_Contifico(
         this.pago,
@@ -485,7 +496,7 @@ export class ShowPaymentsComponent implements OnInit {
           this.mensajes.emision = 'Error al emitir al SRI: ' + error.message;
         },
         complete: () => {
-          this.loading.emision = false;
+          //this.loading.emision = false;
         },
       });
   }
