@@ -1,1 +1,5 @@
 /node_modules
+
+# Archivos de credenciales
+controllers/CRISTOREY/credentials.json
+controllers/CRISTOREY/token.json
