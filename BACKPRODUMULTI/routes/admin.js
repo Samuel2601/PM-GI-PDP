@@ -201,4 +201,11 @@ api.put(
   AdminController.actualizar_pago_id_contifico
 );
 
+//verificarDeudasEstudiante
+api.get(
+  "/verificarDeudasEstudiante/:id",
+  auth.auth,
+  AdminController.verificarDeudasEstudiante
+);
+
 module.exports = api;

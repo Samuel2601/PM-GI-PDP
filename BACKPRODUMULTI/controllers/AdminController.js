@@ -2220,6 +2220,231 @@ const obtener_detalles_ordenes_estudiante_abono = async function (req, res) {
     res.status(403).send({ message: "NoAccess" });
   }
 };
+
+/**
+ * Verifica si un estudiante tiene deudas pendientes de matrícula o pensiones
+ * @param {Request} req - Objeto de solicitud Express
+ * @param {Response} res - Objeto de respuesta Express
+ * @returns {Promise<void>}
+ */
+const verificarDeudasEstudiante = async function (req, res) {
+  if (!req.user) {
+    return res.status(403).json({ message: "NoAccess" });
+  }
+
+  try {
+    // Inicializar conexión y modelos
+    const conn = mongoose.connection.useDb(req.user.base);
+    const Pension = conn.model("pension", PensionSchema);
+    const Dpago = conn.model("dpago", DpagoSchema);
+    const Config = conn.model("config", ConfigSchema);
+    const Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
+    const Estudiante = conn.model("estudiante", EstudianteSchema);
+
+    // Obtener ID o DNI del estudiante
+    const idEstudiante = req.params["id"];
+    if (!idEstudiante) {
+      return res
+        .status(400)
+        .json({ message: "ID o DNI de estudiante no proporcionado" });
+    }
+
+    let estudiante = await Estudiante.findOne({ dni: idEstudiante });
+
+    // Si no se encuentra por ID, buscar por DNI
+    if (!estudiante && mongoose.Types.ObjectId.isValid(idEstudiante)) {
+      estudiante = await Estudiante.findById(idEstudiante);
+    }
+
+    // Verificar si el estudiante fue encontrado
+    if (!estudiante) {
+      return res.status(404).json({ message: "Estudiante no encontrado" });
+    }
+
+    // Buscar todas las pensiones del estudiante
+    const pensiones = await Pension.find({ idestudiante: estudiante._id })
+      .populate("idanio_lectivo")
+      .sort({ createdAt: -1 });
+
+    if (!pensiones || pensiones.length === 0) {
+      return res.status(404).json({
+        message: "No se encontraron registros de pensión para este estudiante",
+      });
+    }
+
+    // Preparar resultado
+    const resultado = [];
+
+    // Procesar cada pensión
+    for (const pension of pensiones) {
+      // Verificar si idanio_lectivo existe y tiene datos
+      if (!pension.idanio_lectivo) {
+        continue; // Saltar si no hay información del año lectivo
+      }
+
+      // Obtener valores de referencia del año lectivo (con 2 decimales)
+      const valorMatricula = parseFloat(
+        (pension.idanio_lectivo.matricula || 0).toFixed(2)
+      );
+      const valorPension = parseFloat(
+        (pension.idanio_lectivo.pension || 0).toFixed(2)
+      );
+      const numPensiones = pension.idanio_lectivo.numpension || 10;
+
+      // Obtener pagos realizados para esta pensión
+      const pagos = await Dpago.find({ idpension: pension._id }).sort({
+        tipo: 1,
+      });
+
+      // Obtener becas para esta pensión
+      const becas = await Pension_Beca.find({ idpension: pension._id }).sort({
+        etiqueta: 1,
+      });
+
+      // Verificar información de becas
+      const tieneBeca = pension.condicion_beca === "Si";
+      const porcentajeBeca = pension.desc_beca || 0;
+      const mesesConBeca = becas.length;
+
+      // Analizar estado de matrícula (tipo 0)
+      const pagosMatricula = pagos.filter((p) => p.tipo === 0 && p.abono === 0);
+      const matriculaPagada = pagosMatricula.length > 0;
+      const valorPendienteMatricula = !matriculaPagada ? valorMatricula : 0;
+
+      // Determinar abonos de matrícula
+      const abonosMatricula = pagos.filter(
+        (p) => p.tipo === 0 && p.abono === 1
+      );
+      const totalAbonadoMatricula = abonosMatricula.reduce(
+        (sum, abono) => sum + abono.valor,
+        0
+      );
+
+      // Analizar estado de pensiones (tipo 1-10)
+      const estadoPensiones = [];
+
+      for (let i = 1; i <= numPensiones; i++) {
+        // Verificar si este mes tiene beca
+        const mesTieneBeca =
+          tieneBeca && becas.some((b) => parseInt(b.etiqueta) === i);
+
+        // Calcular valor de esta pensión considerando beca (con 2 decimales)
+        let valorMensual = valorPension;
+        if (mesTieneBeca && porcentajeBeca === 100) {
+          valorMensual = 0; // Pensión completamente becada
+        } else if (mesTieneBeca) {
+          valorMensual = parseFloat(
+            (valorPension * (1 - porcentajeBeca / 100)).toFixed(2)
+          ); // Descuento parcial
+        }
+
+        // Verificar pagos completos (no abonos) para esta pensión
+        const pagoCompleto = pagos.filter((p) => p.tipo === i && p.abono === 0);
+        const pensionPagada = pagoCompleto.length > 0;
+
+        // Determinar abonos para esta pensión
+        const abonosPension = pagos.filter(
+          (p) => p.tipo === i && p.abono === 1
+        );
+        const totalAbonadoPension = abonosPension.reduce(
+          (sum, abono) => sum + abono.valor,
+          0
+        );
+
+        // Calcular saldo pendiente
+        const saldoPendiente =
+          valorMensual > 0
+            ? Math.max(0, valorMensual - totalAbonadoPension)
+            : 0;
+
+        estadoPensiones.push({
+          mes: i,
+          tieneBeca: mesTieneBeca,
+          valorOriginal: valorPension,
+          valorConDescuento: valorMensual,
+          pagado: pensionPagada,
+          abonado: totalAbonadoPension,
+          pendiente: pensionPagada ? 0 : saldoPendiente,
+        });
+      }
+
+      // Calcular totales
+      const totalPendientePensiones = estadoPensiones.reduce(
+        (sum, p) => sum + p.pendiente,
+        0
+      );
+      const mesesPendientes = estadoPensiones.filter(
+        (p) => p.pendiente > 0
+      ).length;
+
+      // Determinar si tiene deuda
+      const tieneDeudaMatricula = valorPendienteMatricula > 0;
+      const tieneDeudaPensiones = totalPendientePensiones > 0;
+
+      // Construir resultado para esta pensión
+      resultado.push({
+        idPension: pension._id,
+        anioLectivo: pension.anio_lectivo,
+        curso: pension.curso,
+        paralelo: pension.paralelo,
+        idAnioLectivo: pension.idanio_lectivo._id,
+        detallesAnioLectivo: {
+          valorMatricula,
+          valorPension,
+          numPensiones,
+        },
+        estadoMatricula: {
+          pagada: matriculaPagada,
+          abonado: totalAbonadoMatricula,
+          pendiente: valorPendienteMatricula,
+          tieneDeuda: tieneDeudaMatricula,
+        },
+        estadoPensiones: {
+          detallesMensual: estadoPensiones,
+          mesesPendientes,
+          totalPendiente: totalPendientePensiones,
+          tieneDeuda: tieneDeudaPensiones,
+        },
+        tieneDeuda: tieneDeudaMatricula || tieneDeudaPensiones,
+        totalAdeudado: parseFloat(
+          (valorPendienteMatricula + totalPendientePensiones).toFixed(2)
+        ),
+      });
+    }
+
+    // Determinar si tiene alguna deuda en general
+    const tieneDeudaGeneral = resultado.some((r) => r.tieneDeuda);
+    const totalAdeudadoGeneral = resultado.reduce(
+      (sum, r) => sum + r.totalAdeudado,
+      0
+    );
+
+    return res.status(200).json({
+      success: true,
+      estudiante: idEstudiante,
+      tieneDeuda: tieneDeudaGeneral,
+      totalAdeudado: parseFloat(totalAdeudadoGeneral.toFixed(2)),
+      detallePorAnioLectivo: resultado,
+    });
+  } catch (error) {
+    console.error("Error al verificar deudas:", error);
+
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res.status(400).json({
+        success: false,
+        message: "Error de validación. Por favor, verifica tus datos.",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Error al verificar deudas del estudiante",
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
+    }
+  }
+};
+
 const obtener_becas_conf = async function (req, res) {
   if (req.user) {
     try {
@@ -3494,4 +3719,6 @@ module.exports = {
   actualizarStockDocumentos,
   //CONTIFICO
   actualizar_pago_id_contifico,
+
+  verificarDeudasEstudiante,
 };
