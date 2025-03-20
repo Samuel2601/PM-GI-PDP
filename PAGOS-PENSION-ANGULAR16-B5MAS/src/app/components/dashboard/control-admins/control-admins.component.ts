@@ -8,7 +8,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./control-admins.component.scss']
 })
 export class ControlAdminsComponent implements OnInit {
-  
+
   constructor(private _adminService: AdminService,private fb: FormBuilder) {}
   public resgistro_arr: any[] =[];
   public resgistro_const: any[] =[];
@@ -57,13 +57,14 @@ export class ControlAdminsComponent implements OnInit {
 					  _id:item._id,
 					}
 				}
-				
+
 			  });
 
 			this.resgistro_arr = Object.assign(this.resgistro_const);
 		});
 	}
 	ver(element:any){
+    console.log(JSON.parse(element));
 		this.formulario=[];
 		try {
 			this.formulario.push(JSON.parse(element));
@@ -87,7 +88,7 @@ export class ControlAdminsComponent implements OnInit {
 	}
 	isObjectArray(value: any): boolean {
 		return Array.isArray(value);
-	  }	  
+	  }
   filtrar_documento() {
 	this.resgistro_arr = this.resgistro_const;
 		if (this.filtro) {
