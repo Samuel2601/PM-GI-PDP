@@ -1339,6 +1339,7 @@ const actualizar_config_admin = async (req, res) => {
     let data = req.body;
 
     if (data.nuevo === 1) {
+      // Primero, guardar la nueva configuración
       let configfecha = new Date(data.anio_lectivo);
       let mes = (fecha_actual.getFullYear() - configfecha.getFullYear()) * 12;
       mes -= configfecha.getMonth();
@@ -1350,15 +1351,35 @@ const actualizar_config_admin = async (req, res) => {
       config.numpension = numpension;
       await config.save();
 
+      // Registrar la operación para debugging
+      console.log(
+        `Nuevo año lectivo creado: ${config._id} - ${config.anio_lectivo}`
+      );
+
+      // Buscar estudiantes activos con curso <= 9
       let estudiantes = await Estudiante.find({
         estado: "Activo",
         curso: { $lte: 9 },
       });
 
+      console.log(
+        `Encontrados ${estudiantes.length} estudiantes para avanzar de curso`
+      );
+
+      // Procesar cada estudiante y crear pensiones
       for (let estudiante of estudiantes) {
+        // Guardar curso original para referencia
+        const cursoAnterior = estudiante.curso;
+
+        // Incrementar curso
         estudiante.curso++;
         await estudiante.save();
 
+        console.log(
+          `Estudiante ${estudiante._id} avanzado de curso ${cursoAnterior} a ${estudiante.curso}`
+        );
+
+        // Crear nueva pensión para el estudiante con el año lectivo actual
         let pension = new Pension({
           idanio_lectivo: config._id,
           idestudiante: estudiante._id,
@@ -1369,6 +1390,10 @@ const actualizar_config_admin = async (req, res) => {
           especialidad: estudiante.especialidad || "EGB",
         });
         await pension.save();
+
+        console.log(
+          `Pensión creada para estudiante ${estudiante._id} en curso ${estudiante.curso}`
+        );
       }
 
       // Deshabilitar estudiantes de curso 10
@@ -1376,11 +1401,18 @@ const actualizar_config_admin = async (req, res) => {
         estado: "Activo",
         curso: 10,
       });
+
+      console.log(
+        `Encontrados ${estudiantesDesactivar.length} estudiantes de curso 10 para desactivar`
+      );
+
       for (let estudianteDesactivar of estudiantesDesactivar) {
         estudianteDesactivar.estado = "Desactivado";
         await estudianteDesactivar.save();
+        console.log(`Estudiante ${estudianteDesactivar._id} desactivado`);
       }
 
+      // Registrar la operación
       let registro = new Registro({
         admin: req.user.sub,
         tipo: "actualizo",
@@ -1390,14 +1422,16 @@ const actualizar_config_admin = async (req, res) => {
 
       return res.status(200).send({ data: config });
     } else {
+      // Actualizar configuración existente
       let config = await Config.findOne().sort({ createdAt: -1 });
-      if (config._id == data._id) {
-        config.extrapagos = data.extrapagos;
-      }
       if (!config) {
         return res
           .status(400)
           .send({ message: "No existe una configuración previa" });
+      }
+
+      if (config._id == data._id) {
+        config.extrapagos = data.extrapagos;
       }
 
       let configfecha = new Date(data.anio_lectivo);
@@ -1422,8 +1456,10 @@ const actualizar_config_admin = async (req, res) => {
       return res.status(200).send({ data: config });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).send({ message: "Algo salió mal" });
+    console.error("Error en actualizar_config_admin:", error);
+    return res
+      .status(500)
+      .send({ message: "Algo salió mal", error: error.message });
   }
 };
 

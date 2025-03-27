@@ -166,14 +166,21 @@ export class SchoolYearConfigComponent implements OnInit {
   index_selecte = -1;
   select_config(val: any) {
     this.index_selecte = val;
-    this.config = this.config_const[this.index_selecte];
+
+    // Crear una copia REAL del objeto, no una referencia
+    this.config = JSON.parse(
+      JSON.stringify(this.config_const[this.index_selecte])
+    );
+
     if (this.config.extrapagos) {
-      this.arr_rubro_const = Object.assign(JSON.parse(this.config.extrapagos));
-      this.arr_rubro = Object.assign(JSON.parse(this.config.extrapagos));
+      // También crear copias reales para estos arrays
+      this.arr_rubro_const = JSON.parse(this.config.extrapagos);
+      this.arr_rubro = JSON.parse(this.config.extrapagos);
     } else {
       this.arr_rubro_const = [];
       this.arr_rubro = [];
     }
+
     this.auxdate = this.config.anio_lectivo;
     this.auxmescompleto = this.config.mescompleto;
     this.config.mescompleto = '';
@@ -261,29 +268,47 @@ export class SchoolYearConfigComponent implements OnInit {
   }
   load_enviar = true;
   actualizar(actualizarForm: any) {
+    // Log para depuración
+    console.log('Config original:', this.config_const[0]);
+    console.log('Config actual:', this.config);
+
     this.load_enviar = false;
     if (actualizarForm.valid) {
       this.load_btn = true;
 
+      // Obtener año de la última configuración
       let lastConfigAnioLectivo = undefined;
       if (this.config_const.length > 0) {
-        lastConfigAnioLectivo = new Date(
-          this.config_const[0].anio_lectivo
-        ).getFullYear();
+        // Asegurarse de que sea un número
+        const lastDate = new Date(this.config_const[0].anio_lectivo);
+        lastConfigAnioLectivo = lastDate.getFullYear();
       }
 
+      // Obtener año de la configuración actual
+      const currentDate = new Date(this.config.anio_lectivo);
+      const currentAnioLectivo = currentDate.getFullYear();
+
+      console.log('Año anterior:', lastConfigAnioLectivo);
+      console.log('Año actual:', currentAnioLectivo);
+
+      // Comparar correctamente los años
       if (
         !lastConfigAnioLectivo ||
-        this.config.anio_lectivo > lastConfigAnioLectivo
+        currentAnioLectivo > lastConfigAnioLectivo
       ) {
+        console.log('Es un nuevo año lectivo, configurando nuevo = 1');
         this.config.nuevo = 1;
+        delete this.config._id;
       } else {
+        console.log('No es un nuevo año lectivo, limpiando propiedades');
         delete this.config.createdAt;
         delete this.config.extrapagos;
         delete this.config.facturacion;
         delete this.config._id;
         delete this.config.numpension;
       }
+
+      // Descomentar para enviar la solicitud
 
       this._adminService
         .actualizar_config_admin(this.config, this.token)
@@ -293,7 +318,7 @@ export class SchoolYearConfigComponent implements OnInit {
               iziToast.success({
                 title: 'ÉXITOSO',
                 position: 'topRight',
-                message: 'Se ingresado correctamente las configuraciones.',
+                message: 'Se ingresaron correctamente las configuraciones.',
               });
             } else {
               iziToast.error({
@@ -304,21 +329,31 @@ export class SchoolYearConfigComponent implements OnInit {
             }
 
             this.load_btn = false;
-
-            //this.ngOnInit();
             $('#modalConfirmar').modal('hide');
-            location.reload();
+
+            // Evitar usar location.reload() si es posible
+            // En su lugar, usa un método para recargar los datos
+            this.ngOnInit(); // o crea un método específico
+
             this.load_enviar = true;
           },
           (error) => {
             this.load_btn = false;
+            iziToast.error({
+              title: 'ERROR',
+              position: 'topRight',
+              message: 'Ocurrió un error en el servidor',
+            });
           }
         );
+
+      // Log final para verificar los cambios
+      console.log('Config final a enviar:', JSON.stringify(this.config));
     } else {
       iziToast.error({
         title: 'ERROR',
         position: 'topRight',
-        message: 'Los datos del formulario no son validos',
+        message: 'Los datos del formulario no son válidos',
       });
     }
   }
