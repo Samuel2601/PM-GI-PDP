@@ -1343,7 +1343,8 @@ const actualizar_config_admin = async (req, res) => {
       let mes = (fecha_actual.getFullYear() - configfecha.getFullYear()) * 12;
       mes -= configfecha.getMonth();
       mes += fecha_actual.getMonth() + 1;
-      let numpension = Math.min(mes, 10);
+      // Fix: Ensure numpension is never negative
+      let numpension = Math.max(0, Math.min(mes, 10));
 
       let config = new Config(data);
       config.numpension = numpension;
@@ -1411,7 +1412,7 @@ const actualizar_config_admin = async (req, res) => {
         let mes = (fecha_actual.getFullYear() - configfecha.getFullYear()) * 12;
         mes -= configfecha.getMonth();
         mes += fecha_actual.getMonth() + 1;
-        config.numpension = Math.min(mes, 10);
+        config.numpension = Math.max(0, Math.min(mes, 10));
         await config.save();
       } else {
         config.numpension = data.numpension;

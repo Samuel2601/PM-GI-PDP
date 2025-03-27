@@ -151,7 +151,7 @@ export class SchoolYearConfigComponent implements OnInit {
           }
         }
 
-        if (this.config.numpension >= 10) {
+        if (this.config.numpension >= 9) {
           this.load_btn = false;
         }
       });
