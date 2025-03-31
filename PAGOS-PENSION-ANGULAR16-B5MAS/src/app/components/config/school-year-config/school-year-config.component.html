@@ -33,28 +33,6 @@
                         >Años Lectivos</a
                       >
                     </li>
-                    <!--
-                      <li class="nav-item" *ngIf="tip_conf != 2">
-                      <a class="nav-link" (click)="select_nav(2)"
-                        >Institución</a
-                      >
-                    </li>
-                    <li class="nav-item" *ngIf="tip_conf == 2">
-                      <a class="nav-link active" aria-disabled="true"
-                        >Institución</a
-                      >
-                    </li>
-                    <li class="nav-item" *ngIf="tip_conf != 3">
-                      <a class="nav-link" (click)="select_nav(3)"
-                        >Configuración</a
-                      >
-                    </li>
-                    <li class="nav-item" *ngIf="tip_conf == 3">
-                      <a class="nav-link active" aria-disabled="true"
-                        >Configuración</a
-                      >
-                    </li>
-                    -->
                   </ul>
                 </div>
               </div>
@@ -63,6 +41,16 @@
             <div class="container" *ngIf="tip_conf == 1">
               <div class="row">
                 <div class="col-2">
+                  <div class="col-auto" *ngIf="tip_conf == 1">
+                    <button
+                      class="btn btn-primary"
+                      type="button"
+                      data-bs-toggle="modal"
+                      data-bs-target="#modalNuevoAnioLectivo"
+                    >
+                      <i class="bi bi-plus-lg"></i> Nuevo Año Lectivo
+                    </button>
+                  </div>
                   <nav class="nav flex-column nav-tabs">
                     <ng-container
                       *ngFor="let item of config_const; let index = index"
@@ -247,7 +235,7 @@
                           </div>
                         </div>
 
-                        <div class="row mb-3" style="display: none;">
+                        <div class="row mb-3" style="display: none">
                           <label for="inputEmail3" class="form-label"
                             >Mes de cobro completo</label
                           >
@@ -340,9 +328,8 @@
                           data-bs-toggle="modal"
                           [attr.data-bs-target]="'#modalConfirmar'"
                         >
-                          Iniciar
+                          Actualizar
                         </button>
-
                         <button
                           disabled
                           *ngIf="load_btn"
@@ -1334,5 +1321,119 @@
         </div>
       </div>
     </ng-container>
+  </div>
+</div>
+
+<!-- Modal para Crear Nuevo Año Lectivo -->
+<div
+  class="modal fade"
+  id="modalNuevoAnioLectivo"
+  tabindex="-1"
+  aria-labelledby="modalNuevoAnioLectivoLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalNuevoAnioLectivoLabel">
+          Crear Nuevo Año Lectivo
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          #nuevoAnioForm="ngForm"
+          (ngSubmit)="crearNuevoAnioLectivo(nuevoAnioForm)"
+        >
+          <!-- Campos del formulario -->
+          <div class="row mb-3">
+            <label for="inputMatricula" class="form-label"
+              >Monto Matricula</label
+            >
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="basic-matricula"
+                >(Obligatorio)</span
+              >
+              <input
+                type="number"
+                step="0.01"
+                required
+                class="form-control"
+                name="matricula"
+                [(ngModel)]="nuevoConfig.matricula"
+                id="inputMatricula"
+              />
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <label for="inputPension" class="form-label">Monto Pensión</label>
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="basic-pension"
+                >(Obligatorio)</span
+              >
+              <input
+                type="number"
+                required
+                step="0.01"
+                class="form-control"
+                name="pension"
+                [(ngModel)]="nuevoConfig.pension"
+                id="inputPension"
+              />
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <label for="inputFechaAnioLectivo" class="form-label"
+              >Fecha de Año Lectivo</label
+            >
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="basic-anio_lectivo"
+                >(Obligatorio)</span
+              >
+              <input
+                required
+                type="date"
+                class="form-control"
+                name="anio_lectivo"
+                [(ngModel)]="nuevoConfig.anio_lectivo"
+                (ngModelChange)="fechasNuevoAnio($event)"
+                id="inputFechaAnioLectivo"
+              />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="!nuevoAnioForm.valid || loadingNuevoAnio"
+            >
+              <span *ngIf="!loadingNuevoAnio">Crear Año Lectivo</span>
+              <span
+                *ngIf="loadingNuevoAnio"
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              <span *ngIf="loadingNuevoAnio">Creando...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>

@@ -9,6 +9,7 @@ import {
   AbstractControl,
 } from '@angular/forms';
 import iziToast from 'izitoast';
+import { map } from 'rxjs/operators';
 
 declare var $: any;
 
@@ -126,11 +127,18 @@ export class SchoolYearConfigComponent implements OnInit {
         console.log(response);
         if (response.message) {
           this.bol = response.message;
-
           this.load_btn = false;
           this.load_data = false;
         } else {
-          this.config_const = response.data;
+          // Ordenar los datos por año lectivo (del más reciente al más antiguo)
+          this.config_const = response.data.sort((a: any, b: any) => {
+            const fechaA = new Date(a.anio_lectivo);
+            const fechaB = new Date(b.anio_lectivo);
+            return fechaB.getTime() - fechaA.getTime(); // Orden descendente (más reciente primero)
+          });
+
+          console.log('Datos ordenados por año lectivo:', this.config_const);
+
           this.select_config(0);
           if (this.config) {
             this._adminService
@@ -221,7 +229,15 @@ export class SchoolYearConfigComponent implements OnInit {
     this._adminService
       .obtener_detalles_ordenes_rubro(this.arr_rubro[val].idrubro, this.token)
       .subscribe((response) => {
-        if (response.pagos.length == 0) {
+        console.log('Eliminando rubro:', response);
+        // Reemplaza la línea actual con este código:
+        const rubro = response.pagos.filter(
+          (pago: any) =>
+            pago.idpension.idanio_lectivo ===
+            this.config_const[this.index_selecte]._id
+        );
+        console.log('Rubro eliminado:', rubro);
+        if (rubro.length == 0) {
           this.arr_rubro.splice(val, 1);
           this.uniqueArray =
             JSON.stringify(this.arr_rubro) ===
@@ -260,40 +276,61 @@ export class SchoolYearConfigComponent implements OnInit {
     }
   }
   load_enviar = true;
+  // Método actualizar corregido
   actualizar(actualizarForm: any) {
     this.load_enviar = false;
     if (actualizarForm.valid) {
       this.load_btn = true;
 
-      let lastConfigAnioLectivo = undefined;
+      // Crear una copia del objeto para no modificar el original directamente
+      let configToUpdate = JSON.parse(JSON.stringify(this.config));
+
+      // Verificar si es un año nuevo comparando con el último año registrado
+      let esNuevoAnio = false;
+      let ultimoAnioRegistrado = null;
+
       if (this.config_const.length > 0) {
-        lastConfigAnioLectivo = new Date(
+        // Encuentra el último año registrado (asumiendo que el arreglo está ordenado)
+        ultimoAnioRegistrado = new Date(
           this.config_const[0].anio_lectivo
         ).getFullYear();
+        const anioActual = new Date(configToUpdate.anio_lectivo).getFullYear();
+
+        // Es un nuevo año si es posterior al último registrado
+        esNuevoAnio = anioActual > ultimoAnioRegistrado;
+      } else {
+        // Si no hay años registrados, este sería el primero
+        esNuevoAnio = true;
       }
 
-      if (
-        !lastConfigAnioLectivo ||
-        this.config.anio_lectivo > lastConfigAnioLectivo
-      ) {
-        this.config.nuevo = 1;
+      // Si es un nuevo año, configurar el campo nuevo = 1
+      if (esNuevoAnio) {
+        configToUpdate.nuevo = 1;
+        console.log('Enviando como NUEVO año lectivo:', configToUpdate);
       } else {
-        delete this.config.createdAt;
-        delete this.config.extrapagos;
-        delete this.config.facturacion;
-        delete this.config._id;
-        delete this.config.numpension;
+        // Si no es nuevo, limpiar los campos que no deben actualizarse
+        delete configToUpdate.createdAt;
+        delete configToUpdate.extrapagos;
+        delete configToUpdate.facturacion;
+        delete configToUpdate._id;
+        delete configToUpdate.numpension;
+        console.log(
+          'Enviando como actualización de año existente:',
+          configToUpdate
+        );
       }
 
       this._adminService
-        .actualizar_config_admin(this.config, this.token)
+        .actualizar_config_admin(configToUpdate, this.token)
         .subscribe(
           (response) => {
             if (response.message == undefined) {
               iziToast.success({
                 title: 'ÉXITOSO',
                 position: 'topRight',
-                message: 'Se ingresado correctamente las configuraciones.',
+                message: esNuevoAnio
+                  ? 'Se ha creado correctamente el nuevo año lectivo.'
+                  : 'Se han actualizado correctamente las configuraciones.',
               });
             } else {
               iziToast.error({
@@ -304,22 +341,30 @@ export class SchoolYearConfigComponent implements OnInit {
             }
 
             this.load_btn = false;
-
-            //this.ngOnInit();
             $('#modalConfirmar').modal('hide');
-            location.reload();
             this.load_enviar = true;
+
+            // Recargar los datos para reflejar los cambios
+            location.reload();
           },
           (error) => {
+            console.error('Error al actualizar/crear año lectivo:', error);
+            iziToast.error({
+              title: 'ERROR',
+              position: 'topRight',
+              message: 'Ocurrió un error al procesar la solicitud.',
+            });
             this.load_btn = false;
+            this.load_enviar = true;
           }
         );
     } else {
       iziToast.error({
         title: 'ERROR',
         position: 'topRight',
-        message: 'Los datos del formulario no son validos',
+        message: 'Los datos del formulario no son válidos',
       });
+      this.load_enviar = true;
     }
   }
 
@@ -439,6 +484,118 @@ export class SchoolYearConfigComponent implements OnInit {
         this.configForm,
         this.configForm.valid
       );
+    }
+  }
+
+  // Propiedades para nuevo año lectivo
+  public nuevoConfig: any = {
+    matricula: '',
+    pension: '',
+    anio_lectivo: '',
+    nuevo: 1,
+    numpension: 0,
+    extrapagos: '[]',
+  };
+  public loadingNuevoAnio = false;
+  public mesesNuevoAnio: Array<any> = [];
+
+  // Método para manejar las fechas en el nuevo formulario
+  fechasNuevoAnio(event: any) {
+    this.mesesNuevoAnio = [];
+    if (this.nuevoConfig.anio_lectivo) {
+      for (var i = 0; i < 10; i++) {
+        this.mesesNuevoAnio.push({
+          date: new Date(this.nuevoConfig.anio_lectivo).setMonth(
+            new Date(this.nuevoConfig.anio_lectivo).getMonth() + i
+          ),
+        });
+      }
+    }
+  }
+
+  // Método para crear un nuevo año lectivo
+  crearNuevoAnioLectivo(nuevoAnioForm: any) {
+    if (nuevoAnioForm.valid) {
+      this.loadingNuevoAnio = true;
+
+      // Asegurarse de que se envía como nuevo
+      this.nuevoConfig.nuevo = 1;
+
+      // Verificar que el año sea posterior al último registrado
+      let puedeCrear = true;
+      let mensajeError = '';
+
+      if (this.config_const.length > 0) {
+        const ultimoAnio = new Date(
+          this.config_const[0].anio_lectivo
+        ).getFullYear();
+        const nuevoAnio = new Date(this.nuevoConfig.anio_lectivo).getFullYear();
+
+        if (nuevoAnio <= ultimoAnio) {
+          puedeCrear = false;
+          mensajeError = `El año lectivo debe ser posterior al último registrado (${ultimoAnio})`;
+        }
+      }
+
+      if (puedeCrear) {
+        // Enviar solicitud para crear nuevo año lectivo
+        this._adminService
+          .actualizar_config_admin(this.nuevoConfig, this.token)
+          .subscribe(
+            (response) => {
+              if (response.message == undefined) {
+                iziToast.success({
+                  title: 'ÉXITOSO',
+                  position: 'topRight',
+                  message: 'Se ha creado correctamente el nuevo año lectivo.',
+                });
+
+                // Cerrar modal y reiniciar formulario
+                $('#modalNuevoAnioLectivo').modal('hide');
+                this.nuevoConfig = {
+                  matricula: '',
+                  pension: '',
+                  anio_lectivo: '',
+                  nuevo: 1,
+                  numpension: 0,
+                  extrapagos: '[]',
+                };
+
+                // Recargar datos
+                this.call_lectivo();
+              } else {
+                iziToast.error({
+                  title: 'ERROR',
+                  position: 'topRight',
+                  message: response.message,
+                });
+              }
+              this.loadingNuevoAnio = false;
+            },
+            (error) => {
+              console.error('Error al crear nuevo año lectivo:', error);
+              iziToast.error({
+                title: 'ERROR',
+                position: 'topRight',
+                message: 'Ocurrió un error al crear el nuevo año lectivo',
+              });
+              this.loadingNuevoAnio = false;
+            }
+          );
+      } else {
+        iziToast.warning({
+          title: 'ADVERTENCIA',
+          position: 'topRight',
+          message: mensajeError,
+        });
+        this.loadingNuevoAnio = false;
+      }
+    } else {
+      iziToast.error({
+        title: 'ERROR',
+        position: 'topRight',
+        message: 'Por favor, complete todos los campos requeridos',
+      });
     }
   }
 }
