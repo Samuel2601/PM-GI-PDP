@@ -174,14 +174,21 @@ export class SchoolYearConfigComponent implements OnInit {
   index_selecte = -1;
   select_config(val: any) {
     this.index_selecte = val;
-    this.config = this.config_const[this.index_selecte];
+
+    // Crear una copia REAL del objeto, no una referencia
+    this.config = JSON.parse(
+      JSON.stringify(this.config_const[this.index_selecte])
+    );
+
     if (this.config.extrapagos) {
-      this.arr_rubro_const = Object.assign(JSON.parse(this.config.extrapagos));
-      this.arr_rubro = Object.assign(JSON.parse(this.config.extrapagos));
+      // También crear copias reales para estos arrays
+      this.arr_rubro_const = JSON.parse(this.config.extrapagos);
+      this.arr_rubro = JSON.parse(this.config.extrapagos);
     } else {
       this.arr_rubro_const = [];
       this.arr_rubro = [];
     }
+
     this.auxdate = this.config.anio_lectivo;
     this.auxmescompleto = this.config.mescompleto;
     this.config.mescompleto = '';
@@ -278,6 +285,10 @@ export class SchoolYearConfigComponent implements OnInit {
   load_enviar = true;
   // Método actualizar corregido
   actualizar(actualizarForm: any) {
+    // Log para depuración
+    console.log('Config original:', this.config_const[0]);
+    console.log('Config actual:', this.config);
+
     this.load_enviar = false;
     if (actualizarForm.valid) {
       this.load_btn = true;
@@ -320,6 +331,8 @@ export class SchoolYearConfigComponent implements OnInit {
         );
       }
 
+      // Descomentar para enviar la solicitud
+
       this._adminService
         .actualizar_config_admin(configToUpdate, this.token)
         .subscribe(
@@ -358,10 +371,14 @@ export class SchoolYearConfigComponent implements OnInit {
             this.load_enviar = true;
           }
         );
+
+      // Log final para verificar los cambios
+      console.log('Config final a enviar:', JSON.stringify(this.config));
     } else {
       iziToast.error({
         title: 'ERROR',
         position: 'topRight',
+        message: 'Los datos del formulario no son válidos',
         message: 'Los datos del formulario no son válidos',
       });
       this.load_enviar = true;

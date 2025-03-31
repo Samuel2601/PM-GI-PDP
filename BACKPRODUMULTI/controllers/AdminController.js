@@ -1488,6 +1488,10 @@ const actualizar_config_admin = async (req, res) => {
         config.extrapagos = data.extrapagos;
       }
 
+      if (config._id == data._id) {
+        config.extrapagos = data.extrapagos;
+      }
+
       let configfecha = new Date(data.anio_lectivo);
       if (configfecha.getTime() < config.anio_lectivo.getTime()) {
         return res.status(400).send({
@@ -1510,8 +1514,10 @@ const actualizar_config_admin = async (req, res) => {
       return res.status(200).send({ data: config });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).send({ message: "Algo salió mal" });
+    console.error("Error en actualizar_config_admin:", error);
+    return res
+      .status(500)
+      .send({ message: "Algo salió mal", error: error.message });
   }
 };
 

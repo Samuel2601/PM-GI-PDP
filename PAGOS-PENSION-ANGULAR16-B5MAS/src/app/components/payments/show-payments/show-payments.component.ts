@@ -106,6 +106,14 @@ export class ShowPaymentsComponent implements OnInit {
     });
   }
 
+  async armadoconifico() {
+    const pre_factura = await this.armado_Documento_envio_Contifico(
+      this.pago,
+      this.detalles
+    );
+    console.log(pre_factura);
+  }
+
   consultar_apikey() {
     const user_data = JSON.parse(localStorage.getItem('user_data') || '');
     this._institucionService
@@ -307,11 +315,11 @@ export class ShowPaymentsComponent implements OnInit {
         detalles.reduce((acc, detalle) => {
           const { documento } = detalle;
           const docKey = documento.documento || 'Sin comprobante';
-
+          console.log(documento);
           if (!acc[docKey]) {
             acc[docKey] = {
               forma_cobro: documento.cuenta === 'Efectivo' ? 'EF' : 'TRA',
-              monto: documento.valor_original || 0,
+              monto: documento.valor_origen || 0,
               numero_comprobante: docKey,
               fecha: this.getEcuadorDate(documento.f_deposito),
               cuenta_bancaria_id:
@@ -320,10 +328,10 @@ export class ShowPaymentsComponent implements OnInit {
           }
 
           // Sumar los valores si el documento ya existe en el acumulador
-          acc[docKey].monto +=
+          /* acc[docKey].monto +=
             !documento.valor_original && documento.documento === docKey
               ? detalle.valor
-              : 0;
+              : 0;*/
 
           return acc;
         }, {})
@@ -571,9 +579,12 @@ export class ShowPaymentsComponent implements OnInit {
       console.log('No hay API key configurada');
       return;
     }
-    console.log('Manjejar documento Contifico',this.pago.id_contifico);
+    console.log('Manjejar documento Contifico', this.pago.id_contifico);
     try {
-      if (this.pago.id_contifico===undefined||this.pago.id_contifico===null) {
+      if (
+        this.pago.id_contifico === undefined ||
+        this.pago.id_contifico === null
+      ) {
         this.habilitar_boton_generar = true;
         // Si no hay ID Contífico, generar documento
         //await this.generarDocumento();
