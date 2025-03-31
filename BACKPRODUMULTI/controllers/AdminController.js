@@ -1327,18 +1327,42 @@ const actualizar_config_admin = async (req, res) => {
   if (!req.user) {
     return res.status(500).send({ message: "NoAccess" });
   }
-
+  console.log("Actualizando configuración:", req.body);
   try {
+    // Conexión a la base de datos del usuario
     let conn = mongoose.connection.useDb(req.user.base);
+
+    // Definición de modelos
     const Config = conn.model("config", ConfigSchema);
     const Registro = conn.model("registro", RegistroSchema);
     const Pension = conn.model("pension", PensionSchema);
     const Estudiante = conn.model("estudiante", EstudianteSchema);
 
+    // Verificar el tipo de escuela (UE o no) consultando la colección Instituciones
+    const connInstituciones = mongoose.connection.useDb("Instituciones");
+    const Instituto = connInstituciones.model("instituto", InstitucionSchema);
+
+    // Buscar el tipo de escuela basado en req.user.base
+    const institucion = await Instituto.findOne({ base: req.user.base });
+
+    if (!institucion) {
+      console.log("Institución no encontrada", req.user.base);
+      return res.status(404).json({ message: "Institución no encontrada" });
+    }
+
+    // Si no existe el registro o no tiene type_school, asumir que solo tienen EGB (1-10)
+    const esUnidadEducativa = institucion && institucion.type_school === "UE";
+
+    // Determinar las especialidades permitidas
+    // Si no es UE o no existe el registro, solo se permite EGB (1-10)
+    const tieneInicial = esUnidadEducativa;
+    const tieneBGU = esUnidadEducativa;
+
     let fecha_actual = new Date();
     let data = req.body;
 
     if (data.nuevo === 1) {
+      // Crear nueva configuración para el año lectivo
       let configfecha = new Date(data.anio_lectivo);
       let mes = (fecha_actual.getFullYear() - configfecha.getFullYear()) * 12;
       mes -= configfecha.getMonth();
@@ -1350,37 +1374,97 @@ const actualizar_config_admin = async (req, res) => {
       config.numpension = numpension;
       await config.save();
 
-      let estudiantes = await Estudiante.find({
-        estado: "Activo",
-        curso: { $lte: 9 },
-      });
+      // Proceso para todos los estudiantes activos
+      // Manejar promoción de estudiantes por especialidad según el tipo de institución
+      // Para EGB (1-10) - Siempre se procesa independientemente del tipo de institución
+      await promoverEstudiantes(Estudiante, Pension, config, "EGB", 1, 9);
 
-      for (let estudiante of estudiantes) {
-        estudiante.curso++;
-        await estudiante.save();
-
-        let pension = new Pension({
-          idanio_lectivo: config._id,
-          idestudiante: estudiante._id,
-          anio_lectivo: config.anio_lectivo,
-          condicion_beca: "No",
-          curso: estudiante.curso.toString(),
-          paralelo: estudiante.paralelo,
-          especialidad: estudiante.especialidad || "EGB",
-        });
-        await pension.save();
+      // Para Inicial (1-2) - Solo si es UE
+      if (tieneInicial) {
+        await promoverEstudiantes(Estudiante, Pension, config, "Inicial", 1, 2);
       }
 
-      // Deshabilitar estudiantes de curso 10
-      let estudiantesDesactivar = await Estudiante.find({
+      // Para BGU (1-3) - Solo si es UE
+      if (tieneBGU) {
+        await promoverEstudiantes(Estudiante, Pension, config, "BGU", 1, 2);
+      }
+
+      // Desactivar estudiantes que finalizan su ciclo
+
+      // Si la institución tiene Inicial: Inicial 2 pasa a EGB 1
+      if (tieneInicial) {
+        const estudiantesInicialFinal = await Estudiante.find({
+          estado: "Activo",
+          especialidad: "Inicial",
+          curso: 2,
+        });
+
+        for (let estudiante of estudiantesInicialFinal) {
+          estudiante.especialidad = "EGB";
+          estudiante.curso = 1;
+          await estudiante.save();
+
+          // Crear pensión con nueva especialidad
+          let pension = new Pension({
+            idanio_lectivo: config._id,
+            idestudiante: estudiante._id,
+            anio_lectivo: config.anio_lectivo,
+            condicion_beca: "No",
+            curso: estudiante.curso.toString(),
+            paralelo: estudiante.paralelo,
+            especialidad: "EGB",
+          });
+          await pension.save();
+        }
+      }
+
+      // Manejo de estudiantes de EGB 10
+      const estudiantesEGBFinal = await Estudiante.find({
         estado: "Activo",
+        especialidad: "EGB",
         curso: 10,
       });
-      for (let estudianteDesactivar of estudiantesDesactivar) {
-        estudianteDesactivar.estado = "Desactivado";
-        await estudianteDesactivar.save();
+
+      for (let estudiante of estudiantesEGBFinal) {
+        // Si tiene BGU, pasan a BGU 1
+        if (tieneBGU) {
+          estudiante.especialidad = "BGU";
+          estudiante.curso = 1;
+          await estudiante.save();
+
+          // Crear pensión con nueva especialidad
+          let pension = new Pension({
+            idanio_lectivo: config._id,
+            idestudiante: estudiante._id,
+            anio_lectivo: config.anio_lectivo,
+            condicion_beca: "No",
+            curso: estudiante.curso.toString(),
+            paralelo: estudiante.paralelo,
+            especialidad: "BGU",
+          });
+          await pension.save();
+        } else {
+          // Si no tiene BGU, desactivar estudiantes de EGB 10
+          estudiante.estado = "Desactivado";
+          await estudiante.save();
+        }
       }
 
+      // Si tiene BGU: Desactivar estudiantes de BGU 3
+      if (tieneBGU) {
+        let estudiantesBGUFinal = await Estudiante.find({
+          estado: "Activo",
+          especialidad: "BGU",
+          curso: 3,
+        });
+
+        for (let estudiante of estudiantesBGUFinal) {
+          estudiante.estado = "Desactivado";
+          await estudiante.save();
+        }
+      }
+
+      // Registrar la acción
       let registro = new Registro({
         admin: req.user.sub,
         tipo: "actualizo",
@@ -1390,14 +1474,18 @@ const actualizar_config_admin = async (req, res) => {
 
       return res.status(200).send({ data: config });
     } else {
-      let config = await Config.findOne().sort({ createdAt: -1 });
-      if (config._id == data._id) {
-        config.extrapagos = data.extrapagos;
-      }
+      const id = data._id;
+      // Actualizar configuración existente
+      let config = await Config.findById(id);
+
       if (!config) {
         return res
           .status(400)
           .send({ message: "No existe una configuración previa" });
+      }
+
+      if (config._id == data._id) {
+        config.extrapagos = data.extrapagos;
       }
 
       let configfecha = new Date(data.anio_lectivo);
@@ -1426,6 +1514,38 @@ const actualizar_config_admin = async (req, res) => {
     return res.status(500).send({ message: "Algo salió mal" });
   }
 };
+
+// Función auxiliar para promover estudiantes
+async function promoverEstudiantes(
+  Estudiante,
+  Pension,
+  config,
+  especialidad,
+  cursoMin,
+  cursoMax
+) {
+  const estudiantes = await Estudiante.find({
+    estado: "Activo",
+    especialidad: especialidad,
+    curso: { $gte: cursoMin, $lte: cursoMax },
+  });
+
+  for (let estudiante of estudiantes) {
+    estudiante.curso++;
+    await estudiante.save();
+
+    let pension = new Pension({
+      idanio_lectivo: config._id,
+      idestudiante: estudiante._id,
+      anio_lectivo: config.anio_lectivo,
+      condicion_beca: "No",
+      curso: estudiante.curso.toString(),
+      paralelo: estudiante.paralelo,
+      especialidad: estudiante.especialidad,
+    });
+    await pension.save();
+  }
+}
 
 const obtener_pagos_admin = async function (req, res) {
   if (req.user) {
