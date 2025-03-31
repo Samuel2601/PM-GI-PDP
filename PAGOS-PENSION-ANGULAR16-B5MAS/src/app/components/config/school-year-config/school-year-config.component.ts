@@ -379,7 +379,6 @@ export class SchoolYearConfigComponent implements OnInit {
         title: 'ERROR',
         position: 'topRight',
         message: 'Los datos del formulario no son válidos',
-        message: 'Los datos del formulario no son válidos',
       });
       this.load_enviar = true;
     }
