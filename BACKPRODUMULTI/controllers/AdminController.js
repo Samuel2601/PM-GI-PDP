@@ -1323,6 +1323,14 @@ const obtener_config_admin = async (req, res) => {
     res.status(403).send({ message: "NoAccess" });
   }
 };
+
+//REGEX - Ya no se utiliza directamente
+function regex(especialidad) {
+  // Usar expresión regular para hacer la búsqueda case-insensitive
+  const regexEspecialidad = new RegExp("^" + especialidad + "$", "i");
+  return regexEspecialidad;
+}
+
 const actualizar_config_admin = async (req, res) => {
   if (!req.user) {
     return res.status(500).send({ message: "NoAccess" });
@@ -1352,6 +1360,7 @@ const actualizar_config_admin = async (req, res) => {
 
     // Si no existe el registro o no tiene type_school, asumir que solo tienen EGB (1-10)
     const esUnidadEducativa = institucion && institucion.type_school === "UE";
+    console.log("esUnidadEducativa: ", esUnidadEducativa);
 
     // Determinar las especialidades permitidas
     // Si no es UE o no existe el registro, solo se permite EGB (1-10)
@@ -1374,75 +1383,92 @@ const actualizar_config_admin = async (req, res) => {
       config.numpension = numpension;
       await config.save();
 
-      // Proceso para todos los estudiantes activos
-      // Manejar promoción de estudiantes por especialidad según el tipo de institución
-      // Para EGB (1-10) - Siempre se procesa independientemente del tipo de institución
-      await promoverEstudiantes(Estudiante, Pension, config, "EGB", 1, 9);
+      // Obtener todos los estudiantes activos primero
+      const todosEstudiantesActivos = await Estudiante.find({
+        estado: "Activo",
+      });
 
-      // Para Inicial (1-2) - Solo si es UE
+      // Mostramos algunos estudiantes para debug
+      console.log("Total de estudiantes:", todosEstudiantesActivos.length);
+
+      // Procesamos las transiciones de especialidad primero
+
+      // 1. Estudiantes de Inicial 2 -> EGB 1
       if (tieneInicial) {
-        await promoverEstudiantes(Estudiante, Pension, config, "Inicial", 1, 2);
-      }
+        // Usamos una función más robusta para comparar especialidades
+        const estudiantesInicialFinal = todosEstudiantesActivos.filter(
+          (e) =>
+            esEspecialidad(e.especialidad, "Inicial") &&
+            (e.curso === 2 || e.curso === "2")
+        );
 
-      // Para BGU (1-3) - Solo si es UE
-      if (tieneBGU) {
-        await promoverEstudiantes(Estudiante, Pension, config, "BGU", 1, 2);
-      }
-
-      // Desactivar estudiantes que finalizan su ciclo
-
-      // Si la institución tiene Inicial: Inicial 2 pasa a EGB 1
-      if (tieneInicial) {
-        const estudiantesInicialFinal = await Estudiante.find({
-          estado: "Activo",
-          especialidad: "Inicial",
-          curso: 2,
-        });
+        console.log(
+          `Estudiantes de Inicial 2 que pasan a EGB 1: ${estudiantesInicialFinal.length}`
+        );
 
         for (let estudiante of estudiantesInicialFinal) {
-          estudiante.especialidad = "EGB";
-          estudiante.curso = 1;
-          await estudiante.save();
-
-          // Crear pensión con nueva especialidad
-          let pension = new Pension({
+          // You need to await the result of findOne() to properly check if a pension exists
+          const existingPension = await Pension.findOne({
             idanio_lectivo: config._id,
             idestudiante: estudiante._id,
-            anio_lectivo: config.anio_lectivo,
-            condicion_beca: "No",
-            curso: estudiante.curso.toString(),
-            paralelo: estudiante.paralelo,
-            especialidad: "EGB",
           });
-          await pension.save();
+
+          if (!existingPension) {
+            estudiante.especialidad = normalizarEspecialidad("EGB");
+            estudiante.curso = 1;
+            await estudiante.save();
+            // Crear pensión con nueva especialidad
+            let pension = new Pension({
+              idanio_lectivo: config._id,
+              idestudiante: estudiante._id,
+              anio_lectivo: config.anio_lectivo,
+              condicion_beca: "No",
+              curso: "1", // Guardar como string
+              paralelo: estudiante.paralelo,
+              especialidad: normalizarEspecialidad("EGB"),
+            });
+            await pension.save();
+          }
         }
       }
 
-      // Manejo de estudiantes de EGB 10
-      const estudiantesEGBFinal = await Estudiante.find({
-        estado: "Activo",
-        especialidad: "EGB",
-        curso: 10,
-      });
+      // 2. Estudiantes de EGB 10 -> BGU 1 o Desactivar
+      const estudiantesEGBFinal = todosEstudiantesActivos.filter(
+        (e) =>
+          esEspecialidad(e.especialidad, "EGB") &&
+          (e.curso === 10 || e.curso === "10")
+      );
+
+      console.log(
+        `Estudiantes de EGB 10 que se procesan: ${estudiantesEGBFinal.length}`
+      );
 
       for (let estudiante of estudiantesEGBFinal) {
         // Si tiene BGU, pasan a BGU 1
         if (tieneBGU) {
-          estudiante.especialidad = "BGU";
-          estudiante.curso = 1;
-          await estudiante.save();
-
-          // Crear pensión con nueva especialidad
-          let pension = new Pension({
+          // You need to await the result of findOne() to properly check if a pension exists
+          const existingPension = await Pension.findOne({
             idanio_lectivo: config._id,
             idestudiante: estudiante._id,
-            anio_lectivo: config.anio_lectivo,
-            condicion_beca: "No",
-            curso: estudiante.curso.toString(),
-            paralelo: estudiante.paralelo,
-            especialidad: "BGU",
           });
-          await pension.save();
+
+          if (!existingPension) {
+            estudiante.especialidad = normalizarEspecialidad("BGU");
+            estudiante.curso = 1;
+            await estudiante.save();
+
+            // Crear pensión con nueva especialidad
+            let pension = new Pension({
+              idanio_lectivo: config._id,
+              idestudiante: estudiante._id,
+              anio_lectivo: config.anio_lectivo,
+              condicion_beca: "No",
+              curso: "1", // Guardar como string
+              paralelo: estudiante.paralelo,
+              especialidad: normalizarEspecialidad("BGU"),
+            });
+            await pension.save();
+          }
         } else {
           // Si no tiene BGU, desactivar estudiantes de EGB 10
           estudiante.estado = "Desactivado";
@@ -1450,17 +1476,149 @@ const actualizar_config_admin = async (req, res) => {
         }
       }
 
-      // Si tiene BGU: Desactivar estudiantes de BGU 3
+      // 3. Desactivar estudiantes de BGU 3
       if (tieneBGU) {
-        let estudiantesBGUFinal = await Estudiante.find({
-          estado: "Activo",
-          especialidad: "BGU",
-          curso: 3,
-        });
+        const estudiantesBGUFinal = todosEstudiantesActivos.filter(
+          (e) =>
+            esEspecialidad(e.especialidad, "BGU") &&
+            (e.curso === 3 || e.curso === "3")
+        );
+
+        console.log(
+          `Estudiantes de BGU 3 que se desactivan: ${estudiantesBGUFinal.length}`
+        );
 
         for (let estudiante of estudiantesBGUFinal) {
           estudiante.estado = "Desactivado";
           await estudiante.save();
+        }
+      }
+
+      // Ahora procesamos la promoción de curso normal (sin cambiar de especialidad)
+
+      // 1. Promoción de estudiantes de Inicial 1
+      if (tieneInicial) {
+        const estudiantesInicial = todosEstudiantesActivos.filter(
+          (e) =>
+            esEspecialidad(e.especialidad, "Inicial") &&
+            (e.curso === 1 || e.curso === "1") &&
+            e.estado === "Activo"
+        );
+
+        console.log(
+          `Estudiantes de Inicial 1 que pasan a Inicial 2: ${estudiantesInicial.length}`
+        );
+
+        for (let estudiante of estudiantesInicial) {
+          // You need to await the result of findOne() to properly check if a pension exists
+          const existingPension = await Pension.findOne({
+            idanio_lectivo: config._id,
+            idestudiante: estudiante._id,
+          });
+
+          if (!existingPension) {
+            estudiante.curso = 2;
+            await estudiante.save();
+
+            let pension = new Pension({
+              idanio_lectivo: config._id,
+              idestudiante: estudiante._id,
+              anio_lectivo: config.anio_lectivo,
+              condicion_beca: "No",
+              curso: "2", // Guardar como string
+              paralelo: estudiante.paralelo,
+              especialidad: normalizarEspecialidad("Inicial"),
+            });
+            await pension.save();
+          }
+        }
+      }
+
+      // 2. Promoción de estudiantes de EGB 1-9
+      const estudiantesEGB = todosEstudiantesActivos.filter((e) => {
+        // Asegurarnos de que la comparación funcione tanto si curso es número como string
+        const cursoNum = parseInt(e.curso);
+        return (
+          esEspecialidad(e.especialidad, "EGB") &&
+          cursoNum >= 1 &&
+          cursoNum <= 9 &&
+          e.estado === "Activo"
+        );
+      });
+
+      console.log(
+        `Estudiantes de EGB 1-9 que se promocionan: ${estudiantesEGB.length}`
+      );
+
+      for (let estudiante of estudiantesEGB) {
+        // CORRECCIÓN: Aquí estaba el error, faltaba el await y guardar el resultado en una variable
+        const existingPension = await Pension.findOne({
+          idanio_lectivo: config._id,
+          idestudiante: estudiante._id,
+        });
+
+        if (!existingPension) {
+          // Convertir a número para hacer la suma
+          const cursoActual = parseInt(estudiante.curso);
+          const nuevoCurso = cursoActual + 1;
+          estudiante.curso = nuevoCurso;
+          await estudiante.save();
+
+          let pension = new Pension({
+            idanio_lectivo: config._id,
+            idestudiante: estudiante._id,
+            anio_lectivo: config.anio_lectivo,
+            condicion_beca: "No",
+            curso: nuevoCurso.toString(), // Guardar como string
+            paralelo: estudiante.paralelo,
+            especialidad: normalizarEspecialidad("EGB"),
+          });
+          await pension.save();
+        }
+      }
+
+      // 3. Promoción de estudiantes de BGU 1-2
+      if (tieneBGU) {
+        const estudiantesBGU = todosEstudiantesActivos.filter((e) => {
+          // Asegurarnos de que la comparación funcione tanto si curso es número como string
+          const cursoNum = parseInt(e.curso);
+          return (
+            esEspecialidad(e.especialidad, "BGU") &&
+            cursoNum >= 1 &&
+            cursoNum <= 2 &&
+            e.estado === "Activo"
+          );
+        });
+
+        console.log(
+          `Estudiantes de BGU 1-2 que se promocionan: ${estudiantesBGU.length}`
+        );
+
+        for (let estudiante of estudiantesBGU) {
+          // You need to await the result of findOne() to properly check if a pension exists
+          const existingPension = await Pension.findOne({
+            idanio_lectivo: config._id,
+            idestudiante: estudiante._id,
+          });
+
+          if (!existingPension) {
+            // Convertir a número para hacer la suma
+            const cursoActual = parseInt(estudiante.curso);
+            const nuevoCurso = cursoActual + 1;
+            estudiante.curso = nuevoCurso;
+            await estudiante.save();
+
+            let pension = new Pension({
+              idanio_lectivo: config._id,
+              idestudiante: estudiante._id,
+              anio_lectivo: config.anio_lectivo,
+              condicion_beca: "No",
+              curso: nuevoCurso.toString(), // Guardar como string
+              paralelo: estudiante.paralelo,
+              especialidad: normalizarEspecialidad("BGU"),
+            });
+            await pension.save();
+          }
         }
       }
 
@@ -1482,10 +1640,6 @@ const actualizar_config_admin = async (req, res) => {
         return res
           .status(400)
           .send({ message: "No existe una configuración previa" });
-      }
-
-      if (config._id == data._id) {
-        config.extrapagos = data.extrapagos;
       }
 
       if (config._id == data._id) {
@@ -1521,36 +1675,42 @@ const actualizar_config_admin = async (req, res) => {
   }
 };
 
-// Función auxiliar para promover estudiantes
-async function promoverEstudiantes(
-  Estudiante,
-  Pension,
-  config,
-  especialidad,
-  cursoMin,
-  cursoMax
-) {
-  const estudiantes = await Estudiante.find({
-    estado: "Activo",
-    especialidad: especialidad,
-    curso: { $gte: cursoMin, $lte: cursoMax },
-  });
+// Función auxiliar para normalizar nombres de especialidades
+function normalizarEspecialidad(especialidad) {
+  // Definir el formato correcto para cada especialidad
+  const formatosCorrecto = {
+    inicial: "Inicial",
+    egb: "EGB",
+    bgu: "BGU",
+  };
 
-  for (let estudiante of estudiantes) {
-    estudiante.curso++;
-    await estudiante.save();
+  // Convertir a minúsculas para comparación
+  const especMinuscula = especialidad.toLowerCase();
 
-    let pension = new Pension({
-      idanio_lectivo: config._id,
-      idestudiante: estudiante._id,
-      anio_lectivo: config.anio_lectivo,
-      condicion_beca: "No",
-      curso: estudiante.curso.toString(),
-      paralelo: estudiante.paralelo,
-      especialidad: estudiante.especialidad,
-    });
-    await pension.save();
-  }
+  // Devolver el formato correcto si existe, o el original si no se encuentra
+  return formatosCorrecto[especMinuscula] || especialidad;
+}
+
+// Función para comparar especialidades ignorando mayúsculas/minúsculas
+function esEspecialidad(especialidadEstudiante, especialidadBuscada) {
+  if (!especialidadEstudiante) return false;
+
+  // Convertir ambas a minúsculas para comparar
+  const especEstudianteLower = especialidadEstudiante.toLowerCase();
+  const especBuscadaLower = especialidadBuscada.toLowerCase();
+
+  return especEstudianteLower === especBuscadaLower;
+}
+
+// Función para comparar especialidades ignorando mayúsculas/minúsculas
+function esEspecialidad(especialidadEstudiante, especialidadBuscada) {
+  if (!especialidadEstudiante) return false;
+
+  // Convertir ambas a minúsculas para comparar
+  const especEstudianteLower = especialidadEstudiante.toLowerCase();
+  const especBuscadaLower = especialidadBuscada.toLowerCase();
+
+  return especEstudianteLower === especBuscadaLower;
 }
 
 const obtener_pagos_admin = async function (req, res) {
