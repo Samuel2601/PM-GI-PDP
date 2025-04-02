@@ -71,7 +71,7 @@ export class RegistroComponent implements OnInit {
         calle1: ['', Validators.required],
         calle2: ['', Validators.required],
         referencia: ['', Validators.required],
-        type_school: ['', Validators.required],
+        type_school: [''],
         portada: [],
       },
       {
@@ -310,7 +310,7 @@ export class RegistroComponent implements OnInit {
             .create_institucion(this.registrationForm.value, this.file)
             .subscribe((response) => {
               console.log(response);
-              if (response.message === "Registrado con éxito") {
+              if (response.message === 'Registrado con éxito') {
                 iziToast.show({
                   title: 'APROBADO',
                   class: 'iziToast-success',
@@ -341,7 +341,7 @@ export class RegistroComponent implements OnInit {
         this.imgSelect = 'assets/img/01.jpg';
         this.file = undefined;
       }
-    }else{
+    } else {
       console.error('Debe seleccionar una opción', this.registrationForm);
       iziToast.show({
         title: 'ERROR',

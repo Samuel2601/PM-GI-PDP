@@ -5,11 +5,10 @@ const InstitucionSchema = require("../../models/Institucion.js");
 const { PRODUCTOS_BASE } = require("../seeds/product.seeds.js");
 const VentaSchema = require("../../models/Pago.js");
 
-// Document endpoints
-const getDocuments = async (req) => {
+const getDocumentById = async (req, id) => {
   try {
     return await makeRequest(req, {
-      path: "/documento/",
+      path: `/documento/${id}/`,
       method: "get",
     });
   } catch (error) {
@@ -23,10 +22,11 @@ const getDocuments = async (req) => {
   }
 };
 
-const getDocumentById = async (req, id) => {
+// Document endpoints
+const getDocuments = async (req, resultSize = 20) => {
   try {
     return await makeRequest(req, {
-      path: `/documento/${id}/`,
+      path: `/documento/?result_size=${resultSize}`,
       method: "get",
     });
   } catch (error) {
@@ -71,10 +71,31 @@ const generate_num_documento = async (req, session) => {
   }
 
   const basePrefijo = match[1];
-  const sufijo = parseInt(match[2], 10);
-  const nuevoSufijo = String(sufijo + 1).padStart(9, "0");
-  const nuevoNumeroComprobante = `${basePrefijo}-${nuevoSufijo}`;
+  let sufijo = parseInt(match[2], 10);
+  let nuevoNumeroComprobante;
+  let existe = true;
+  let intentos = 0;
+  const maxIntentos = 100; // Límite de intentos para evitar bucles infinitos
+  // Obtener los últimos 30 documentos
+  const documentos = await getDocuments(req, 30);
 
+  // Intentar generar un número de documento único
+  while (existe && intentos < maxIntentos) {
+    sufijo += 1;
+    const nuevoSufijo = String(sufijo).padStart(9, "0");
+    nuevoNumeroComprobante = `${basePrefijo}-${nuevoSufijo}`;
+
+    // Verificar si el número de documento ya existe
+    existe = documentos.some((doc) => doc.documento === nuevoNumeroComprobante);
+    intentos++;
+  }
+
+  if (intentos >= maxIntentos) {
+    throw new Error(
+      "No se pudo generar un número de documento único después de múltiples intentos"
+    );
+  }
+  // Actualizar el contador en la institución
   institucion.generacion_numero_comprobante = nuevoNumeroComprobante;
   await institucion.save({ session });
 
@@ -147,7 +168,7 @@ const createDocument = async (req, documentData, idpago) => {
                   JSON.stringify(new_Producto)
               );
             }
-            new_Producto.categoria_id=categorias[0].id
+            new_Producto.categoria_id = categorias[0].id;
             producto = await makeRequest(req, {
               path: "/producto/",
               method: "post",

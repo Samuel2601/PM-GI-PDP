@@ -265,6 +265,28 @@ export class ShowPaymentsComponent implements OnInit {
     return `${day}/${month}/${year}`;
   };
 
+  async obtener(id: any): Promise<number> {
+    try {
+      const response = await firstValueFrom(
+        this._adminService.obtener_documento_admin(id, this.token)
+      );
+      console.log(response);
+
+      if (response && response.fact && Array.isArray(response.fact)) {
+        // Filtrar el array para excluir la factura actual (this.pago._id)
+        const facturasFiltradas = response.fact.filter(
+          (factId: string) => factId !== this.pago._id
+        );
+
+        return facturasFiltradas.length;
+      }
+      return 0;
+    } catch (error) {
+      console.error('Error al obtener documento:', error);
+      return 0;
+    }
+  }
+
   async armado_Documento_envio_Contifico(
     pago: any,
     detalles: any[]
@@ -318,20 +340,20 @@ export class ShowPaymentsComponent implements OnInit {
           console.log(documento);
           if (!acc[docKey]) {
             acc[docKey] = {
+              id: documento._id,
               forma_cobro: documento.cuenta === 'Efectivo' ? 'EF' : 'TRA',
-              monto: documento.valor_origen || 0,
+              monto: 0,
               numero_comprobante: docKey,
               fecha: this.getEcuadorDate(documento.f_deposito),
               cuenta_bancaria_id:
                 documento.cuenta === 'Efectivo' ? null : account.id,
+              valor_origen: documento.valor_origen || 0,
             };
           }
 
           // Sumar los valores si el documento ya existe en el acumulador
-          /* acc[docKey].monto +=
-            !documento.valor_original && documento.documento === docKey
-              ? detalle.valor
-              : 0;*/
+          acc[docKey].monto +=
+            documento.documento === docKey ? detalle.valor : 0;
 
           return acc;
         }, {})
@@ -342,10 +364,32 @@ export class ShowPaymentsComponent implements OnInit {
         detalles.reduce((sum, det) => sum + det.valor, 0).toFixed(2)
       );
 
-      // Redondear los montos de cobros a 2 decimales
-      cobros.forEach((cobro) => {
-        cobro.monto = Number(cobro.monto.toFixed(2));
-      });
+      // Procesar cada cobro para verificar discrepancias y aplicar índices
+      const cobrosArray = await Promise.all(
+        Object.values(cobros).map(async (cobro: any) => {
+          // Comprobar si hay discrepancia entre valor_origen y monto acumulado
+          if (cobro.valor_origen > 0 && cobro.monto !== cobro.valor_origen) {
+            // Obtener cuántas veces se ha asignado este documento
+            const asignaciones = await this.obtener(cobro.id);
+
+            // Siempre añadir un índice cuando hay discrepancia
+            // Si hay asignaciones previas, usar ese número, si no, comenzar con 1
+            const indice = asignaciones > 0 ? asignaciones : 1;
+            cobro.numero_comprobante = `${cobro.numero_comprobante}-${
+              indice + 1
+            }`;
+          }
+
+          // Redondear el monto a 2 decimales
+          cobro.monto = Number(cobro.monto.toFixed(2));
+
+          // Eliminar propiedades temporales antes de devolver
+          const { valor_origen, ...cobroFinal } = cobro;
+          return cobroFinal;
+        })
+      );
+
+      console.log(cobrosArray);
 
       return {
         //pos: 'ceaa9097-1d76-4eb8-0000-6f412fa0297b', // Token fijo o dinámico
@@ -425,7 +469,7 @@ export class ShowPaymentsComponent implements OnInit {
             );
             setTimeout(() => {
               location.reload();
-            }, 2000);
+            }, 2500);
           } else {
             this.mensajes.creacion = 'Error al crear el documento';
             this.showErrorToast(
