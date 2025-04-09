@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminService } from 'src/app/service/admin.service';
 import { EstudianteService } from 'src/app/service/student.service';
-import { Observable, of, Subject } from 'rxjs';
+import { firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { take, catchError, takeUntil, finalize, tap } from 'rxjs/operators';
 import { NgForm } from '@angular/forms';
 
@@ -146,25 +146,49 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
   /**
    * Initialize component data and configuration
    */
+  /**
+   * Initialize component data and configuration
+   */
   private initializeComponent(): void {
-    const aux = localStorage.getItem('identity');
+    const identity = localStorage.getItem('identity');
+    const userData = localStorage.getItem('user_data');
 
-    this._adminService
-      .obtener_admin(aux, this.token)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((response) => {
-        if (response.data) {
-          this.rol = response.data.rol;
-          this.yo =
-            response.data.email === 'samuel.arevalo@espoch.edu.ec' ? 1 : 0;
-        } else {
-          const user = JSON.parse(localStorage.getItem('user_data') || '{}');
-          this.yo = user.email === 'samuel.arevalo@espoch.edu.ec' ? 1 : 0;
-          this.rol = user.rol || this.rol;
-        }
+    // Primero intentamos cargar los datos desde localStorage
+    if (userData) {
+      const user = JSON.parse(userData);
+      this.yo = user.email === 'samuel.arevalo@espoch.edu.ec' ? 1 : 0;
+      this.rol = user.rol || this.rol;
+      this.loadConfig();
+      return; // Evitamos la petición HTTP si ya tenemos los datos
+    }
 
-        this.loadConfig();
-      });
+    // Solo si no tenemos datos en localStorage, hacemos la petición
+    if (identity) {
+      this._adminService
+        .obtener_admin(identity, this.token)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((response) => {
+          if (response.data) {
+            this.rol = response.data.rol;
+            this.yo =
+              response.data.email === 'samuel.arevalo@espoch.edu.ec' ? 1 : 0;
+
+            // Opcionalmente, podemos guardar estos datos para futuras visitas
+            localStorage.setItem(
+              'user_data',
+              JSON.stringify({
+                email: response.data.email,
+                rol: response.data.rol,
+              })
+            );
+          }
+
+          this.loadConfig();
+        });
+    } else {
+      // Si no hay identity ni user_data, cargamos la configuración con valores por defecto
+      this.loadConfig();
+    }
   }
 
   /**
@@ -185,7 +209,7 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
         }),
         takeUntil(this.destroy$)
       )
-      .subscribe((response) => {
+      .subscribe(async (response) => {
         this.config = response.data[0];
         this.num_pagos = this.config.numpension;
         this.valores_pensiones = parseFloat(this.config.pension.toFixed(2));
@@ -195,37 +219,44 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
         this.auxmes = this.config.anio_lectivo;
 
         this.disableActionButtons();
-        this.loadEstudiantes();
-        this.loadDocumentos();
+        await this.loadEstudiantes();
+        await this.loadDocumentos();
       });
   }
 
   /**
    * Load student data
    */
-  loadEstudiantes(): void {
+  /**
+   * Load student data
+   */
+  async loadEstudiantes(): Promise<void> {
     this.load_estudiantes = true;
+    this.estudiantes = []; // Inicializa el array vacío antes de la petición
 
-    this._adminService
-      .listar_estudiantes_pago(this.token)
-      .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => (this.load_estudiantes = false))
-      )
-      .subscribe(
-        (response) => {
-          if (response.data) {
-            this.estudiantes = response.data;
-            this.estudiantes_const = [...this.estudiantes];
-          } else {
-            this.showErrorToast('Ocurrió un error al cargar los estudiantes');
-          }
-        },
-        (error) => {
-          console.error('Error al cargar estudiantes:', error);
-          this.showErrorToast(error);
-        }
-      );
+    try {
+      const response = await this._adminService
+        .listar_estudiantes_pago(this.token)
+        .pipe(takeUntil(this.destroy$))
+        .toPromise();
+
+      this.load_estudiantes = false;
+
+      if (response?.data && response.data.length > 0) {
+        this.estudiantes = response.data;
+        this.estudiantes_const = [...this.estudiantes];
+      } else {
+        this.estudiantes = [];
+        this.estudiantes_const = [];
+        this.showErrorToast('No hay estudiantes disponibles');
+      }
+    } catch (error) {
+      this.load_estudiantes = false;
+      console.error('Error al cargar estudiantes:', error);
+      this.estudiantes = [];
+      this.estudiantes_const = [];
+      this.showErrorToast('Error al cargar estudiantes');
+    }
   }
 
   /**
@@ -249,31 +280,36 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
   /**
    * Load document data
    */
-  loadDocumentos(): void {
+  async loadDocumentos(): Promise<void> {
     this.load_documento = true;
+    this.documento = []; // Inicializa el array vacío antes de la petición
 
-    this._adminService
-      .listar_documentos_admin(this.token)
-      .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => (this.load_documento = false))
-      )
-      .subscribe(
-        (response) => {
-          if (response.data) {
-            this.documento = response.data.filter(
-              (element: any) => element.valor >= 0.01
-            );
-            this.documento_const = [...this.documento];
-          } else {
-            this.showErrorToast('Ocurrió algo con el servidor');
-          }
-        },
-        (error) => {
-          console.error('Error al cargar documentos:', error);
-          this.showErrorToast(error);
-        }
+    try {
+      const response = await firstValueFrom(
+        this._adminService
+          .listar_documentos_admin(this.token)
+          .pipe(takeUntil(this.destroy$))
       );
+
+      this.load_documento = false;
+
+      if (response?.data) {
+        this.documento = response.data.filter(
+          (element: any) => element.valor >= 0.01
+        );
+        this.documento_const = [...this.documento];
+      } else {
+        this.documento = [];
+        this.documento_const = [];
+        this.showErrorToast('Ocurrió algo con el servidor');
+      }
+    } catch (error) {
+      this.load_documento = false;
+      console.error('Error al cargar documentos:', error);
+      this.documento = [];
+      this.documento_const = [];
+      this.showErrorToast('Error al cargar documentos');
+    }
   }
 
   /**
@@ -517,7 +553,7 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
     if (!this.idpension) return;
 
     this.obtenerDetallesOrdenes().subscribe((response: any) => {
-      console.log('Detalles', response);
+      //console.log('Detalles', response);
       this.fecha = [];
       const becas = response?.becas || [];
 
@@ -576,7 +612,7 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
       }
 
       // Check if current date is within school year
-      console.log('Pension', this.pension[this.indexpen]);
+      //console.log('Pension', this.pension[this.indexpen]);
       const fechaActual = new Date();
       const inicioAnioLectivo = new Date(
         this.pension[this.indexpen].anio_lectivo
@@ -621,13 +657,6 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
         }
       }
     });
-
-    console.log(
-      'Fechas Inicial: ',
-      this.fecha,
-      'Fichas de cobrar: ',
-      this.fecha2
-    );
   }
 
   /**
@@ -767,14 +796,6 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
    * Add document to payment with specified amount
    */
   addDocumento2(debe: number): void {
-    console.log(
-      'Debe:',
-      debe,
-      'Valor:',
-      this.valorigualdocumento,
-      'Tipo:',
-      this.tipo
-    );
     let ab = 0;
     let est = 'NaN';
 
@@ -876,7 +897,7 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
       }
 
       // Add payment to list if valid
-      console.log('Valor', this.valor);
+      //console.log('Valor', this.valor);
       if (this.valor > 0) {
         this.dpago.push({
           idpension: this.idpension,
