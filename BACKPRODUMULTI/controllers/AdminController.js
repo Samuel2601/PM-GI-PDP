@@ -1277,6 +1277,7 @@ const registro_documento_admin = async function (req, res) {
     res.status(403).send({ message: "NoAccess" });
   }
 };
+
 const listar_documentos_admin = async function (req, res) {
   if (req.user) {
     try {
@@ -1294,7 +1295,11 @@ const listar_documentos_admin = async function (req, res) {
       // Usar los modelos ya inicializados
       const { Documento } = models;
 
-      var documentos = await Documento.find().sort({ createdAt: -1 });
+      // Modificar la consulta para obtener solo los últimos 2000 documentos
+      var documentos = await Documento.find()
+        .sort({ createdAt: -1 })
+        .limit(2000);
+
       res.status(200).send({ data: documentos });
     } catch (error) {
       console.error(error);
@@ -1312,6 +1317,7 @@ const listar_documentos_admin = async function (req, res) {
     res.status(403).send({ message: "NoAccess" });
   }
 };
+
 const obtener_documento_admin = async function (req, res) {
   if (req.user) {
     const dbName = req.user.base;
