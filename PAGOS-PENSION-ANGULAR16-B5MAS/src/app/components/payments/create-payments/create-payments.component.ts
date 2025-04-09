@@ -410,13 +410,13 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
    */
   private setupPensionData(i: number): void {
     const pension = this.pension[i];
-
+    console.log('Pension', pension);
     // Initialize rubros
     this.arr_rubro_const = JSON.parse(
       pension.idanio_lectivo.extrapagos || '[]'
     );
     this.arr_rubro = JSON.parse(pension.idanio_lectivo.extrapagos || '[]');
-
+    console.log('Arrrubro', this.arr_rubro);
     if (pension.extrapagos) {
       const auxrubro = JSON.parse(pension.extrapagos);
 
@@ -479,23 +479,47 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
    */
   updateRubros(i: number): void {
     if (this.pension[i].idanio_lectivo.extrapagos) {
+      // Cargar todos los rubros disponibles inicialmente
       this.arr_rubro_const = JSON.parse(
         this.pension[i].idanio_lectivo.extrapagos
       );
       this.arr_rubro = JSON.parse(this.pension[i].idanio_lectivo.extrapagos);
 
-      if (this.pension[i].extrapagos) {
-        const auxrubro = JSON.parse(this.pension[i].extrapagos);
+      // Obtener los detalles de órdenes para filtrar correctamente
+      this.obtenerDetallesOrdenes().subscribe((response: any) => {
+        if (response && response.abonos && response.abonos.length > 0) {
+          // Agrupar abonos por tipo y calcular la suma total
+          const sumaPorTipo = new Map<number, number>();
 
-        auxrubro.forEach((item: any) => {
-          this.arr_rubro = this.arr_rubro.filter(
-            (element: any) => element.idrubro != item.idrubro
-          );
-          this.arr_rubro_const = this.arr_rubro_const.filter(
-            (element: any) => element.idrubro != item.idrubro
-          );
-        });
-      }
+          response.abonos.forEach((abono: any) => {
+            const tipo = abono.tipo;
+            const valorActual = sumaPorTipo.get(tipo) || 0;
+            sumaPorTipo.set(tipo, valorActual + abono.abono);
+          });
+
+          // Filtrar arr_rubro para eliminar los rubros que tienen suma de abono = 0
+          this.arr_rubro = this.arr_rubro.filter((rubro: any) => {
+            // Si no hay entrada para este tipo o la suma no es 0, mantener el rubro
+            return (
+              !sumaPorTipo.has(rubro.idrubro) ||
+              sumaPorTipo.get(rubro.idrubro) !== 0
+            );
+          });
+
+          // Hacer lo mismo con arr_rubro_const para mantener la consistencia
+          this.arr_rubro_const = this.arr_rubro_const.filter((rubro: any) => {
+            return (
+              !sumaPorTipo.has(rubro.idrubro) ||
+              sumaPorTipo.get(rubro.idrubro) !== 0
+            );
+          });
+        }
+      });
+    } else {
+      // Si no hay extrapagos definidos, inicializar con arrays vacíos
+      this.arr_rubro_const = [];
+      this.arr_rubro = [];
+      console.log('No hay extrapagos definidos');
     }
   }
 
@@ -1195,6 +1219,7 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
               'Datos almacenados en caché para pensión:',
               this.idpension
             );
+            console.log('Datos de respuesta:', response);
           } else {
             console.warn(
               'Respuesta no válida del API, no se almacenará en caché'
