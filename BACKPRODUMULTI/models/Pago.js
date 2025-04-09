@@ -3,7 +3,7 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
-var VentaSchema = Schema({
+const VentaSchema = new Schema({
   estudiante: { type: Schema.ObjectId, ref: "estudiante", required: true },
 
   nombres_factura: { type: String, required: false },

@@ -309,6 +309,11 @@ export class IndexStudentsComponent implements OnInit {
         // validators: [{ validate: 'required', error: 'Obligatorio' }],
       },
       {
+        label: 'Tipo especialidad',
+        key: 'type_especialidad',
+        // validators: [{ validate: 'required', error: 'Obligatorio' }],
+      },
+      {
         label: 'Nombres Padre',
         key: 'nombres_padre',
       },
@@ -441,6 +446,12 @@ export class IndexStudentsComponent implements OnInit {
       {
         nombre: 'especialidad',
         label: 'Especialidad',
+        obligatorio: false,
+      },
+      //type_especialidad
+      {
+        nombre: 'type_especialidad',
+        label: 'Tipo especialidad',
         obligatorio: false,
       },
       {

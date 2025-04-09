@@ -1,12 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from 'src/app/service/admin.service';
 import { EstudianteService } from 'src/app/service/student.service';
 import { GLOBAL } from 'src/app/service/GLOBAL';
 import { TableUtil, TableUtil2 } from '../show-payments/tableUtil';
-//import {createClient} from 'soap';
 import iziToast from 'izitoast';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import {
+  firstValueFrom,
+  lastValueFrom,
+  Observable,
+  of,
+  Subject,
+  Subscription,
+  throwError,
+} from 'rxjs';
+import {
+  catchError,
+  delay,
+  finalize,
+  retryWhen,
+  take,
+  takeUntil,
+  tap,
+  timeout,
+} from 'rxjs/operators';
 import { InstitucionServiceService } from 'src/app/service/institucion.service.service';
 import { PersonService } from 'src/app/service/confitico/person.service';
 import { InventoryService } from 'src/app/service/confitico/inventory.service';
@@ -16,6 +33,7 @@ import { PRODUCTOS_BASE } from './seedproductos';
 import { TransactionService } from 'src/app/service/confitico/transaction.service';
 import { Cliente, Cobro, Documento, Vendedor } from './document.interface';
 import { BankingService } from 'src/app/service/confitico/banking.service';
+import { RetryService } from 'src/app/service/retry.service';
 declare var $: any;
 
 @Component({
@@ -75,10 +93,48 @@ export class ShowPaymentsComponent implements OnInit {
   public fecha: Array<any> = [];
   public pension: any = {};
   public linkfact = '';
+
+  // Estado de carga mejorado
+  loading = {
+    generacion: false,
+    creacion: false,
+    emision: false,
+    consultaDoc: false,
+    dataInitialization: false,
+    retrying: false,
+  };
+
+  mensajes = {
+    generacion: '',
+    creacion: '',
+    emision: '',
+    consultaDoc: '',
+    dataInitialization: '',
+  };
+
+  // Variables para manejo de reintentos
+  private dataInitRetryCount = 0;
+  private maxRetries = 5;
+  private retryDelay = 2000;
+  private destroy$ = new Subject<void>();
+  private loadingTimerId: any;
+
+  public rol = '';
+  public idp = '';
+  public yo = 0;
+  public info: any;
+  public base: any;
+  public apikey: any = undefined;
+  public documento_contifico: any = null;
+  public habilitar_boton_generar: boolean = false;
+  public create_person: boolean = false;
+  public id_facturacion: any;
+  public loademit: boolean = false;
+  private error_constru = '';
+
   constructor(
     private _route: ActivatedRoute,
     private _adminService: AdminService,
-
     private _estudianteService: EstudianteService,
     private _router: Router,
     private _institucionService: InstitucionServiceService,
@@ -86,17 +142,21 @@ export class ShowPaymentsComponent implements OnInit {
     private _invetarioService: InventoryService,
     private _transactionService: TransactionService,
     private _bankingService: BankingService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private retryService: RetryService
   ) {
     this.token = localStorage.getItem('token');
     this.url = GLOBAL.url;
   }
-  public rol = '';
-  public idp = '';
-  public yo = 0;
-  public info: any;
-  public base: any;
-  public apikey: any = undefined;
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    if (this.loadingTimerId) {
+      clearTimeout(this.loadingTimerId);
+    }
+  }
 
   consultarDocumento() {
     this._transactionService.getDocuments().subscribe((response: any) => {
@@ -114,16 +174,70 @@ export class ShowPaymentsComponent implements OnInit {
     console.log(pre_factura);
   }
 
-  consultar_apikey() {
-    const user_data = JSON.parse(localStorage.getItem('user_data') || '');
-    this._institucionService
-      .getInstitucionKey(user_data.base)
-      .subscribe((response: any) => {
-        if (response) {
-          this.apikey = response.apiKey;
-          console.log(this.apikey);
-        }
-      });
+  // Crear un servicio de caché
+  async consultar_apikey() {
+    try {
+      // Primero intentar obtener del localStorage
+      const cachedApiKey = localStorage.getItem('cached_api_key');
+      const cachedTimestamp = localStorage.getItem('cached_api_key_timestamp');
+      const currentTime = new Date().getTime();
+
+      // Si tenemos una clave en caché y no ha expirado (por ejemplo, válida por 1 día)
+      if (
+        cachedApiKey &&
+        cachedTimestamp &&
+        currentTime - parseInt(cachedTimestamp) < 24 * 60 * 60 * 1000
+      ) {
+        console.log('Usando API key desde caché');
+        this.apikey = cachedApiKey;
+        return;
+      }
+
+      // Si no hay caché o está expirada, consultar al servidor
+      const user_data = JSON.parse(localStorage.getItem('user_data') || '');
+      const response = await lastValueFrom(
+        this._institucionService.getInstitucionKey(user_data.base).pipe(
+          this.retryService.exponentialBackoff(
+            3,
+            1000,
+            2,
+            (retryCount, error) => {
+              console.log(
+                `Reintento ${retryCount}: Error al obtener apikey`,
+                error
+              );
+            }
+          )
+        )
+      );
+
+      if (response) {
+        this.apikey = (response as { apiKey: string }).apiKey;
+
+        // Guardar en caché
+        localStorage.setItem('cached_api_key', this.apikey);
+        localStorage.setItem(
+          'cached_api_key_timestamp',
+          currentTime.toString()
+        );
+
+        console.log(
+          'API key obtenida del servidor y almacenada en caché:',
+          this.apikey
+        );
+      }
+    } catch (error) {
+      console.error('Error al consultar API key:', error);
+
+      // En caso de error, intentar usar la última clave en caché aunque esté expirada
+      const cachedApiKey = localStorage.getItem('cached_api_key');
+      if (cachedApiKey) {
+        console.log(
+          'Usando API key en caché como fallback después de un error'
+        );
+        this.apikey = cachedApiKey;
+      }
+    }
   }
   async consultaTodosProducto() {
     this._invetarioService.getProducts().subscribe({
@@ -137,6 +251,7 @@ export class ShowPaymentsComponent implements OnInit {
       },
     });
   }
+
   async consultaProducto(): Promise<void> {
     for (const element of this.detalles) {
       if (element.tipo > 11) {
@@ -240,13 +355,28 @@ export class ShowPaymentsComponent implements OnInit {
       title: 'ERROR',
       position: 'topRight',
       message,
+      timeout: 5000,
+      closeOnClick: true,
     });
   }
+
   private showSuccessToast(message: string): void {
     iziToast.success({
-      title: 'SUCCESS',
+      title: 'ÉXITO',
       position: 'topRight',
       message,
+      timeout: 5000,
+      closeOnClick: true,
+    });
+  }
+
+  private showInfoToast(message: string): void {
+    iziToast.info({
+      title: 'INFO',
+      position: 'topRight',
+      message,
+      timeout: 5000,
+      closeOnClick: true,
     });
   }
 
@@ -499,21 +629,7 @@ export class ShowPaymentsComponent implements OnInit {
         },
       });
   }
-  // Agrega estas variables en tu clase
-  loading = {
-    generacion: false,
-    creacion: false,
-    emision: false,
-    consultaDoc: false,
-  };
 
-  mensajes = {
-    generacion: '',
-    creacion: '',
-    emision: '',
-    consultaDoc: '',
-  };
-  habilitar_boton_generar: boolean = false;
   async generarDocumento() {
     this.habilitar_boton_generar = true;
     if (this.apikey && !this.pago.id_contifico) {
@@ -553,25 +669,49 @@ export class ShowPaymentsComponent implements OnInit {
       });
   }
 
-  documento_contifico: any = null;
   async ngOnInit(): Promise<void> {
     try {
       this.load_data = true;
+      this.loading.dataInitialization = true;
+      this.mensajes.dataInitialization = 'Inicializando datos...';
+
+      // Configurar timeout para mostrar mensaje si tarda demasiado
+      this.loadingTimerId = setTimeout(() => {
+        if (this.loading.dataInitialization) {
+          this.mensajes.dataInitialization =
+            'La carga está tomando más tiempo de lo esperado. Por favor, espere...';
+        }
+      }, 5000);
 
       // Consultar API key primero
       await this.consultar_apikey();
 
       // Obtener información del admin
       const adminResponse = await lastValueFrom(
-        this._adminService.obtener_info_admin(this.token)
+        this._adminService.obtener_info_admin(this.token).pipe(
+          this.retryService.exponentialBackoff(
+            3,
+            1000,
+            2,
+            (retryCount, error) => {
+              this.loading.retrying = true;
+              this.mensajes.dataInitialization = `Reintentando obtener datos del administrador (${retryCount}/3)...`;
+              console.log(
+                `Reintento ${retryCount}: Error al obtener datos de admin`,
+                error
+              );
+            }
+          ),
+          finalize(() => (this.loading.retrying = false))
+        )
       );
 
-      if (!adminResponse?.data) {
+      if (!(adminResponse as { data?: any })?.data) {
         throw new Error('No se pudo obtener la información del administrador');
       }
 
       // Establecer información básica
-      this.info = adminResponse.data;
+      this.info = (adminResponse as { data: any }).data;
       this.setUserData();
 
       // Obtener parámetros de la ruta y procesar documento
@@ -582,6 +722,10 @@ export class ShowPaymentsComponent implements OnInit {
         'Error al cargar los datos. Por favor, recargue la página.'
       );
     } finally {
+      if (this.loadingTimerId) {
+        clearTimeout(this.loadingTimerId);
+      }
+      this.loading.dataInitialization = false;
       this.load_data = false;
     }
   }
@@ -603,7 +747,7 @@ export class ShowPaymentsComponent implements OnInit {
 
   private async procesarRutaYDocumento(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this._route.params.subscribe({
+      this._route.params.pipe(takeUntil(this.destroy$)).subscribe({
         next: async (params) => {
           try {
             this.id = params['id'];
@@ -623,22 +767,33 @@ export class ShowPaymentsComponent implements OnInit {
       console.log('No hay API key configurada');
       return;
     }
-    console.log('Manjejar documento Contifico', this.pago.id_contifico);
+    console.log('Manejar documento Contifico', this.pago.id_contifico);
     try {
       if (
         this.pago.id_contifico === undefined ||
         this.pago.id_contifico === null
       ) {
         this.habilitar_boton_generar = true;
-        // Si no hay ID Contífico, generar documento
-        //await this.generarDocumento();
       } else {
-        // Si hay ID Contífico, obtener documento
-        this.loading = { ...this.loading, consultaDoc: true };
+        // Si hay ID Contífico, obtener documento con reintentos
+        this.loading.consultaDoc = true;
         this.mensajes.consultaDoc = 'Consultando documento...';
 
         const response = await lastValueFrom(
-          this._transactionService.getDocumentById(this.pago.id_contifico)
+          this._transactionService.getDocumentById(this.pago.id_contifico).pipe(
+            this.retryService.exponentialBackoff(
+              3,
+              1000,
+              2,
+              (retryCount, error) => {
+                this.mensajes.consultaDoc = `Reintentando consulta de documento (${retryCount}/3)...`;
+                console.log(
+                  `Reintento ${retryCount}: Error al consultar documento`,
+                  error
+                );
+              }
+            )
+          )
         );
 
         this.documento_contifico = response;
@@ -650,10 +805,10 @@ export class ShowPaymentsComponent implements OnInit {
       this.mensajes.consultaDoc = 'Error al consultar documento';
       this.showErrorToast('Error al procesar el documento');
     } finally {
-      this.loading = { ...this.loading, consultaDoc: false };
+      this.loading.consultaDoc = false;
     }
   }
-  public create_person: boolean = false;
+
   async consultar_Cedula(cedula: any): Promise<boolean> {
     try {
       console.log('Consultando cedula', cedula);
@@ -686,7 +841,6 @@ export class ShowPaymentsComponent implements OnInit {
       return false;
     }
   }
-  public id_facturacion: any;
 
   async verificar_persona() {
     let mensajeError = '';
@@ -777,18 +931,45 @@ export class ShowPaymentsComponent implements OnInit {
   }
 
   async init_data() {
+    this.dataInitRetryCount = 0;
+    return this.attemptInitData();
+  }
+
+  private async attemptInitData(): Promise<void> {
     try {
+      const loadingMessage =
+        this.dataInitRetryCount > 0
+          ? `Cargando datos (intento ${this.dataInitRetryCount + 1}/${
+              this.maxRetries + 1
+            })...`
+          : 'Cargando datos del pago...';
+
+      this.mensajes.dataInitialization = loadingMessage;
+
+      // Usamos timeout para manejar respuestas lentas del servidor
       const response = await lastValueFrom(
-        this._adminService.obtener_detalles_ordenes_estudiante(
-          this.id,
-          this.token
-        )
+        this._adminService
+          .obtener_detalles_ordenes_estudiante(this.id, this.token)
+          .pipe(
+            timeout(10000), // 10 segundos de timeout
+            catchError((error) => {
+              if (this.dataInitRetryCount < this.maxRetries) {
+                this.dataInitRetryCount++;
+                console.warn(
+                  `Reintento ${this.dataInitRetryCount}/${this.maxRetries} para cargar datos: ${error.message}`
+                );
+                return throwError(
+                  () => new Error('Tiempo de espera agotado, reintentando...')
+                );
+              }
+              return throwError(() => error);
+            })
+          )
       );
 
       if (response.data != undefined) {
-        console.log(response);
+        console.log('Datos cargados exitosamente:', response);
         this.pago = response.data;
-        //await this.verificar_persona();
         this.detalles = response.detalles;
 
         this.detalles.forEach((element: any) => {
@@ -799,26 +980,49 @@ export class ShowPaymentsComponent implements OnInit {
           ).getFullYear();
         });
 
-        console.log(this.detalles);
+        await this.detalle_data();
+        //await this.armado2();
 
-        await this.detalle_data(); // Espera que termine
-
-        await this.armado2();
         this.detalles.forEach((element: any) => {
-          // Build description
           element.descripcion = this.buildDescripcion(element);
         });
-        //await this.consultaProducto();
-        //await this.armado(); // Luego espera este
 
         await this.manejarDocumentoContifico();
       } else {
         this.pago = undefined;
+        if (this.dataInitRetryCount < this.maxRetries) {
+          this.dataInitRetryCount++;
+          console.warn(
+            `Datos no disponibles, reintentando (${this.dataInitRetryCount}/${this.maxRetries})...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, this.retryDelay));
+          return this.attemptInitData();
+        } else {
+          console.error(
+            'No se pudo cargar los datos después de varios intentos'
+          );
+        }
       }
     } catch (error) {
       console.error('Error al obtener los detalles:', error);
+
+      if (this.dataInitRetryCount < this.maxRetries) {
+        this.dataInitRetryCount++;
+        console.warn(
+          `Reintentando cargar datos (${this.dataInitRetryCount}/${this.maxRetries})...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, this.retryDelay));
+        return this.attemptInitData();
+      } else {
+        this.showErrorToast(
+          `No se pudieron cargar los datos después de ${
+            this.maxRetries + 1
+          } intentos. Por favor, refresque la página.`
+        );
+      }
     }
   }
+
   exportTable() {
     TableUtil.exportToPdf(
       this.mesespdf[new Date(this.auxmes).getMonth()].toString() +
@@ -953,8 +1157,6 @@ export class ShowPaymentsComponent implements OnInit {
       });
     }
   }
-  private error_constru = '';
-  public loademit: boolean = false;
   async armado() {
     //console.log(this.pension[this.auxp]);
     //if(this.linkfact!=''){

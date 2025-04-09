@@ -7,52 +7,29 @@ var ejs = require("ejs");
 var nodemailer = require("nodemailer");
 var smtpTransport = require("nodemailer-smtp-transport");
 var path = require("path");
-let { months, suppressDeprecationWarnings } = require("moment");
 
 let Estudiante = require("../models/Estudiante");
-let Pension_Beca = require("../models/Pension_Beca");
-let Config = require("../models/Config");
 let Factura = require("../models/Facturacion");
-let Documento = require("../models/Documento");
 let Pago = require("../models/Pago");
 let Dpago = require("../models/Dpago");
-let Pension = require("../models/Pension");
 let Registro = require("../models/Registro");
 let Admin = require("../models/Admin");
 let AdminInstituto = require("../models/AdminInstituto");
 let Institucion = require("../models/Institucion");
-let Proveedor = require("../models/Proveedor");
 
-const ConfigSchema = require("../models/Config");
 const FacturaSchema = require("../models/Facturacion");
 const AdminInstitutoSchema = require("../models/AdminInstituto");
 const AdminSchema = require("../models/Admin");
 const RegistroSchema = require("../models/Registro");
-const VentaSchema = require("../models/Pago");
-const PensionSchema = require("../models/Pension");
-const EstudianteSchema = require("../models/Estudiante");
 const DpagoSchema = require("../models/Dpago");
-const Pension_becaSchema = require("../models/Pension_Beca");
 const DocumentoSchema = require("../models/Documento");
 const InstitucionSchema = require("../models/Institucion");
-const ProveedorSchema = require("../models/Proveedor");
 
 const ConfigPSchema = require("../models/Config_plana");
 
-/*
-let conn = mongoose.connection.useDb(req.user.base);
-
-Admin=conn.model('admin',AdminSchema);
-Registro=conn.model('registro',RegistroSchema);
-Pago=conn.model('pago',VentaSchema);
-Config=conn.model('config',ConfigSchema);
-Pension=conn.model('pension',PensionSchema);
-Pension_Beca=conn.model('pension_beca',Pension_becaSchema);
-Estudiante=conn.model('estudiante',EstudianteSchema);
-Documento=conn.model('document',DocumentoSchema);
-Dpago=conn.model('dpago',DpagoSchema);
-*/
 var mongoose = require("mongoose");
+
+const modelsService = require("../service/models.service");
 
 const getDashboar_estudiante = async function (req, res) {
   if (req.user) {
@@ -206,9 +183,20 @@ const newpassword = async function (req, res) {
   if (req.user) {
     try {
       var data = req.body;
-      let conn = mongoose.connection.useDb(req.user.base);
-      Admin = conn.model("admin", AdminSchema);
-      Registro = conn.model("registro", RegistroSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Admin, Registro } = models;
+
       bcrypt.hash(data.password, null, null, async function (err, hash) {
         if (hash) {
           data.password = hash;
@@ -712,9 +700,19 @@ const actualizarInstitucion = async (req, res) => {
 const registro_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Admin = conn.model("admin", AdminSchema);
-      Registro = conn.model("registro", RegistroSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Admin, Registro } = models;
 
       var data = req.body;
       var admin_arr = [];
@@ -811,8 +809,20 @@ const registro_admin = async function (req, res) {
 const listar_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Admin = conn.model("admin", AdminSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Admin } = models;
+
       var admin_arr = [];
       admin_arr = await Admin.find({});
 
@@ -827,13 +837,20 @@ const listar_admin = async function (req, res) {
 const listar_registro = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Registro = conn.model("registro", RegistroSchema);
-      Admin = conn.model("admin", AdminSchema);
-      Pago = conn.model("pago", VentaSchema);
-      Config = conn.model("config", ConfigSchema);
-      Estudiante = conn.model("estudiante", EstudianteSchema);
-      Documento = conn.model("document", DocumentoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Registro, Admin, Pago, Config, Estudiante, Documento } = models;
+
       var admin_arr = [];
       let desde = req.params["desde"];
       let hasta = req.params["hasta"];
@@ -871,8 +888,20 @@ const listar_registro = async function (req, res) {
 const obtener_admin = async function (req, res) {
   var id = req.params["id"];
   try {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Admin = conn.model("admin", AdminSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Admin } = models;
+
     let estudiante = await Admin.findById({ _id: id });
 
     res.status(200).send({ data: estudiante });
@@ -883,7 +912,20 @@ const obtener_admin = async function (req, res) {
 const actualizar_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Admin, Registro } = models;
+
       Admin = conn.model("admin", AdminSchema);
       Registro = conn.model("registro", RegistroSchema);
 
@@ -989,9 +1031,20 @@ async function crearRegistroActualizacion(req, admin, data) {
 const eliminar_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Admin = conn.model("admin", AdminSchema);
-      Registro = conn.model("registro", RegistroSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Admin, Registro } = models;
+
       var id = req.params["id"];
       var data = await Admin.findById(id);
       await Admin.updateOne(
@@ -1027,13 +1080,21 @@ const eliminar_admin = async function (req, res) {
 const eliminar_estudiante_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Registro = conn.model("registro", RegistroSchema);
-      Pago = conn.model("pago", VentaSchema);
-      Config = conn.model("config", ConfigSchema);
-      Pension = conn.model("pension", PensionSchema);
-      Estudiante = conn.model("estudiante", EstudianteSchema);
-      Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Registro, Pago, Config, Pension, Estudiante, Pension_Beca } =
+        models;
+
       var id = req.params["id"];
       var data = await Estudiante.findById(id);
       var cn = await Config.find().sort({ createdAt: -1 }); //await Config.findById({_id:'61abe55d2dce63583086f108'});
@@ -1094,10 +1155,20 @@ const eliminar_estudiante_admin = async function (req, res) {
 const reactivar_estudiante_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Registro = conn.model("registro", RegistroSchema);
-      Config = conn.model("config", ConfigSchema);
-      Pension = conn.model("pension", PensionSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Registro, Config, Pension } = models;
+
       var id = req.params["id"];
       var pension = {};
       var data = await Estudiante.findById(id);
@@ -1130,6 +1201,8 @@ const reactivar_estudiante_admin = async function (req, res) {
         pension.curso = data.curso;
         pension.paralelo = data.paralelo;
         pension.especialidad = data.especialidad || "EGB";
+        //type_especialidad
+        pension.type_especialidad = data.type_especialidad || "";
         var reg2 = await Pension.create(pension);
         res.status(200).send({ message: "Reactivado" });
       } else {
@@ -1154,9 +1227,20 @@ const reactivar_estudiante_admin = async function (req, res) {
 const registro_documento_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Registro = conn.model("registro", RegistroSchema);
-      Documento = conn.model("document", DocumentoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Registro, Documento } = models;
+
       let data = req.body;
 
       let documentos = await Documento.find({ documento: data.documento });
@@ -1196,8 +1280,20 @@ const registro_documento_admin = async function (req, res) {
 const listar_documentos_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Documento = conn.model("document", DocumentoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Documento } = models;
+
       var documentos = await Documento.find().sort({ createdAt: -1 });
       res.status(200).send({ data: documentos });
     } catch (error) {
@@ -1218,9 +1314,20 @@ const listar_documentos_admin = async function (req, res) {
 };
 const obtener_documento_admin = async function (req, res) {
   if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Dpago = conn.model("dpago", DpagoSchema);
-    Documento = conn.model("document", DocumentoSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Dpago, Documento } = models;
+
     var id = req.params["id"];
     try {
       var reg = await Documento.findById({ _id: id });
@@ -1245,9 +1352,20 @@ const obtener_documento_admin = async function (req, res) {
 const actualizar_documento_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Documento = conn.model("document", DocumentoSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Documento, Dpago } = models;
+
       let id = req.params["id"];
       let data = req.body;
       let admin = await Documento.findById(id);
@@ -1297,9 +1415,19 @@ const verificar_token = async function (req, res) {
 const obtener_config_admin = async (req, res) => {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
+      const dbName = req.user.base;
 
-      Config = conn.model("config", ConfigSchema);
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Config } = models;
 
       let config = await Config.find().sort({ createdAt: -1 }); //await Config.findById({_id:'61abe55d2dce63583086f108'});
       if (config.length == 0) {
@@ -1338,13 +1466,19 @@ const actualizar_config_admin = async (req, res) => {
   console.log("Actualizando configuración:", req.body);
   try {
     // Conexión a la base de datos del usuario
-    let conn = mongoose.connection.useDb(req.user.base);
+    const dbName = req.user.base;
 
-    // Definición de modelos
-    const Config = conn.model("config", ConfigSchema);
-    const Registro = conn.model("registro", RegistroSchema);
-    const Pension = conn.model("pension", PensionSchema);
-    const Estudiante = conn.model("estudiante", EstudianteSchema);
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Config, Registro, Pension, Estudiante } = models;
 
     // Verificar el tipo de escuela (UE o no) consultando la colección Instituciones
     const connInstituciones = mongoose.connection.useDb("Instituciones");
@@ -1415,6 +1549,7 @@ const actualizar_config_admin = async (req, res) => {
 
           if (!existingPension) {
             estudiante.especialidad = normalizarEspecialidad("EGB");
+            estudiante.type_especialidad = null; // No asignar type_especialidad para EGB
             estudiante.curso = 1;
             await estudiante.save();
             // Crear pensión con nueva especialidad
@@ -1426,6 +1561,7 @@ const actualizar_config_admin = async (req, res) => {
               curso: "1", // Guardar como string
               paralelo: estudiante.paralelo,
               especialidad: normalizarEspecialidad("EGB"),
+              type_especialidad: null, // No asignar type_especialidad para EGB
             });
             await pension.save();
           }
@@ -1453,7 +1589,9 @@ const actualizar_config_admin = async (req, res) => {
           });
 
           if (!existingPension) {
-            estudiante.especialidad = normalizarEspecialidad("BGU");
+            const bgEspecialidad = normalizarEspecialidad("BGU");
+            estudiante.especialidad = bgEspecialidad;
+            estudiante.type_especialidad = null; // Asignar type_especialidad para BGU
             estudiante.curso = 1;
             await estudiante.save();
 
@@ -1465,7 +1603,8 @@ const actualizar_config_admin = async (req, res) => {
               condicion_beca: "No",
               curso: "1", // Guardar como string
               paralelo: estudiante.paralelo,
-              especialidad: normalizarEspecialidad("BGU"),
+              especialidad: bgEspecialidad,
+              type_especialidad: null, // Asignar type_especialidad para BGU
             });
             await pension.save();
           }
@@ -1528,6 +1667,7 @@ const actualizar_config_admin = async (req, res) => {
               curso: "2", // Guardar como string
               paralelo: estudiante.paralelo,
               especialidad: normalizarEspecialidad("Inicial"),
+              type_especialidad: null, // No asignar type_especialidad para Inicial
             });
             await pension.save();
           }
@@ -1572,6 +1712,7 @@ const actualizar_config_admin = async (req, res) => {
             curso: nuevoCurso.toString(), // Guardar como string
             paralelo: estudiante.paralelo,
             especialidad: normalizarEspecialidad("EGB"),
+            type_especialidad: null, // No asignar type_especialidad para EGB
           });
           await pension.save();
         }
@@ -1596,6 +1737,15 @@ const actualizar_config_admin = async (req, res) => {
 
         for (let estudiante of estudiantesBGU) {
           // You need to await the result of findOne() to properly check if a pension exists
+          const ultimaPension = await Pension.findOne({
+            idestudiante: estudiante._id,
+          }).sort({ createdAt: -1 }); // Ordenar por fecha de creación descendente
+
+          // Extraer type_especialidad, o null si no existe pensión
+          const typeEspecialidad = ultimaPension
+            ? ultimaPension.type_especialidad
+            : null;
+
           const existingPension = await Pension.findOne({
             idanio_lectivo: config._id,
             idestudiante: estudiante._id,
@@ -1606,8 +1756,11 @@ const actualizar_config_admin = async (req, res) => {
             const cursoActual = parseInt(estudiante.curso);
             const nuevoCurso = cursoActual + 1;
             estudiante.curso = nuevoCurso;
+            estudiante.type_especialidad = typeEspecialidad; // Asignar type_especialidad
+            estudiante.especialidad = normalizarEspecialidad("BGU");
             await estudiante.save();
 
+            const bguEspecialidad = normalizarEspecialidad("BGU");
             let pension = new Pension({
               idanio_lectivo: config._id,
               idestudiante: estudiante._id,
@@ -1615,7 +1768,8 @@ const actualizar_config_admin = async (req, res) => {
               condicion_beca: "No",
               curso: nuevoCurso.toString(), // Guardar como string
               paralelo: estudiante.paralelo,
-              especialidad: normalizarEspecialidad("BGU"),
+              especialidad: bguEspecialidad,
+              type_especialidad: typeEspecialidad, // Asignar type_especialidad para BGU
             });
             await pension.save();
           }
@@ -1716,10 +1870,20 @@ function esEspecialidad(especialidadEstudiante, especialidadBuscada) {
 const obtener_pagos_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
+      const dbName = req.user.base;
 
-      Pago = conn.model("pago", VentaSchema);
-      Estudiante = conn.model("estudiante", EstudianteSchema);
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Pago, Estudiante } = models;
+
       let pagos = [];
       let desde = req.params["desde"];
       let hasta = req.params["hasta"];
@@ -1754,9 +1918,19 @@ const obtener_pagos_admin = async function (req, res) {
 const obtener_pagos_dash = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Pension = conn.model("pension", PensionSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Pension, Dpago } = models;
 
       let pagos = [];
       let desde = req.params["desde"];
@@ -2315,10 +2489,19 @@ const listado_detalles_erroneos = [
 
 consultarPension_Estudiante = async function (req) {
   try {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Pension = conn.model("pension", PensionSchema);
-    Estudiante = conn.model("estudiante", EstudianteSchema);
-    Dpago = conn.model("dpago", DpagoSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Pension, Estudiante, Dpago } = models;
 
     // Reemplazar forEach por Promise.all
     let dpagos = await Promise.all(
@@ -2391,13 +2574,20 @@ const obtener_detallespagos_admin = async function (req, res) {
     try {
       //await consultarPension_Estudiante(req);
       var id = req.params["id"];
-      let conn = mongoose.connection.useDb(req.user.base);
-      Pago = conn.model("pago", VentaSchema);
-      Config = conn.model("config", ConfigSchema);
-      Pension = conn.model("pension", PensionSchema);
-      Estudiante = conn.model("estudiante", EstudianteSchema);
-      Documento = conn.model("document", DocumentoSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Pago, Config, Pension, Estudiante, Documento, Dpago } = models;
+
       let detalle = [];
       let pagosd = [];
 
@@ -2449,12 +2639,20 @@ const obtener_detallespagos_admin = async function (req, res) {
 const obtener_detallespagos_pension_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Pago = conn.model("pago", VentaSchema);
-      Pension = conn.model("pension", PensionSchema);
-      Estudiante = conn.model("estudiante", EstudianteSchema);
-      Documento = conn.model("document", DocumentoSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Pago, Pension, Estudiante, Documento, Dpago } = models;
+
       var id = req.params["id"];
       let detalle = [];
       detalle = await Dpago.find({ idpension: id })
@@ -2483,9 +2681,20 @@ const obtener_detallespagos_pension_admin = async function (req, res) {
 const obtener_detalles_ordenes_estudiante_abono = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Pension_Beca, Dpago } = models;
+
       var id = req.params["id"];
       abonos = await Dpago.find({ idpension: id }).sort({ tipo: 1 });
       becas = await Pension_Beca.find({ idpension: id }).sort({ etiqueta: 1 });
@@ -2521,12 +2730,20 @@ const verificarDeudasEstudiante = async function (req, res) {
 
   try {
     // Inicializar conexión y modelos
-    const conn = mongoose.connection.useDb(req.user.base);
-    const Pension = conn.model("pension", PensionSchema);
-    const Dpago = conn.model("dpago", DpagoSchema);
-    const Config = conn.model("config", ConfigSchema);
-    const Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
-    const Estudiante = conn.model("estudiante", EstudianteSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      return res.status(500).send({
+        message: `No se pudieron cargar los modelos para la base ${dbName}`,
+        status: modelsService.getModelsCacheStatus(), // Para depuración
+      });
+    }
+
+    // Usar los modelos ya inicializados
+    const { Pension, Dpago, Config, Pension_Beca, Estudiante } = models;
 
     // Obtener ID o DNI del estudiante
     const idEstudiante = req.params["id"];
@@ -2735,10 +2952,19 @@ const verificarDeudasEstudiante = async function (req, res) {
 const obtener_becas_conf = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Pension = conn.model("pension", PensionSchema);
-      Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
-      Config = conn.model("config", ConfigSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Pension, Pension_Beca, Config } = models;
 
       var id = req.params["id"];
 
@@ -2786,14 +3012,23 @@ const obtener_becas_conf = async function (req, res) {
 const obtener_detalles_ordenes_rubro = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Config = conn.model("config", ConfigSchema);
-      Pension = conn.model("pension", Pension_becaSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Config, Pension, Dpago } = models;
 
       var id = req.params["id"];
 
-      pagos = await Dpago.find({ tipo: id })
+      const pagos = await Dpago.find({ tipo: id })
         .populate("idpension")
         .populate("idanio_lectivo");
 
@@ -2845,9 +3080,20 @@ const marcar_finalizado_orden = async function (req, res) {
 
   try {
     // Conexión a la base de datos correspondiente
-    const conn = mongoose.connection.useDb(req.user.base);
-    const Registro = conn.model("registro", RegistroSchema);
-    const Pago = conn.model("pago", VentaSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      return res.status(500).send({
+        message: `No se pudieron cargar los modelos para la base ${dbName}`,
+        status: modelsService.getModelsCacheStatus(), // Para depuración
+      });
+    }
+
+    // Usar los modelos ya inicializados
+    const { Registro, Pago } = models;
 
     const id = req.params["id"];
     const data = { ...req.body, numeroIdPago: id };
@@ -2906,9 +3152,18 @@ const marcar_finalizado_orden = async function (req, res) {
 };
 
 cambiar_estado = async function (id, base, admin, data) {
-  let conn = mongoose.connection.useDb(base);
-  Registro = conn.model("registro", RegistroSchema);
-  Pago = conn.model("pago", VentaSchema);
+  const dbName = req.user.base;
+
+  // Obtener los modelos para esta base de datos
+  const models = modelsService.getModels(dbName);
+
+  if (!models) {
+    throw new Error(`No se pudieron cargar los modelos para la base ${dbName}`);
+  }
+
+  // Usar los modelos ya inicializados
+  const { Registro, Pago } = models;
+
   let registro = {};
   registro.admin = admin;
   registro.tipo = "Emitido";
@@ -2928,9 +3183,20 @@ cambiar_estado = async function (id, base, admin, data) {
 const eliminar_finalizado_orden = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Registro = conn.model("registro", RegistroSchema);
-      Pago = conn.model("pago", VentaSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Registro, Pago } = models;
+
       var id = req.params["id"];
 
       let data = req.body;
@@ -2967,16 +3233,26 @@ const eliminar_finalizado_orden = async function (req, res) {
 const eliminar_documento_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Registro = conn.model("registro", RegistroSchema);
-      Documento = conn.model("document", DocumentoSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Registro, Documento, Dpago } = models;
+
       var id = req.params["id"];
 
       var dpagos = await Dpago.find({ documento: id });
       if (dpagos.length == 0) {
         let doc = await Documento.findById({ _id: id });
-        registro = {};
+        const registro = {};
         registro.documento = id;
         registro.admin = req.user.sub;
         registro.tipo = "Elimino";
@@ -3002,13 +3278,20 @@ const eliminar_documento_admin = async function (req, res) {
 const eliminar_orden_admin = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Registro = conn.model("registro", RegistroSchema);
-      Pago = conn.model("pago", VentaSchema);
-      Config = conn.model("config", ConfigSchema);
-      Pension = conn.model("pension", PensionSchema);
-      Documento = conn.model("document", DocumentoSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Registro, Pago, Config, Pension, Documento, Dpago } = models;
+
       var id = req.params["id"];
       //registra el pago
       var pagos = await Pago.findById(id);
@@ -3173,13 +3456,20 @@ const eliminar_orden_admin = async function (req, res) {
 const eliminar_orden_pm = async function (req, res) {
   if (req.user) {
     try {
-      let conn = mongoose.connection.useDb(req.user.base);
-      Registro = conn.model("registro", RegistroSchema);
-      Pago = conn.model("pago", VentaSchema);
-      Config = conn.model("config", ConfigSchema);
-      Pension = conn.model("pension", PensionSchema);
-      Documento = conn.model("document", DocumentoSchema);
-      Dpago = conn.model("dpago", DpagoSchema);
+      const dbName = req.user.base;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        throw new Error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+      }
+
+      // Usar los modelos ya inicializados
+      const { Registro, Pago, Config, Pension, Documento, Dpago } = models;
+
       var id = req.params["id"];
 
       //remueve detalles de pago
@@ -3200,8 +3490,20 @@ const actualizar_pago_id_contifico = async function (req, res) {
   if (!req.user) {
     return res.status(401).send({ message: "No autorizado" });
   }
-  const conn = mongoose.connection.useDb(req.user.base);
-  const Pago = conn.model("pago", VentaSchema);
+  const dbName = req.user.base;
+
+  // Obtener los modelos para esta base de datos
+  const models = modelsService.getModels(dbName);
+
+  if (!models) {
+    return res.status(500).send({
+      message: `No se pudieron cargar los modelos para la base ${dbName}`,
+      status: modelsService.getModelsCacheStatus(), // Para depuración
+    });
+  }
+
+  // Usar los modelos ya inicializados
+  const { Pago } = models;
 
   try {
     const { id, id_contifico } = req.body;
@@ -3227,7 +3529,30 @@ const registroCompraManualEstudiante = async function (req, res) {
     return res.status(401).send({ message: "No autorizado" });
   }
 
-  const conn = mongoose.connection.useDb(req.user.base);
+  const dbName = req.user.base;
+
+  // Obtener los modelos para esta base de datos
+  const models = modelsService.getModels(dbName);
+
+  if (!models) {
+    return res.status(500).send({
+      message: `No se pudieron cargar los modelos para la base ${dbName}`,
+      status: modelsService.getModelsCacheStatus(), // Para depuración
+    });
+  }
+
+  // Usar los modelos ya inicializados
+  const {
+    Pago,
+    Dpago,
+    Estudiante,
+    Registro,
+    Pension,
+    Pension_Beca,
+    Documento,
+    Config,
+  } = models;
+
   const session = null; // await mongoose.startSession();
 
   try {
@@ -3235,7 +3560,7 @@ const registroCompraManualEstudiante = async function (req, res) {
 
     const { pago, detalles, config } = await crearPagoYRegistro(
       req,
-      conn,
+      models,
       session
     );
 
@@ -3243,7 +3568,7 @@ const registroCompraManualEstudiante = async function (req, res) {
       detalles,
       config,
       pago,
-      conn,
+      models,
       session
     );
 
@@ -3251,13 +3576,13 @@ const registroCompraManualEstudiante = async function (req, res) {
       throw new Error("No se pudieron registrar los pagos");
     }
 
-    await actualizarPagoTotal(pago, dpagosValidos, conn, session);
+    await actualizarPagoTotal(pago, dpagosValidos, models, session);
 
     //await session.commitTransaction();
     res.status(200).send({ pago, message: "Registrado correctamente" });
   } catch (error) {
     console.error("Error en registro de compra:", error);
-    if (session.inTransaction()) {
+    if (session && session.inTransaction()) {
       //  await session.abortTransaction();
     }
     res
@@ -3270,9 +3595,8 @@ const registroCompraManualEstudiante = async function (req, res) {
   }
 };
 
-async function crearPagoYRegistro(req, conn, session) {
-  const Pago = conn.model("pago", VentaSchema);
-  const Registro = conn.model("registro", RegistroSchema);
+async function crearPagoYRegistro(req, models, session) {
+  const { Pago, Registro } = models;
 
   const { config, detalles, ...data } = req.body;
   data.estado = "Registrado";
@@ -3297,8 +3621,8 @@ async function crearPagoYRegistro(req, conn, session) {
   return { pago, detalles, config };
 }
 
-async function procesarDetallesPagos(detalles, config, pago, conn, session) {
-  const Dpago = conn.model("dpago", DpagoSchema);
+async function procesarDetallesPagos(detalles, config, pago, models, session) {
+  const { Dpago } = models;
   const dpagosValidos = [];
 
   for (const element of detalles) {
@@ -3319,7 +3643,7 @@ async function procesarDetallesPagos(detalles, config, pago, conn, session) {
         element,
         config,
         pago,
-        conn,
+        models,
         session
       );
       console.log("Resultado procesamiento: ", resultadoProcesamiento);
@@ -3340,8 +3664,8 @@ async function procesarDetallesPagos(detalles, config, pago, conn, session) {
   return dpagosValidos;
 }
 
-async function actualizarPagoTotal(pago, dpagosValidos, conn, session) {
-  const Pago = conn.model("pago", VentaSchema);
+async function actualizarPagoTotal(pago, dpagosValidos, models, session) {
+  const { Pago } = models;
   const sumaValores = dpagosValidos.reduce(
     (total, elemento) => total + elemento.valor,
     0
@@ -3354,7 +3678,7 @@ async function actualizarPagoTotal(pago, dpagosValidos, conn, session) {
   );
 }
 
-async function procesarDetallePago(element, config, pago, conn, session) {
+async function procesarDetallePago(element, config, pago, models, session) {
   try {
     switch (true) {
       case element.tipo === 0:
@@ -3362,13 +3686,19 @@ async function procesarDetallePago(element, config, pago, conn, session) {
           element,
           config,
           pago,
-          conn,
+          models,
           session
         );
       case element.tipo > 0 && element.tipo <= 10:
-        return await procesarPagoPension(element, config, pago, conn, session);
+        return await procesarPagoPension(
+          element,
+          config,
+          pago,
+          models,
+          session
+        );
       default:
-        return await procesarPagoExtra(element, config, pago, conn, session);
+        return await procesarPagoExtra(element, config, pago, models, session);
     }
   } catch (error) {
     console.error("Error procesando detalle de pago:", error);
@@ -3376,15 +3706,14 @@ async function procesarDetallePago(element, config, pago, conn, session) {
   }
 }
 
-async function procesarPagoMatricula(element, config, pago, conn, session) {
-  const Pension = conn.model("pension", PensionSchema);
+async function procesarPagoMatricula(element, config, pago, models, session) {
+  const { Pension, Dpago } = models;
 
   try {
     let mat = 0;
     if (element.valor === config.matricula) {
       mat = 1;
     } else {
-      const Dpago = conn.model("dpago", DpagoSchema);
       const abonos = await Dpago.find({
         estudiante: pago.estudiante,
         tipo: element.tipo,
@@ -3401,18 +3730,15 @@ async function procesarPagoMatricula(element, config, pago, conn, session) {
       { matricula: mat }
       //{ session }
     );
-    return await actualizarStockDocumento(element, conn, session);
+    return await actualizarStockDocumento(element, models, session);
   } catch (error) {
     console.error("Error en procesamiento de matrícula:", error);
     return false;
   }
 }
 
-async function procesarPagoPension(element, config, pago, conn, session) {
-  const Pension = conn.model("pension", PensionSchema);
-  const Pension_Beca = conn.model("pension_beca", Pension_becaSchema);
-  const Dpago = conn.model("dpago", DpagoSchema);
-  const Registro = conn.model("registro", RegistroSchema);
+async function procesarPagoPension(element, config, pago, models, session) {
+  const { Pension, Pension_Beca, Dpago, Registro } = models;
 
   try {
     // Buscar la pensión
@@ -3498,17 +3824,15 @@ async function procesarPagoPension(element, config, pago, conn, session) {
       );
     }
 
-    return await actualizarStockDocumento(element, conn, session);
+    return await actualizarStockDocumento(element, models, session);
   } catch (error) {
     console.error("Error en procesamiento de pensión:", error);
     return false;
   }
 }
 
-async function procesarPagoExtra(element, config, pago, conn, session) {
-  const Pension = conn.model("pension", PensionSchema);
-  const Registro = conn.model("registro", RegistroSchema);
-  const Config = conn.model("config", ConfigSchema);
+async function procesarPagoExtra(element, config, pago, models, session) {
+  const { Pension, Registro, Config } = models;
   try {
     // Buscar pensión con configuración de año lectivo
     const pension_config = await Pension.findById({
@@ -3545,15 +3869,15 @@ async function procesarPagoExtra(element, config, pago, conn, session) {
       }
     }
 
-    return await actualizarStockDocumento(element, conn, session);
+    return await actualizarStockDocumento(element, models, session);
   } catch (error) {
     console.error("Error en procesamiento de pago extra:", error);
     return false;
   }
 }
 
-async function actualizarStockDocumento(element, conn, session) {
-  const Documento = conn.model("document", DocumentoSchema);
+async function actualizarStockDocumento(element, models, session) {
+  const { Documento, Dpago, Registro } = models;
   //console.log("Elemento del documento: ", element);
   try {
     const documento = await Documento.findById(element.documento);
@@ -3561,7 +3885,6 @@ async function actualizarStockDocumento(element, conn, session) {
       throw new Error("Documento no encontrado");
     }
 
-    const Dpago = conn.model("dpago", DpagoSchema);
     const pagosPrevios = await Dpago.find({ documento: documento._id });
     //console.log("Pagos previos: ", pagosPrevios);
     const totalPagado =
@@ -3572,7 +3895,6 @@ async function actualizarStockDocumento(element, conn, session) {
     let valorOriginal = parseFloat(documento.valor_origen || 0).toFixed(2);
     if (valorOriginal == 0) {
       try {
-        const Registro = conn.model("registro", RegistroSchema);
         // Obtener el valor original del documento desde `Registro`
         const registro = await Registro.findOne({
           tipo: "creo",

@@ -3,7 +3,7 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
-var PensionSchema = Schema({
+const PensionSchema = new Schema({
   idestudiante: { type: Schema.ObjectId, ref: "estudiante", required: true },
 
   matricula: { type: Number, default: 0, min: 0, max: 1, required: true },
@@ -22,6 +22,7 @@ var PensionSchema = Schema({
   curso: { type: String, require: true },
   paralelo: { type: String, require: true },
   especialidad: { type: String, require: false, default: "EGB" },
+  type_especialidad: { type: String, require: false, default: null },
 
   extrapagos: { type: String, require: false },
 
@@ -29,6 +30,5 @@ var PensionSchema = Schema({
 });
 
 module.exports = PensionSchema;
-
 
 //module.exports =  mongoose.model('pension',PensionSchema);

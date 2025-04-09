@@ -3,7 +3,7 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
-var EstudianteSchema = Schema({
+const EstudianteSchema = new Schema({
   nombres: { type: String, required: true },
   apellidos: { type: String, required: true },
 
@@ -21,6 +21,7 @@ var EstudianteSchema = Schema({
   curso: { type: String, required: false },
   paralelo: { type: String, required: false },
   especialidad: { type: String, required: false, default: "EGB" },
+  type_especialidad: { type: String, require: false, default: null },
 
   nombres_padre: { type: String, required: false },
   dni_padre: { type: String, required: false },
@@ -34,6 +35,5 @@ var EstudianteSchema = Schema({
 });
 
 module.exports = EstudianteSchema;
-
 
 //module.exports =  mongoose.model('estudiante',EstudianteSchema);

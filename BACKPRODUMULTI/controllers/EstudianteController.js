@@ -33,6 +33,8 @@ const FacturacionSchema = require("../models/Facturacion");
 
 var mongoose = require("mongoose");
 
+const modelsService = require("../service/models.service");
+
 registro_estudiante_tienda = async function (req, res) {
   let data = req.body;
   var estudiantes_arr = [];
@@ -66,8 +68,20 @@ registro_estudiante_tienda = async function (req, res) {
 
 listar_estudiantes_tienda = async function (req, res) {
   if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Estudiante = conn.model("estudiante", EstudianteSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Estudiante } = models;
+
     var estudiantes = await Estudiante.find().sort({ createdAt: -1 });
     res.status(200).send({ data: estudiantes });
   } else {
@@ -81,12 +95,19 @@ const listar_pensiones_estudiantes_tienda = async function (req, res) {
 
   try {
     let id = req.params["id"];
-    let conn = mongoose.connection.useDb(req.user.base);
+    const dbName = req.user.base;
 
-    // Definir modelos
-    const Pension = conn.model("pension", PensionSchema);
-    const Estudiante = conn.model("estudiante", EstudianteSchema);
-    const Config = conn.model("config", ConfigSchema);
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Pension, Estudiante, Config } = models;
 
     // Obtener estudiantes y pensiones
     const estudiantes = await Estudiante.find().lean();
@@ -176,11 +197,20 @@ const registro_estudiante = async (req, res) => {
 
   try {
     // Inicializar modelos en la base de datos del usuario
-    const conn = mongoose.connection.useDb(req.user.base);
-    const Estudiante = conn.model("estudiante", EstudianteSchema);
-    const Pension = conn.model("pension", PensionSchema);
-    const PensionBeca = conn.model("pension_beca", Pension_becaSchema);
-    const Config = conn.model("config", ConfigSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      return res.status(500).send({
+        message: `No se pudieron cargar los modelos para la base ${dbName}`,
+        status: modelsService.getModelsCacheStatus(), // Para depuración
+      });
+    }
+
+    // Usar los modelos ya inicializados
+    const { Estudiante, Pension, PensionBeca, Config } = models;
 
     // Obtener datos de la solicitud
     const data = req.body;
@@ -315,10 +345,20 @@ const registro_estudiante_masivo = async (req, res) => {
       });
     }
 
-    const conn = mongoose.connection.useDb(req.user.base);
-    const Config = conn.model("config", ConfigSchema);
-    const Pension = conn.model("pension", PensionSchema);
-    const Estudiante = conn.model("estudiante", EstudianteSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      return res.status(500).send({
+        message: `No se pudieron cargar los modelos para la base ${dbName}`,
+        status: modelsService.getModelsCacheStatus(), // Para depuración
+      });
+    }
+
+    // Usar los modelos ya inicializados
+    const { Config, Pension, Estudiante } = models;
 
     const config = await Config.findOne().sort({ createdAt: -1 });
     if (!config) {
@@ -545,9 +585,20 @@ const borrado_estudiante_masivo = async (req, res) => {
       });
     }
 
-    const conn = mongoose.connection.useDb(req.user.base);
-    const Estudiante = conn.model("estudiante", EstudianteSchema);
-    const Pension = conn.model("pension", PensionSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      return res.status(500).send({
+        message: `No se pudieron cargar los modelos para la base ${dbName}`,
+        status: modelsService.getModelsCacheStatus(), // Para depuración
+      });
+    }
+
+    // Usar los modelos ya inicializados
+    const { Estudiante, Pension } = models;
 
     const stats = {
       eliminados: 0,
@@ -665,8 +716,20 @@ const login_estudiante = async function (req, res) {
 
 const obtener_estudiante_guest = async function (req, res) {
   if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Estudiante = conn.model("estudiante", EstudianteSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Estudiante } = models;
+
     var id = req.params["id"];
     try {
       let estudiante = await Estudiante.findById({ _id: id });
@@ -683,9 +746,20 @@ const obtener_pension_estudiante_guest = async function (req, res) {
   //var pen={};
 
   if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Pension = conn.model("pension", PensionSchema);
-    Config = conn.model("config", ConfigSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Pension, Config } = models;
+
     var id = req.params["id"];
     try {
       let estudiante = await Pension.find({ idestudiante: id })
@@ -728,11 +802,20 @@ const actualizar_estudiante_admin = async function (req, res) {
 
   try {
     // Inicializar modelos en la base de datos del usuario
-    const conn = mongoose.connection.useDb(req.user.base);
-    const Estudiante = conn.model("estudiante", EstudianteSchema);
-    const Config = conn.model("config", ConfigSchema);
-    const Pension = conn.model("pension", PensionSchema);
-    const PensionBeca = conn.model("pension_beca", Pension_becaSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      return res.status(500).send({
+        message: `No se pudieron cargar los modelos para la base ${dbName}`,
+        status: modelsService.getModelsCacheStatus(), // Para depuración
+      });
+    }
+
+    // Usar los modelos ya inicializados
+    const { Estudiante, Config, Pension, PensionBeca } = models;
 
     // Obtener ID y datos del estudiante
     const id = req.params["id"];
@@ -954,8 +1037,20 @@ const actualizar_estudiante_admin = async function (req, res) {
 
 const obtener_ordenes_estudiante = async function (req, res) {
   if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Estudiante = conn.model("estudiante", EstudianteSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Pago } = models;
+
     var id = req.params["id"];
 
     let reg = await Pago.find({ estudiante: id }).sort({ createdAt: -1 });
@@ -1024,16 +1119,22 @@ const bart = require("./bart");
 
 const obtener_detalles_ordenes_estudiante = async function (req, res) {
   if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Admin = conn.model("admin", AdminSchema);
-    Pago = conn.model("pago", VentaSchema);
-    Estudiante = conn.model("estudiante", EstudianteSchema);
-    Documento = conn.model("document", DocumentoSchema);
-    Pension = conn.model("pension", PensionSchema);
-    Dpago = conn.model("dpago", DpagoSchema);
+    const dbName = req.user.base;
 
-    Facturacion = conn.model("facturacion", FacturacionSchema);
-    ctacon = await Facturacion.find({});
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Admin, Pago, Estudiante, Documento, Pension, Dpago } = models;
+
+    /*Facturacion = conn.model("facturacion", FacturacionSchema);
+    ctacon = await Facturacion.find({});*/
 
     var id = req.params["id"];
     //////console.log(id.toString());
@@ -1459,9 +1560,20 @@ const soapprueba = async function () {
 
 const obtener_detalles_por_estudiante = async function (req, res) {
   if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Pago = conn.model("pago", VentaSchema);
-    Dpago = conn.model("dpago", DpagoSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Pago, Dpago } = models;
+
     let detalles = [];
     var id = req.params["id"];
     //////console.log(id.toString());
@@ -1556,8 +1668,20 @@ const comprobar_carrito_estudiante = async function (req, res) {
 
 const consultarIDPago = async function (req, res) {
   if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Pago = conn.model("pago", VentaSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Pago } = models;
+
     var id = req.params["id"];
     var pagos = await Pago.find({ transaccion: id });
     res.status(200).send({ data: pagos });
@@ -1695,8 +1819,19 @@ const enviar_orden_compra = async function (pago) {
 
 listar_estudiantes_pago = async function (req, res) {
   if (req.user) {
-    let conn = mongoose.connection.useDb(req.user.base);
-    Estudiante = conn.model("estudiante", EstudianteSchema);
+    const dbName = req.user.base;
+
+    // Obtener los modelos para esta base de datos
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    // Usar los modelos ya inicializados
+    const { Estudiante } = models;
 
     try {
       // Seleccionar solo los campos necesarios

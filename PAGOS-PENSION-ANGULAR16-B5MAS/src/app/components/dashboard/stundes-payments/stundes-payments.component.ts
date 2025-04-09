@@ -492,44 +492,46 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
       this._adminService
         .obtener_detallespagos_admin(this.token, this.config[val]._id)
         .subscribe((response) => {
-          console.log(response);
-          this.estudiantes = response.data.map((item: any) => {
-            try {
-              if (item.tipo == null) {
-                console.error(item);
+          //console.log(response);
+          this.estudiantes = response.data
+            .map((item: any) => {
+              try {
+                if (item.tipo == null) {
+                  console.error(item);
+                  return null;
+                }
+                return {
+                  abono: item.abono,
+                  documento: item.documento,
+                  estado: item.estado,
+                  estudiante: item.estudiante,
+                  idpension: {
+                    anio_lectivo: item.idpension.anio_lectivo,
+                    condicion_beca: item.idpension.condicion_beca,
+                    curso: item.idpension.curso,
+                    extrapagos: item.idpension.extrapagos,
+                    idanio_lectivo: item.idpension.idanio_lectivo,
+                    idestudiante: item.idpension.idestudiante,
+                    matricula: item.idpension.matricula,
+                    meses: item.idpension.meses,
+                    paga_mat: item.idpension.paga_mat,
+                    paralelo: item.idpension.paralelo,
+                    especialidad: item.idpension.especialidad,
+                    _id: item.idpension._id,
+                  },
+                  pago: {
+                    estado: item.pago.estado || '',
+                    _id: item.pago._id,
+                  },
+                  tipo: item.tipo,
+                  valor: item.valor,
+                };
+              } catch (error) {
+                console.error(error, item);
                 return null;
               }
-              return {
-                abono: item.abono,
-                documento: item.documento,
-                estado: item.estado,
-                estudiante: item.estudiante,
-                idpension: {
-                  anio_lectivo: item.idpension.anio_lectivo,
-                  condicion_beca: item.idpension.condicion_beca,
-                  curso: item.idpension.curso,
-                  extrapagos: item.idpension.extrapagos,
-                  idanio_lectivo: item.idpension.idanio_lectivo,
-                  idestudiante: item.idpension.idestudiante,
-                  matricula: item.idpension.matricula,
-                  meses: item.idpension.meses,
-                  paga_mat: item.idpension.paga_mat,
-                  paralelo: item.idpension.paralelo,
-                  especialidad: item.idpension.especialidad,
-                  _id: item.idpension._id,
-                },
-                pago: {
-                  estado: item.pago.estado || '',
-                  _id: item.pago._id,
-                },
-                tipo: item.tipo,
-                valor: item.valor,
-              };
-            } catch (error) {
-              console.error(error, item);
-              return null;
-            }
-          }).filter((item:any) => item !== null);
+            })
+            .filter((item: any) => item !== null);
           this._configService.setProgress(
             this._configService.getProgress() + 5
           );
@@ -557,7 +559,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                 )
                 .subscribe((response) => {
                   if (response.data) {
-                    console.log(response.data);
+                    //console.log(response.data);
                     this.penest = response.data
                       .map((item: any) => {
                         try {
@@ -598,7 +600,7 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                       })
                       .filter((item: any) => item !== null); // Filtra elementos nulos en caso de error.
 
-                    console.log(this.penest.length);
+                    //console.log(this.penest.length);
                     this._configService.setProgress(
                       this._configService.getProgress() + 5
                     );
@@ -898,12 +900,12 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
                           }
                         }
                       });
-                      console.log(this.pagos_estudiante);
+                      //console.log(this.pagos_estudiante);
                       const totalPensiones = this.pagospension.reduce(
                         (sum: any, item: any) => sum + item.num,
                         0
                       );
-                      console.log(totalPensiones);
+                      //console.log(totalPensiones);
                       this._configService.setProgress(
                         this._configService.getProgress() + 5
                       );
