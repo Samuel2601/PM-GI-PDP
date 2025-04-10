@@ -1167,7 +1167,7 @@ const reactivar_estudiante_admin = async function (req, res) {
       }
 
       // Usar los modelos ya inicializados
-      const { Registro, Config, Pension } = models;
+      const { Registro, Config, Pension, Estudiante } = models;
 
       var id = req.params["id"];
       var pension = {};
