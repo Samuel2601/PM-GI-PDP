@@ -474,7 +474,7 @@ export class ShowPaymentsComponent implements OnInit {
               forma_cobro: documento.cuenta === 'Efectivo' ? 'EF' : 'TRA',
               monto: 0,
               numero_comprobante: docKey,
-              fecha: this.getEcuadorDate(documento.f_deposito),
+              fecha: this.getEcuadorDate(new Date()),
               cuenta_bancaria_id:
                 documento.cuenta === 'Efectivo' ? null : account.id,
               valor_origen: documento.valor_origen || 0,
