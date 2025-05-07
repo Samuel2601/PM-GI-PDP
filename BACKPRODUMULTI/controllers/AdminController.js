@@ -1298,7 +1298,7 @@ const listar_documentos_admin = async function (req, res) {
       // Modificar la consulta para obtener solo los últimos 2000 documentos
       var documentos = await Documento.find()
         .sort({ createdAt: -1 })
-        .limit(2000);
+        .limit(5000);
 
       res.status(200).send({ data: documentos });
     } catch (error) {
