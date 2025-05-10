@@ -998,17 +998,18 @@ async function actualizarInformacionAdmin(
   res,
   req,
   admin,
-  AdminSchema,
+  Admin, // Cambiado de AdminSchema a Admin para que coincida con el nombre usado en la función
   Registro
 ) {
-  let admin_arr3 = await AdminSchema.find({ rol: "direc", _id: { $ne: id } });
+  // Cambiar AdminSchema por Admin en todas las referencias dentro de la función
+  let admin_arr3 = await Admin.find({ rol: "direc", _id: { $ne: id } });
 
   if (
     (admin_arr3.length !== 0 && data.rol !== "direc") ||
     admin_arr3.length === 0
   ) {
-    // Actualizar información sin cambiar el rol a Colecturía
-    await AdminSchema.updateOne(
+    // Cambiar AdminSchema por Admin aquí también
+    await Admin.updateOne(
       { _id: id },
       {
         estado: data.estado,
@@ -1021,11 +1022,12 @@ async function actualizarInformacionAdmin(
         dni: data.dni,
       }
     );
-    await crearRegistroActualizacion(req, admin, data, AdminSchema, Registro);
+    // Cambiar AdminSchema por Admin aquí
+    await crearRegistroActualizacion(req, admin, data, Admin, Registro);
     res.status(200).send({ message: "Actualizado con éxito" });
   } else {
-    // Actualizar información y cambiar el rol a Colecturía
-    await AdminSchema.updateOne(
+    // Cambiar AdminSchema por Admin aquí
+    await Admin.updateOne(
       { _id: id },
       {
         estado: data.estado,
@@ -1038,7 +1040,8 @@ async function actualizarInformacionAdmin(
         dni: data.dni,
       }
     );
-    await crearRegistroActualizacion(req, admin, data, AdminSchema, Registro);
+    // Cambiar AdminSchema por Admin aquí
+    await crearRegistroActualizacion(req, admin, data, Admin, Registro);
     res.status(200).send({
       message: "Actualizado con éxito. Se cambió el rol a Colecturía",
     });
