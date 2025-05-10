@@ -955,7 +955,15 @@ const actualizar_admin = async function (req, res) {
             if (hash) {
               data.password = hash;
               // Actualizar información del administrador
-              await actualizarInformacionAdmin(id, data, res, req, admin);
+              await actualizarInformacionAdmin(
+                id,
+                data,
+                res,
+                req,
+                admin,
+                Admin,
+                Registro
+              );
             } else {
               res.status(200).send({
                 message: "Error al cifrar la contraseña",
