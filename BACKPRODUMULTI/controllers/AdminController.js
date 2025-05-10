@@ -926,8 +926,8 @@ const actualizar_admin = async function (req, res) {
       // Usar los modelos ya inicializados
       const { Admin, Registro } = models;
 
-      Admin = conn.model("admin", AdminSchema);
-      Registro = conn.model("registro", RegistroSchema);
+      //Admin = conn.model("admin", AdminSchema);
+      //Registro = conn.model("registro", RegistroSchema);
 
       var id = req.params["id"];
       var data = req.body;
@@ -1298,7 +1298,7 @@ const listar_documentos_admin = async function (req, res) {
       // Modificar la consulta para obtener solo los últimos 2000 documentos
       var documentos = await Documento.find()
         .sort({ createdAt: -1 })
-        .limit(5000);
+        .limit(2000);
 
       res.status(200).send({ data: documentos });
     } catch (error) {
