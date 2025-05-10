@@ -210,7 +210,7 @@ const registro_estudiante = async (req, res) => {
     }
 
     // Usar los modelos ya inicializados
-    const { Estudiante, Pension, PensionBeca, Config } = models;
+    const { Estudiante, Pension, Pension_Beca, Config } = models;
 
     // Obtener datos de la solicitud
     const data = req.body;
@@ -290,7 +290,7 @@ const registro_estudiante = async (req, res) => {
       // Registrar detalles de beca si existen
       if (item.arr_etiquetas && item.arr_etiquetas.length > 0) {
         for (const detalle of item.arr_etiquetas) {
-          await PensionBeca.create(
+          await Pension_Beca.create(
             [
               {
                 ...detalle,
@@ -815,7 +815,7 @@ const actualizar_estudiante_admin = async function (req, res) {
     }
 
     // Usar los modelos ya inicializados
-    const { Estudiante, Config, Pension, PensionBeca } = models;
+    const { Estudiante, Config, Pension, Pension_Beca } = models;
 
     // Obtener ID y datos del estudiante
     const id = req.params["id"];
@@ -989,7 +989,10 @@ const actualizar_estudiante_admin = async function (req, res) {
         // Manejar detalles de beca si existen
         if (data.pension_beca && Array.isArray(data.pension_beca)) {
           // Eliminar detalles antiguos
-          await PensionBeca.deleteMany({ idpension: pension._id }, { session });
+          await Pension_Beca.deleteMany(
+            { idpension: pension._id },
+            { session }
+          );
 
           // Crear nuevos detalles
           for (const detalle of data.pension_beca) {
@@ -997,7 +1000,7 @@ const actualizar_estudiante_admin = async function (req, res) {
               ...detalle,
               idpension: pension._id,
             };
-            await PensionBeca.create([detalleCompleto], { session });
+            await Pension_Beca.create([detalleCompleto], { session });
           }
         }
       }
