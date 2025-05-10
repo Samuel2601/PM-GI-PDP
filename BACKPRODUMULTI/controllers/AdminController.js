@@ -965,7 +965,15 @@ const actualizar_admin = async function (req, res) {
           });
         } else {
           // Actualizar información del administrador sin cambiar la contraseña
-          await actualizarInformacionAdmin(id, data, res, req, admin);
+          await actualizarInformacionAdmin(
+            id,
+            data,
+            res,
+            req,
+            admin,
+            Admin,
+            Registro
+          );
         }
       }
     } catch (error) {
@@ -976,7 +984,15 @@ const actualizar_admin = async function (req, res) {
     res.status(500).send({ message: "NoAccess" });
   }
 };
-async function actualizarInformacionAdmin(id, data, res, req, admin) {
+async function actualizarInformacionAdmin(
+  id,
+  data,
+  res,
+  req,
+  admin,
+  Admin,
+  Registro
+) {
   let admin_arr3 = await Admin.find({ rol: "direc", _id: { $ne: id } });
 
   if (
@@ -997,7 +1013,7 @@ async function actualizarInformacionAdmin(id, data, res, req, admin) {
         dni: data.dni,
       }
     );
-    await crearRegistroActualizacion(req, admin, data);
+    await crearRegistroActualizacion(req, admin, data, Admin, Registro);
     res.status(200).send({ message: "Actualizado con éxito" });
   } else {
     // Actualizar información y cambiar el rol a Colecturía
@@ -1014,13 +1030,13 @@ async function actualizarInformacionAdmin(id, data, res, req, admin) {
         dni: data.dni,
       }
     );
-    await crearRegistroActualizacion(req, admin, data);
+    await crearRegistroActualizacion(req, admin, data, Admin, Registro);
     res.status(200).send({
       message: "Actualizado con éxito. Se cambió el rol a Colecturía",
     });
   }
 }
-async function crearRegistroActualizacion(req, admin, data) {
+async function crearRegistroActualizacion(req, admin, data, Admin, Registro) {
   let registro = {};
   registro.admin = req.user.sub;
   registro.tipo = "actualizo";
