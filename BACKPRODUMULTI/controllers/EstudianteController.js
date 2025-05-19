@@ -1161,6 +1161,100 @@ const obtener_detalles_ordenes_estudiante = async function (req, res) {
   }
 };
 
+// Generar documento con nuevo proveedor
+const generarDocumentoNuevoProveedor = async function (req, res) {
+  if (req.user) {
+    try {
+      const dbName = req.user.base;
+      const { id } = req.params;
+      const { fecha } = req.body;
+
+      // Obtener los modelos para esta base de datos
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        return res.status(500).send({
+          success: false,
+          message: `No se pudieron cargar los modelos para la base ${dbName}`,
+        });
+      }
+
+      // Usar los modelos ya inicializados
+      const { Pago, Dpago } = models;
+
+      // Obtener pago y detalles
+      const pago = await Pago.findById(id)
+        .populate("estudiante")
+        .populate("encargado");
+
+      if (!pago) {
+        return res.status(404).send({
+          success: false,
+          message: "No se encontró el pago",
+        });
+      }
+
+      const detalles = await Dpago.find({ pago: pago._id })
+        .populate("documento")
+        .populate("idpension");
+
+      // Generar documento usando el servicio
+      const documento = await facturacionService.generarDocumentoNuevoProveedor(
+        pago,
+        detalles,
+        fecha
+      );
+
+      // Enviar documento al servicio externo
+      const respuestaAPI = await enviarDocumentoAPI(documento);
+
+      // Actualizar el pago con el ID del documento generado
+      if (respuestaAPI && respuestaAPI.IdComprobante) {
+        await Pago.findByIdAndUpdate(pago._id, {
+          id_contifico: respuestaAPI.IdComprobante.toString(),
+        });
+      }
+
+      res.status(200).send({
+        success: true,
+        message: "Documento generado correctamente",
+        data: respuestaAPI,
+      });
+    } catch (error) {
+      console.error("Error al generar documento:", error);
+      res.status(500).send({
+        success: false,
+        message: "Error al generar documento",
+        error: error.message,
+      });
+    }
+  } else {
+    res.status(403).send({ success: false, message: "NoAccess" });
+  }
+};
+
+// Función para enviar el documento al servicio externo
+const enviarDocumentoAPI = async (documento) => {
+  try {
+    // Configurar la llamada a la API externa
+    const apiUrl =
+      "https://plataforma.geoneg.com:8081/api/Invoice/GuardarComprobantesAPI";
+    //const apiKey = process.env.FACTURACION_API_KEY;
+
+    const response = await axios.post(apiUrl, documento, {
+      headers: {
+        "Content-Type": "application/json",
+        //Authorization: `Bearer ${apiKey}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error al enviar documento a API externa:", error);
+    throw new Error(`Error en API externa: ${error.message}`);
+  }
+};
+
 //const xml = fs.readFileSync('ruta/al/archivo.xml');
 
 const forge = require("node-forge");
@@ -1179,6 +1273,7 @@ function toJson(xml) {
   });
 }
 const factura = require("./facturacion");
+const facturacionService = require("../service/geoneg/facturacion.service");
 function soapprueba2(pagos) {
   try {
     //console.log('2',pagos);

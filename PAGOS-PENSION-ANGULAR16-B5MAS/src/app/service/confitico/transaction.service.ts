@@ -67,4 +67,14 @@ export class TransactionService {
       headers: this.getHeaders(),
     });
   }
+
+  createDocumentNuevoProveedor(data: any): Observable<any> {
+    return this.http.post(
+      `https://plataforma.geoneg.com:8081/api/Invoice/GuardarComprobantesAPI`,
+      data,
+      {
+        headers: this.getHeaders(),
+      }
+    );
+  }
 }

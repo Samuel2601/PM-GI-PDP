@@ -1322,10 +1322,22 @@ const listar_documentos_admin = async function (req, res) {
       // Usar los modelos ya inicializados
       const { Documento } = models;
 
-      // Modificar la consulta para obtener solo los últimos 2000 documentos
-      var documentos = await Documento.find()
-        .sort({ createdAt: -1 })
-        .limit(2000);
+      // Modificar la consulta para obtener solo los Ãºltimos 2000 documentos
+      const startOfYear = new Date(new Date().getFullYear() - 1, 0, 1); // 1 de enero, 00:00:00
+      const endOfYear = new Date(
+        new Date().getFullYear(),
+        11,
+        31,
+        23,
+        59,
+        59,
+        999
+      ); // 31 de diciembre, 23:59:59
+
+      const documentos = await Documento.find({
+        createdAt: { $gte: startOfYear, $lte: endOfYear },
+      }).sort({ createdAt: -1 });
+      //.limit(5000);
 
       res.status(200).send({ data: documentos });
     } catch (error) {

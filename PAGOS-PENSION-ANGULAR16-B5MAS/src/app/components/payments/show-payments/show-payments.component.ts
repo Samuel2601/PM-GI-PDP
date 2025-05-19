@@ -174,7 +174,16 @@ export class ShowPaymentsComponent implements OnInit {
     console.log(pre_factura);
   }
 
+  async armadocnuevo_proveedor() {
+    const new_proveedor = await this.armado_Documento_nuevo_proveedor(
+      this.pago,
+      this.detalles
+    );
+    console.log('Nuevo proveedor:', new_proveedor);
+  }
+
   // Crear un servicio de caché
+  apikey_int: boolean = false;
   async consultar_apikey() {
     try {
       // Primero intentar obtener del localStorage
@@ -190,6 +199,7 @@ export class ShowPaymentsComponent implements OnInit {
       ) {
         console.log('Usando API key desde caché');
         this.apikey = cachedApiKey;
+        this.apikey_int = /^\d+$/.test(this.apikey); // Verifica si apikey contiene solo dígitos
         return;
       }
 
@@ -226,6 +236,12 @@ export class ShowPaymentsComponent implements OnInit {
           this.apikey
         );
       }
+      if (this.apikey) {
+        // Verifica si apikey contiene solo dígitos
+        this.apikey_int = /^\d+$/.test(this.apikey);
+      }
+      console.log('API key:', this.apikey);
+      console.log('API key int:', this.apikey_int);
     } catch (error) {
       console.error('Error al consultar API key:', error);
 
@@ -236,6 +252,11 @@ export class ShowPaymentsComponent implements OnInit {
           'Usando API key en caché como fallback después de un error'
         );
         this.apikey = cachedApiKey;
+
+        if (this.apikey) {
+          // Verifica si apikey contiene solo dígitos
+          this.apikey_int = /^\d+$/.test(this.apikey);
+        }
       }
     }
   }
@@ -597,9 +618,9 @@ export class ShowPaymentsComponent implements OnInit {
               },
               this.token
             );
-            setTimeout(() => {
+            /*setTimeout(() => {
               location.reload();
-            }, 2500);
+            }, 2500);*/
           } else {
             this.mensajes.creacion = 'Error al crear el documento';
             this.showErrorToast(
@@ -632,7 +653,7 @@ export class ShowPaymentsComponent implements OnInit {
 
   async generarDocumento() {
     this.habilitar_boton_generar = true;
-    if (this.apikey && !this.pago.id_contifico) {
+    if (this.apikey && !this.pago.id_contifico && this.apikey_int === false) {
       const pre_factura = await this.armado_Documento_envio_Contifico(
         this.pago,
         this.detalles
@@ -644,6 +665,8 @@ export class ShowPaymentsComponent implements OnInit {
         console.error(error);
         this.habilitar_boton_generar = true;
       }
+    } else if (this.apikey && !this.pago.id_contifico && this.apikey_int) {
+      await this.generarDocumentoNuevoProveedor();
     }
   }
 
@@ -658,7 +681,7 @@ export class ShowPaymentsComponent implements OnInit {
           console.log(response);
           this.documento_contifico = response;
           this.mensajes.emision = 'Documento emitido exitosamente al SRI';
-          setTimeout(() => location.reload(), 5000);
+          /*setTimeout(() => location.reload(), 5000);*/
         },
         error: (error) => {
           this.mensajes.emision = 'Error al emitir al SRI: ' + error.message;
@@ -763,6 +786,12 @@ export class ShowPaymentsComponent implements OnInit {
   }
 
   private async manejarDocumentoContifico(): Promise<void> {
+    if (this.apikey_int === true) {
+      this.habilitar_boton_generar = true;
+      console.log('No hay API key configurada');
+      return;
+    }
+
     if (!this.apikey) {
       console.log('No hay API key configurada');
       return;
@@ -1145,9 +1174,9 @@ export class ShowPaymentsComponent implements OnInit {
               message: 'Algo Salio mal',
             });
           }
-          setTimeout(() => {
+          /*setTimeout(() => {
             location.reload();
-          }, 1000);
+          }, 1000);*/
         });
     } else {
       iziToast.error({
@@ -1757,7 +1786,7 @@ export class ShowPaymentsComponent implements OnInit {
         //this.loadXML();
       }
     } catch (error) {
-      location.reload();
+      //location.reload();
     }
   }
   eliminar_factura() {
@@ -1788,7 +1817,7 @@ export class ShowPaymentsComponent implements OnInit {
                   position: 'topRight',
                   message: 'El pago fue registrado correctamente.',
                 });
-                location.reload();
+                //location.reload();
 
                 //wind.close();
               });
@@ -1800,7 +1829,7 @@ export class ShowPaymentsComponent implements OnInit {
             });
           }
           setTimeout(() => {
-            location.reload();
+            // location.reload();
           }, 1000);
         });
     } else {
@@ -1809,6 +1838,510 @@ export class ShowPaymentsComponent implements OnInit {
         position: 'topRight',
         message: this.error_constru,
       });
+    }
+  }
+
+  //APARTADO PARA NUEVO PROVEEDOR
+  // Función principal para armar el documento en el formato del nuevo proveedor
+  async armado_Documento_nuevo_proveedor(
+    pago: any,
+    detalles: any[]
+  ): Promise<any> {
+    try {
+      // Calcular subtotal y total
+      const subtotal = Number(
+        detalles.reduce((sum, det) => sum + det.valor, 0).toFixed(2)
+      );
+
+      // Crear el documento con el formato del nuevo proveedor
+      return {
+        codigoComprobante: 'FACT',
+        idProveedor: 0,
+        Ingreso: true,
+        porcentajeDescuentoFacturacion: 0,
+        valorFacturaLetras: this.numeroALetras(subtotal),
+        Comprobante: {
+          GeneroEmpresa: true,
+          Identificacion: pago.estudiante.dni_factura,
+          NumeroComprobante: 0,
+          MontoPagosGeneral: 0,
+          CodigoTipoPago: '0',
+          SaldoComprobante: subtotal,
+          CodigoBanco: '0',
+          NumeroCuenta: '0',
+          NumeroDocumento: '0',
+          Observaciones: '',
+          NumeroCuotas: 1,
+          ValorXCuota: subtotal,
+          DiaPago: 1,
+          FechaVcto: this.formatearFechaYYYYMMDD(new Date()),
+          PieSubtotal: subtotal,
+          PieDescuento: 0,
+          PieValorDescuento: 0,
+          PieBaseIva0: subtotal,
+          PieBaseIVA: 0,
+          PieIVA: 0,
+          PieTotalVenta: subtotal,
+          FechaAfiliacion: this.formatearFechaYYYYMMDD(new Date()),
+          FechaVigencia: this.formatearFechaYYYYMMDD(new Date()),
+          IdEmpresaCorporativa: 0,
+          ValorInscripcionOriginal: 0,
+          ValorInscripcion: 0,
+          MontoLetras: this.numeroALetras(subtotal),
+          Fecha: this.formatearFechaYYYYMMDD(new Date()),
+          FormaCobroDoc: '0',
+          RegistraCheque: false,
+          IncluyeRetencion: 'N',
+          NombreCliente: pago.estudiante.nombres_factura,
+          DireccionCliente: pago.estudiante.direccion,
+          TelefonoCliente: pago.estudiante.telefono,
+          MailCliente: pago.estudiante.email_padre,
+          IdComprobanteRef: 0,
+          Observacion: `Estudiante: ${pago.estudiante.nombres} ${pago.estudiante.apellidos}`,
+          LiberaGuias: 'N',
+          IdCentralCostos: 0,
+          tipoComprobante: 'FACT',
+          Referencia1: '0',
+          Referencia2: '0',
+          CodigoCuentaCajaBanco: '0',
+          Operacion: '',
+          IdComprobante: 0,
+          CodigoAsiento: 0,
+          PorcentajeDescuentoFacturacion: 0,
+          IdReferencia: 0,
+          FechaCheque: this.formatearFechaYYYYMMDD(new Date()),
+          AplicaCredito: 'N',
+          IdCuota: 0,
+          DocumentoConDiferido: 'N',
+          IdCentralCostoOrigen: 0,
+          IdCentralCostoDestino: 0,
+          CodigoVendedor: '0',
+          MotivoTraslado: '0',
+          IdProveedor: 0,
+          Referencia3: '',
+          Moneda: 'USD',
+          Plazo: 30,
+          IdPais: 0,
+          TipoSolicitud: 'N',
+          SecuencialPagoMasivo: 0,
+          CodigoProcesoInicio: '0',
+          CodigoProcesoActual: '0',
+          IdCentralCostosMPrima: 0,
+          Responsable: pago.encargado
+            ? `${pago.encargado.nombres} ${pago.encargado.apellidos}`
+            : 'RESPONSABLE',
+          IdGeneral: 0,
+        },
+        ComprobanteProducto: this.mapearDetallesProductos(detalles),
+        PagosCXC: this.mapearPagos(pago, detalles),
+        Sesion: {
+          IdInstitucion: 311505,
+          IdOficina: 335006,
+          CodigoEmpresa: '0891792143001',
+          IdPerfilUsuario: 0,
+          Identificacion: '0891792143001',
+          CodigoPerfil: '0',
+          IdUsuario: 3271,
+          FechaSistema: this.formatearFechaYYYYMMDD(new Date()),
+          NombreCompletoUsuario: '',
+          NombreCortoUsuario: '',
+          IdTransaccion: 0,
+          IPEstacion: '0.00',
+          IdEmpresaOperadora: 1655,
+        },
+      };
+    } catch (error) {
+      console.error('Error al armar documento para nuevo proveedor:', error);
+      this.showErrorToast('Error al armar documento para nuevo proveedor');
+      throw new Error('Error al armar documento para nuevo proveedor');
+    }
+  }
+
+  // Mapear los detalles a productos
+  private mapearDetallesProductos(detalles: any[]): any[] {
+    return detalles.map((detalle, index) => {
+      const codigoProducto =
+        detalle.tipo === 0
+          ? '13'
+          : String(new Date(this.fecha[detalle.tipo - 1].date).getMonth() + 1);
+      return {
+        IdComprobante: index + 1,
+        id: '0',
+        newPrice: detalle.valor,
+        CodigoProducto: codigoProducto,
+        Nombre: this.obtenerDescripcionProducto(detalle),
+        Costo: 0,
+        CodigoPrecioVenta: 'FINAL',
+        PrecioMasImpuestos: detalle.valor,
+        PrecioDescuentoImpuesto: 0,
+        PorcImpuestos: 0,
+        cartCount: 1,
+        PrecioSistema: detalle.valor,
+        PrecioDescuento: 0,
+        PrecioVenta: detalle.valor,
+        Total: detalle.valor,
+        PorcImpuestoIVA: 0,
+        ImpuestoIVA0: true,
+        ValorImpuestoIVA: 0,
+        CodigoGeneral: '0',
+        Parametro1: '',
+        Parametro2: '',
+        BaseImpuestoIVA0: detalle.valor,
+        BaseImpuestoIVA: 0,
+        Series: '',
+        PorcDescuento: 0,
+        IdCentralCostos: 0,
+        UltimoPrecioCliente: 0,
+        CodigoPrecio: 'FINAL',
+        IDENTITYCAMPO: 0,
+        UnidadFuncional: 'UN',
+        UnidadVenta: 'UN',
+        UnidadFraccionNo: 0,
+        EsSeries: true,
+        IdPuntoVentaDetalle: 0,
+        NombreAlmacen: '',
+        Parametro3: '',
+        Parametro4: codigoProducto,
+        IdComprobanteDetalleRef: 0,
+        IdPuntoVenta: 2237,
+        Descuento: 0,
+      };
+    });
+  }
+
+  // Mapear los pagos con manejo de índices
+  private async mapearPagos(pago: any, detalles: any[]): Promise<any[]> {
+    // Primero agrupamos los pagos por número de documento
+    const pagosMap = new Map<string, any>();
+
+    detalles.forEach((detalle) => {
+      if (detalle.documento) {
+        const docKey = detalle.documento.documento || 'SIN_DOCUMENTO';
+
+        if (!pagosMap.has(docKey)) {
+          pagosMap.set(docKey, {
+            Identificacion: pago.estudiante.dni_factura,
+            IdSaldosComprobante: '0',
+            Fecha: this.formatearFechaYYYYMMDD(
+              new Date(detalle.documento.fecha || new Date())
+            ),
+            MontoPagosGeneral: detalle.valor.toString(),
+            CodigoTipoPago:
+              detalle.documento.cuenta === 'Efectivo'
+                ? 'EFECTIVO'
+                : 'TRANSFERENCIA',
+            CodigoBanco: '0',
+            NumeroCuenta: '0',
+            NumeroDocumento: docKey,
+            Observaciones: `PAGO ${this.obtenerDescripcionCortaProducto(
+              detalle
+            )}`,
+            MontoLetras: '',
+            RegistraCheque: false,
+            IncluyeRetencion: 'N',
+            CodigoCuentaCajaBanco: '0',
+            IdReferencia: '0',
+            IdSecuencial: '0',
+            IdCabeceraAsiento: '0',
+            FechaCheque: '1900-00-00',
+            IdCuota: '0',
+            DocumentoConDiferido: 'N',
+            IDENTITYCAMPO: '0',
+            SecuencialPagoMasivo: '0',
+            ModalidadPago: '0',
+            IdCabeceraPagoLote: '0',
+            // Añadimos estos campos para el control de índices
+            id: detalle.documento._id,
+            valor_origen: detalle.documento.valor_origen || 0,
+          });
+        } else {
+          // Si ya existe el pago, actualizar el monto
+          const pagoExistente = pagosMap.get(docKey);
+          pagoExistente.MontoPagosGeneral = (
+            parseFloat(pagoExistente.MontoPagosGeneral) + detalle.valor
+          ).toFixed(2);
+        }
+      }
+    });
+
+    // Procesamos cada pago para verificar discrepancias y aplicar índices
+    const pagosArray = await Promise.all(
+      Array.from(pagosMap.values()).map(async (pago) => {
+        // Comprobar si hay discrepancia entre valor_origen y monto acumulado
+        if (
+          pago.valor_origen > 0 &&
+          parseFloat(pago.MontoPagosGeneral) !== pago.valor_origen
+        ) {
+          // Obtener cuántas veces se ha asignado este documento
+          const asignaciones = await this.obtener(pago.id);
+
+          // Siempre añadir un índice cuando hay discrepancia
+          // Si hay asignaciones previas, usar ese número, si no, comenzar con 1
+          const indice = asignaciones > 0 ? asignaciones : 1;
+          pago.NumeroDocumento = `${pago.NumeroDocumento}-${indice + 1}`;
+        }
+
+        // Eliminar propiedades temporales antes de devolver
+        const { id, valor_origen, ...pagoFinal } = pago;
+        return pagoFinal;
+      })
+    );
+
+    return pagosArray;
+  }
+
+  // Obtener descripción del producto
+  private obtenerDescripcionProducto(detalle: any): string {
+    if (detalle.tipo === 0) {
+      return 'MATRICULA';
+    } else if (detalle.tipo > 0 && detalle.tipo <= 12) {
+      const mesesNombres = [
+        'ENERO',
+        'FEBRERO',
+        'MARZO',
+        'ABRIL',
+        'MAYO',
+        'JUNIO',
+        'JULIO',
+        'AGOSTO',
+        'SEPTIEMBRE',
+        'OCTUBRE',
+        'NOVIEMBRE',
+        'DICIEMBRE',
+      ];
+      return `PENSION ${
+        mesesNombres[new Date(this.fecha[detalle.tipo - 1].date).getMonth()]
+      }`;
+    } else {
+      return detalle.descripcion || 'OTRO PAGO';
+    }
+  }
+
+  // Obtener descripción corta
+  private obtenerDescripcionCortaProducto(detalle: any): string {
+    if (detalle.tipo === 0) {
+      return 'MATRICULA';
+    } else if (detalle.tipo > 0 && detalle.tipo <= 12) {
+      const mesesNombres = [
+        'ENERO',
+        'FEBRERO',
+        'MARZO',
+        'ABRIL',
+        'MAYO',
+        'JUNIO',
+        'JULIO',
+        'AGOSTO',
+        'SEPTIEMBRE',
+        'OCTUBRE',
+        'NOVIEMBRE',
+        'DICIEMBRE',
+      ];
+      return mesesNombres[detalle.tipo - 1];
+    } else {
+      return 'OTRO';
+    }
+  }
+
+  // Formatear fecha en formato YYYY-MM-DD
+  private formatearFechaYYYYMMDD(fecha: Date): string {
+    const year = fecha.getFullYear();
+    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+    const day = String(fecha.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Convertir número a letras (implementación básica)
+  private numeroALetras(numero: number): string {
+    const partes = numero.toFixed(2).split('.');
+    let entero = parseInt(partes[0]);
+    const decimal = parseInt(partes[1]);
+
+    // Esta es una versión simplificada - en producción usa una librería completa
+    const unidades = [
+      '',
+      'UNO',
+      'DOS',
+      'TRES',
+      'CUATRO',
+      'CINCO',
+      'SEIS',
+      'SIETE',
+      'OCHO',
+      'NUEVE',
+    ];
+    const especiales = [
+      'DIEZ',
+      'ONCE',
+      'DOCE',
+      'TRECE',
+      'CATORCE',
+      'QUINCE',
+      'DIECISEIS',
+      'DIECISIETE',
+      'DIECIOCHO',
+      'DIECINUEVE',
+    ];
+    const decenas = [
+      '',
+      'DIEZ',
+      'VEINTE',
+      'TREINTA',
+      'CUARENTA',
+      'CINCUENTA',
+      'SESENTA',
+      'SETENTA',
+      'OCHENTA',
+      'NOVENTA',
+    ];
+    const centenas = [
+      '',
+      'CIENTO',
+      'DOSCIENTOS',
+      'TRESCIENTOS',
+      'CUATROCIENTOS',
+      'QUINIENTOS',
+      'SEISCIENTOS',
+      'SETECIENTOS',
+      'OCHOCIENTOS',
+      'NOVECIENTOS',
+    ];
+
+    let resultado = '';
+
+    if (entero === 0) {
+      resultado = 'CERO';
+    } else {
+      // Manejar centenas
+      if (entero >= 100) {
+        if (entero === 100) resultado = 'CIEN';
+        else resultado = centenas[Math.floor(entero / 100)];
+        entero %= 100;
+        if (entero > 0) resultado += ' ';
+      }
+
+      // Manejar decenas y unidades
+      if (entero >= 10 && entero <= 19) {
+        resultado += especiales[entero - 10];
+      } else {
+        if (entero >= 20) {
+          resultado += decenas[Math.floor(entero / 10)];
+          entero %= 10;
+          if (entero > 0) resultado += ' Y ';
+        }
+
+        if (entero > 0) {
+          resultado += unidades[entero];
+        }
+      }
+    }
+
+    // Agregar decimales
+    resultado += ` COMA ${decimal < 10 ? 'CERO' : ''} ${decimal}`;
+
+    return resultado;
+  }
+
+  // Función para crear documento con el nuevo proveedor
+  async crear_documento_nuevo_proveedor(documento: any) {
+    this.loading.creacion = true;
+    this.mensajes.creacion = 'Creando documento en el nuevo sistema...';
+
+    this._transactionService.createDocumentNuevoProveedor(documento).subscribe({
+      next: async (response) => {
+        if (response) {
+          console.log(
+            'Documento creado con éxito en nuevo proveedor',
+            response,
+            response.IdComprobante
+          );
+          this.mensajes.creacion = 'Documento creado exitosamente';
+          this.showSuccessToast('Documento creado con éxito');
+          const idComprobante = response.IdComprobante;
+          if (typeof idComprobante !== 'number') {
+            console.error(
+              'IdComprobante no es un número válido:',
+              idComprobante
+            );
+          }
+
+          this._adminService
+            .actualizar_pago_id_contifico(
+              {
+                id: this.pago._id,
+                id_contifico: idComprobante.toString(),
+              },
+              this.token
+            )
+            .subscribe({
+              next: (respuesta) => {
+                console.log('Respuesta de actualización:', respuesta);
+                // aquí puedes mostrar un toast u otra acción
+              },
+              error: (err) => {
+                console.error('Error al actualizar id_contifico:', err);
+                // puedes mostrar un mensaje de error aquí también
+              },
+            });
+
+          setTimeout(() => {
+            // location.reload();
+          }, 2500);
+        } else {
+          this.mensajes.creacion =
+            'Error al crear el documento' + response.Operation.OperationMessage;
+          this.showErrorToast(
+            'Error al crear el documento. Por favor, inténtelo nuevamente.' +
+              response.Operation.OperationMessage
+          );
+        }
+      },
+      error: (error) => {
+        console.error('Error en la creación del documento:', error);
+        let errorMessage =
+          'Ocurrió un error desconocido. Por favor, inténtelo más tarde.';
+
+        if (error?.error?.error?.mensaje) {
+          errorMessage = error.error.error.mensaje;
+        } else if (error?.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+
+        this.mensajes.creacion = errorMessage;
+        this.showErrorToast(errorMessage);
+      },
+      complete: () => {
+        this.loading.generacion = false;
+        this.loading.creacion = false;
+      },
+    });
+  }
+
+  // Función principal para generar documento con nuevo proveedor
+  async generarDocumentoNuevoProveedor() {
+    this.habilitar_boton_generar = true;
+
+    if (this.apikey && !this.pago.id_nuevo_proveedor) {
+      try {
+        const pre_factura = await this.armado_Documento_nuevo_proveedor(
+          this.pago,
+          this.detalles
+        );
+        console.log('Documento para nuevo proveedor:', pre_factura);
+
+        await this.crear_documento_nuevo_proveedor(pre_factura);
+      } catch (error) {
+        console.error('Error al generar documento:', error);
+        this.habilitar_boton_generar = true;
+        this.showErrorToast(
+          'Error al generar el documento. Por favor, inténtelo nuevamente.'
+        );
+      }
+    } else {
+      this.showInfoToast(
+        'El documento ya fue generado anteriormente o falta configurar la API key.'
+      );
     }
   }
 }
