@@ -1209,7 +1209,8 @@ const generarDocumentoNuevoProveedor = async function (req, res) {
       // Generar documento usando el servicio
       const documento = await facturacionService.generarDocumentoNuevoProveedor(
         pago,
-        detalles
+        detalles,
+        req.user.base
       );
       console.log("Documento generado", documento);
       // Enviar documento al servicio externo

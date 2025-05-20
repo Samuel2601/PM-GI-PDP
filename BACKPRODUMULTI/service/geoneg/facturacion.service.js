@@ -1,8 +1,10 @@
 // services/facturacion.service.js
 
+const modelsService = require("../models.service");
+
 class FacturacionService {
   // Método principal para generar factura con nuevo proveedor
-  async generarDocumentoNuevoProveedor(pago, detalles) {
+  async generarDocumentoNuevoProveedor(pago, detalles, dbName) {
     try {
       // Calcular subtotal y total
       const subtotal = Number(
@@ -17,7 +19,7 @@ class FacturacionService {
         valorFacturaLetras: this.numeroALetras(subtotal),
         Comprobante: this.crearComprobante(pago, subtotal),
         ComprobanteProducto: this.mapearDetallesProductos(detalles, fechas),
-        PagosCXC: await this.mapearPagos(pago, detalles),
+        PagosCXC: await this.mapearPagos(pago, detalles, dbName),
         Sesion: this.crearDatosSesion(),
       };
     } catch (error) {
@@ -169,7 +171,7 @@ class FacturacionService {
   }
 
   // Mapear los pagos con manejo de índices
-  async mapearPagos(pago, detalles) {
+  async mapearPagos(pago, detalles, dbName) {
     // Primero agrupamos los pagos por número de documento
     const pagosMap = new Map();
 
@@ -225,23 +227,30 @@ class FacturacionService {
 
     // Procesamos cada pago para verificar discrepancias y aplicar índices
     const pagosArray = await Promise.all(
-      Array.from(pagosMap.values()).map(async (pago) => {
+      Array.from(pagosMap.values()).map(async (documento_pago) => {
         // Comprobar si hay discrepancia entre valor_origen y monto acumulado
         if (
-          pago.valor_origen > 0 &&
-          parseFloat(pago.MontoPagosGeneral) !== pago.valor_origen
+          documento_pago.valor_origen > 0 &&
+          parseFloat(documento_pago.MontoPagosGeneral) !==
+            documento_pago.valor_origen
         ) {
           // Obtener cuántas veces se ha asignado este documento
-          const asignaciones = await this.obtenerAsignacionesDocumento(pago.id);
+          const asignaciones = await this.obtenerAsignacionesDocumento(
+            pago._id,
+            documento_pago.id,
+            dbName
+          );
 
           // Siempre añadir un índice cuando hay discrepancia
           // Si hay asignaciones previas, usar ese número, si no, comenzar con 1
           const indice = asignaciones > 0 ? asignaciones : 1;
-          pago.NumeroDocumento = `${pago.NumeroDocumento}-${indice + 1}`;
+          documento_pago.NumeroDocumento = `${documento_pago.NumeroDocumento}-${
+            indice + 1
+          }`;
         }
 
         // Eliminar propiedades temporales antes de devolver
-        const { id, valor_origen, ...pagoFinal } = pago;
+        const { id, valor_origen, ...pagoFinal } = documento_pago;
         return pagoFinal;
       })
     );
@@ -250,10 +259,36 @@ class FacturacionService {
   }
 
   // Método para consultar asignaciones de documento (implementar según tu estructura)
-  async obtenerAsignacionesDocumento(idDocumento) {
-    // Implementar lógica para obtener cuántas asignaciones tiene un documento
-    // Esto dependerá de tu estructura de base de datos
-    return 0; // Valor por defecto, reemplazar con lógica real
+  async obtenerAsignacionesDocumento(idPago, idDocumento, dbName) {
+    try {
+      const models = modelsService.getModels(dbName);
+
+      if (!models) {
+        console.error(
+          `No se pudieron cargar los modelos para la base ${dbName}`
+        );
+        return 0;
+      }
+
+      const { Dpago } = models;
+
+      // Buscar todos los detalles de pago que tienen este documento
+      const detalles = await Dpago.find({ documento: idDocumento });
+
+      // Extraer los IDs de pago únicos, excluyendo el pago actual
+      const pagosUnicos = new Set();
+      detalles.forEach((detalle) => {
+        if (detalle.pago && detalle.pago.toString() !== idPago.toString()) {
+          pagosUnicos.add(detalle.pago.toString());
+        }
+      });
+
+      // Devolver la cantidad de pagos únicos (excluyendo el actual)
+      return pagosUnicos.size;
+    } catch (error) {
+      console.error("Error al obtener asignaciones del documento:", error);
+      return 0;
+    }
   }
 
   // Crear objeto de sesión

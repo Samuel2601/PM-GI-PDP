@@ -1394,6 +1394,7 @@ const obtener_documento_admin = async function (req, res) {
     res.status(500).send({ message: "NoAccess" });
   }
 };
+
 const actualizar_documento_admin = async function (req, res) {
   if (req.user) {
     try {
