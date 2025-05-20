@@ -31,6 +31,8 @@ const Pension_becaSchema = require("../models/Pension_Beca");
 const DocumentoSchema = require("../models/Documento");
 const FacturacionSchema = require("../models/Facturacion");
 
+const axios = require("axios");
+
 var mongoose = require("mongoose");
 
 const modelsService = require("../service/models.service");
@@ -1167,7 +1169,7 @@ const generarDocumentoNuevoProveedor = async function (req, res) {
     try {
       const dbName = req.user.base;
       const { id } = req.params;
-      const { fecha } = req.body;
+      //const fecha = req.body?.fecha || new Date();
 
       // Obtener los modelos para esta base de datos
       const models = modelsService.getModels(dbName);
@@ -1180,7 +1182,7 @@ const generarDocumentoNuevoProveedor = async function (req, res) {
       }
 
       // Usar los modelos ya inicializados
-      const { Pago, Dpago } = models;
+      const { Pago, Dpago, Config } = models;
 
       // Obtener pago y detalles
       const pago = await Pago.findById(id)
@@ -1194,17 +1196,22 @@ const generarDocumentoNuevoProveedor = async function (req, res) {
         });
       }
 
-      const detalles = await Dpago.find({ pago: pago._id })
-        .populate("documento")
-        .populate("idpension");
+      const detalles = await Dpago.find({ pago: pago._id }).populate([
+        { path: "documento" },
+        {
+          path: "idpension",
+          populate: {
+            path: "idanio_lectivo",
+          },
+        },
+      ]);
 
       // Generar documento usando el servicio
       const documento = await facturacionService.generarDocumentoNuevoProveedor(
         pago,
-        detalles,
-        fecha
+        detalles
       );
-
+      console.log("Documento generado", documento);
       // Enviar documento al servicio externo
       const respuestaAPI = await enviarDocumentoAPI(documento);
 
@@ -1973,6 +1980,7 @@ module.exports = {
   listar_pensiones_estudiantes_tienda,
 
   listar_estudiantes_pago,
+  generarDocumentoNuevoProveedor,
 };
 //comentario 2
 //Comentario de prueba

@@ -2320,25 +2320,69 @@ export class ShowPaymentsComponent implements OnInit {
 
   // Función principal para generar documento con nuevo proveedor
   async generarDocumentoNuevoProveedor() {
-    this.habilitar_boton_generar = true;
+    this.habilitar_boton_generar = false; // Deshabilitar botón durante la operación
+    this.loading.generacion = true;
+    this.mensajes.generacion = 'Generando documento en el nuevo proveedor...';
 
-    if (this.apikey && !this.pago.id_nuevo_proveedor) {
+    if (this.apikey && !this.pago.id_contifico) {
       try {
-        const pre_factura = await this.armado_Documento_nuevo_proveedor(
-          this.pago,
-          this.detalles
-        );
-        console.log('Documento para nuevo proveedor:', pre_factura);
+        // Llamar al servicio del backend para generar el documento
+        this._transactionService
+          .generarDocumentoNuevoProveedor(this.pago._id, this.token)
+          .subscribe({
+            next: (response) => {
+              console.log('Documento generado con éxito:', response);
 
-        await this.crear_documento_nuevo_proveedor(pre_factura);
+              if (response.success) {
+                this.mensajes.generacion = 'Documento generado exitosamente';
+                this.showSuccessToast('Documento generado con éxito');
+
+                // Actualizar el ID en el objeto local
+                if (response.data && response.data.IdComprobante) {
+                  this.pago.id_contifico =
+                    response.data.IdComprobante.toString();
+                  // No es necesario llamar a actualizar_pago_id_contifico porque el backend ya lo hace
+                }
+              } else {
+                this.mensajes.generacion =
+                  'Error al generar el documento: ' + (response.message || '');
+                this.showErrorToast(
+                  response.message || 'Error al generar el documento'
+                );
+              }
+            },
+            error: (error) => {
+              console.error('Error en la generación del documento:', error);
+              let errorMessage =
+                'Ocurrió un error desconocido. Por favor, inténtelo más tarde.';
+
+              if (error?.error?.error?.mensaje) {
+                errorMessage = error.error.error.mensaje;
+              } else if (error?.error?.message) {
+                errorMessage = error.error.message;
+              } else if (error?.message) {
+                errorMessage = error.message;
+              }
+
+              this.mensajes.generacion = errorMessage;
+              this.showErrorToast(errorMessage);
+            },
+            complete: () => {
+              this.loading.generacion = false;
+              this.habilitar_boton_generar = true; // Volver a habilitar el botón
+            },
+          });
       } catch (error) {
         console.error('Error al generar documento:', error);
         this.habilitar_boton_generar = true;
+        this.loading.generacion = false;
         this.showErrorToast(
           'Error al generar el documento. Por favor, inténtelo nuevamente.'
         );
       }
     } else {
+      this.loading.generacion = false;
+      this.habilitar_boton_generar = true;
       this.showInfoToast(
         'El documento ya fue generado anteriormente o falta configurar la API key.'
       );

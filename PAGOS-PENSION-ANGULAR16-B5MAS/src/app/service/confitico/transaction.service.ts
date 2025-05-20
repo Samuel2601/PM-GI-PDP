@@ -77,4 +77,15 @@ export class TransactionService {
       }
     );
   }
+
+  generarDocumentoNuevoProveedor(id: string, token: any): Observable<any> {
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: token,
+    });
+
+    return this.http.get(`${GLOBAL.url}/generarDocumentoNuevoProveedor/${id}`, {
+      headers: headers,
+    });
+  }
 }

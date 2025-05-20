@@ -2,13 +2,13 @@
 
 class FacturacionService {
   // Método principal para generar factura con nuevo proveedor
-  async generarDocumentoNuevoProveedor(pago, detalles, fechas) {
+  async generarDocumentoNuevoProveedor(pago, detalles) {
     try {
       // Calcular subtotal y total
       const subtotal = Number(
         detalles.reduce((sum, det) => sum + det.valor, 0).toFixed(2)
       );
-
+      const fechas = this.generarFechas(detalles[0]);
       return {
         codigoComprobante: "FACT",
         idProveedor: 0,
@@ -24,6 +24,19 @@ class FacturacionService {
       console.error("Error al armar documento para nuevo proveedor:", error);
       throw new Error("Error al armar documento para nuevo proveedor");
     }
+  }
+
+  generarFechas(detalle) {
+    const fecha = [];
+
+    for (let j = 0; j < 10; j++) {
+      fecha.push({
+        date: new Date(detalle.idpension.idanio_lectivo.anio_lectivo).setMonth(
+          new Date(detalle.idpension.idanio_lectivo.anio_lectivo).getMonth() + j
+        ),
+      });
+    }
+    return fecha;
   }
 
   // Crear objeto Comprobante

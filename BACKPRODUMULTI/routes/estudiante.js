@@ -85,6 +85,12 @@ api.get(
 );
 
 api.get(
+  "/generarDocumentoNuevoProveedor/:id",
+  auth.auth,
+  estudianteController.generarDocumentoNuevoProveedor
+);
+
+api.get(
   "/obtener_detalles_por_estudiante/:id",
   auth.auth,
   estudianteController.obtener_detalles_por_estudiante
