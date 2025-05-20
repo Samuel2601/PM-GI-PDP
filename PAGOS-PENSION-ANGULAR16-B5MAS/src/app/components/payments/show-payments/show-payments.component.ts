@@ -149,6 +149,9 @@ export class ShowPaymentsComponent implements OnInit {
     this.url = GLOBAL.url;
   }
 
+  xml_path: string | null = null;
+  ride_path: string | null = null;
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -667,6 +670,19 @@ export class ShowPaymentsComponent implements OnInit {
       }
     } else if (this.apikey && !this.pago.id_contifico && this.apikey_int) {
       await this.generarDocumentoNuevoProveedor();
+    }
+    if (this.apikey && this.pago.id_contifico && this.apikey_int) {
+      this._transactionService.getXml_Ride(this.pago.id_contifico).subscribe({
+        next: (response: any) => {
+          console.log(response);
+
+          this.xml_path = response.PathXML?.trim() ? response.PathXML : null;
+          this.ride_path = response.PathRIDE?.trim() ? response.PathRIDE : null;
+        },
+        error: (error) => {
+          console.error('Error al obtener xml:', error);
+        },
+      });
     }
   }
 

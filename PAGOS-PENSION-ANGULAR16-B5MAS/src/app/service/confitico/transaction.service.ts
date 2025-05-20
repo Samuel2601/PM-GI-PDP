@@ -88,4 +88,35 @@ export class TransactionService {
       headers: headers,
     });
   }
+
+  getXml_Ride(id: string): Observable<any> {
+    const data: any = {
+      Operacion: 'C1',
+      Fecha1: '2020/01/01',
+      Fecha2: '2020/01/01',
+      Parametro1: id,
+      Parametro2: '',
+      Sesion: {
+        IdInstitucion: 311505,
+        IdOficina: 335006,
+        CodigoEmpresa: '0891792143001',
+        IdPerfilUsuario: 0,
+        Identificacion: '0891792143001',
+        CodigoPerfil: '0',
+        IdUsuario: 3271,
+        FechaSistema: '2025-05-13',
+        NombreCompletoUsuario: '',
+        NombreCortoUsuario: 'uesarevalo',
+        IdTransaccion: 0,
+        IPEstacion: '0.00',
+        IdEmpresaOperadora: 1655,
+      },
+    };
+    return this.http.post(
+      `https://plataforma.geoneg.com:8081/api/Invoice/ConsultaXML_RIDE`,
+      {
+        headers: this.getHeaders(),
+      }
+    );
+  }
 }

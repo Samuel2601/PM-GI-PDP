@@ -286,6 +286,28 @@
                     >
                       Normal
                     </button>
+
+                    <a
+                      *ngIf="xml_path"
+                      [href]="xml_path"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <button mat-raised-button class="btn btn-dark btn-sm">
+                        XML
+                      </button>
+                    </a>
+
+                    <a
+                      *ngIf="ride_path"
+                      [href]="ride_path"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <button mat-raised-button class="btn btn-dark btn-sm">
+                        RIDE
+                      </button>
+                    </a>
                   </div>
                 </div>
 
