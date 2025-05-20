@@ -672,17 +672,25 @@ export class ShowPaymentsComponent implements OnInit {
       await this.generarDocumentoNuevoProveedor();
     }
     if (this.apikey && this.pago.id_contifico && this.apikey_int) {
-      this._transactionService.getXml_Ride(this.pago.id_contifico).subscribe({
-        next: (response: any) => {
-          console.log(response);
+      this._transactionService
+        .getXml_Ride(this.pago.id_contifico, this.token)
+        .subscribe({
+          next: (response: any) => {
+            console.log(response);
 
-          this.xml_path = response.PathXML?.trim() ? response.PathXML : null;
-          this.ride_path = response.PathRIDE?.trim() ? response.PathRIDE : null;
-        },
-        error: (error) => {
-          console.error('Error al obtener xml:', error);
-        },
-      });
+            this.xml_path = response.data.PathXML?.trim()
+              ? response.data.PathXML
+              : null;
+            this.ride_path = response.data.PathRIDE?.trim()
+              ? response.data.PathRIDE
+              : null;
+          },
+          error: (error) => {
+            this.mensajes.emision =
+              'Error al generar el documento: ' + error.message;
+            this.showErrorToast(error.message);
+          },
+        });
     }
   }
 

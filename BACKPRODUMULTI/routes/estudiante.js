@@ -90,6 +90,8 @@ api.get(
   estudianteController.generarDocumentoNuevoProveedor
 );
 
+api.get("/getXmlRide/:id", auth.auth, estudianteController.getXml_Ride);
+
 api.get(
   "/obtener_detalles_por_estudiante/:id",
   auth.auth,

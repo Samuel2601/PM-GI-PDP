@@ -1263,6 +1263,67 @@ const enviarDocumentoAPI = async (documento) => {
   }
 };
 
+const getXml_Ride = async function (req, res) {
+  if (!req.user) return res.status(403).send({ message: "NoAccess" });
+
+  try {
+    const id = req.params["id"];
+
+    // Generar fecha actual en formato YYYY-MM-DD
+    const fechaActual = new Date().toISOString().split("T")[0];
+
+    const apiUrl =
+      "https://plataforma.geoneg.com:8081/api/Invoice/ConsultaXML_RIDE";
+    const data = {
+      Operacion: "C1",
+      Fecha1: "2020/01/01", // Parece ser un valor predeterminado en tu caso
+      Fecha2: "2020/01/01",
+      Parametro1: id,
+      Parametro2: "",
+      Sesion: {
+        IdInstitucion: 311505,
+        IdOficina: 335006,
+        CodigoEmpresa: "0891792143001",
+        IdPerfilUsuario: 0,
+        Identificacion: "0891792143001",
+        CodigoPerfil: "0",
+        IdUsuario: 3271,
+        FechaSistema: fechaActual, // Usar fecha actual
+        NombreCompletoUsuario: "",
+        NombreCortoUsuario: "uesarevalo",
+        IdTransaccion: 0,
+        IPEstacion: "0.00",
+        IdEmpresaOperadora: 1655,
+      },
+    };
+
+    const response = await axios.post(apiUrl, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Dado que la respuesta es simple, enviamos directamente response.data
+    res.status(200).send({ data: response.data });
+  } catch (error) {
+    console.error("Error al consultar XML/RIDE:", error.message);
+
+    // Verificar si hay una respuesta específica de la API
+    if (error.response && error.response.data) {
+      return res.status(error.response.status || 500).send({
+        message: "Error al consultar XML/RIDE",
+        error: error.response.data,
+      });
+    }
+
+    // Error general
+    res.status(500).send({
+      message: "Error al consultar XML/RIDE",
+      error: error.message,
+    });
+  }
+};
+
 //const xml = fs.readFileSync('ruta/al/archivo.xml');
 
 const forge = require("node-forge");
@@ -1982,6 +2043,7 @@ module.exports = {
 
   listar_estudiantes_pago,
   generarDocumentoNuevoProveedor,
+  getXml_Ride,
 };
 //comentario 2
 //Comentario de prueba
