@@ -84,7 +84,7 @@ export class TransactionService {
       Authorization: token,
     });
 
-    return this.http.get(`${GLOBAL.url}/generarDocumentoNuevoProveedor/${id}`, {
+    return this.http.get(`${GLOBAL.url}generarDocumentoNuevoProveedor/${id}`, {
       headers: headers,
     });
   }
@@ -95,7 +95,7 @@ export class TransactionService {
       Authorization: token,
     });
 
-    return this.http.get(`${GLOBAL.url}/getXmlRide/${id}`, {
+    return this.http.get(`${GLOBAL.url}getXmlRide/${id}`, {
       headers: headers,
     });
   }

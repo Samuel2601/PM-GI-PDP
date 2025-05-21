@@ -671,27 +671,6 @@ export class ShowPaymentsComponent implements OnInit {
     } else if (this.apikey && !this.pago.id_contifico && this.apikey_int) {
       await this.generarDocumentoNuevoProveedor();
     }
-    if (this.apikey && this.pago.id_contifico && this.apikey_int) {
-      this._transactionService
-        .getXml_Ride(this.pago.id_contifico, this.token)
-        .subscribe({
-          next: (response: any) => {
-            console.log(response);
-
-            this.xml_path = response.data.PathXML?.trim()
-              ? response.data.PathXML
-              : null;
-            this.ride_path = response.data.PathRIDE?.trim()
-              ? response.data.PathRIDE
-              : null;
-          },
-          error: (error) => {
-            this.mensajes.emision =
-              'Error al generar el documento: ' + error.message;
-            this.showErrorToast(error.message);
-          },
-        });
-    }
   }
 
   emitirSRI() {
@@ -763,6 +742,28 @@ export class ShowPaymentsComponent implements OnInit {
 
       // Obtener parámetros de la ruta y procesar documento
       await this.procesarRutaYDocumento();
+
+      if (this.apikey && this.pago.id_contifico && this.apikey_int) {
+        this._transactionService
+          .getXml_Ride(this.pago.id_contifico, this.token)
+          .subscribe({
+            next: (response: any) => {
+              console.log(response);
+
+              this.xml_path = response.data.PathXML?.trim()
+                ? response.data.PathXML
+                : null;
+              this.ride_path = response.data.PathRIDE?.trim()
+                ? response.data.PathRIDE
+                : null;
+            },
+            error: (error) => {
+              this.mensajes.emision =
+                'Error al generar el documento: ' + error.message;
+              this.showErrorToast(error.message);
+            },
+          });
+      }
     } catch (error) {
       console.error('Error en la inicialización:', error);
       this.showErrorToast(
