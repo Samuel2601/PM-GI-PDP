@@ -1247,7 +1247,7 @@ const enviarDocumentoAPI = async (documento) => {
     console.log("documento", documento);
     // Configurar la llamada a la API externa
     const apiUrl =
-      "https://plataforma.geoneg.com:8081/api/Invoice/GuardarComprobantesAPI_123123123";
+      "https://plataforma.geoneg.com:8081/api/Invoice/GuardarComprobantesAPI";
     //const apiKey = process.env.FACTURACION_API_KEY;
 
     const response = await axios.post(apiUrl, documento, {
