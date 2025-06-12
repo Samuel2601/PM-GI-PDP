@@ -28,5 +28,5 @@ var InstitucionSchema = Schema({
 });
 
 //module.exports =  mongoose.model('instituto',InstitucionSchema);
-export const Instituto = mongoose.model("Instituto", InstitucionSchema);
+//export const Instituto = mongoose.model("Instituto", InstitucionSchema);
 module.exports = InstitucionSchema;

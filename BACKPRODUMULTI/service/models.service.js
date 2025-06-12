@@ -11,6 +11,8 @@ const PensionSchema = require("../models/Pension");
 const Pension_becaSchema = require("../models/Pension_Beca");
 const RegistroSchema = require("../models/Registro");
 const AdminSchema = require("../models/Admin");
+const InstitucionSchema = require("../models/Institucion");
+const AdminInstitutoSchema = require("../models/AdminInstituto");
 
 // Importar todos los esquemas
 
@@ -34,10 +36,29 @@ const databasesList = [
  */
 function initModelsForDatabase(dbName) {
   try {
+    let models = {};
+    if (!modelsCache["Instituciones"] || dbName === "Instituciones") {
+      const conn = mongoose.connection.useDb("Instituciones");
+      const Institucion = conn.model("Instituto", InstitucionSchema);
+      const AdminInstituto = mongoose.model(
+        "AdminInstituto",
+        AdminInstitutoSchema
+      );
+      /*modelsCache["Instituciones"] = {
+        
+        lastUsed: Date.now(),
+      };*/
+      models = {
+        Instituto: Institucion,
+        AdminInstituto: AdminInstituto,
+      };
+      return models;
+    }
+
     const conn = mongoose.connection.useDb(dbName);
 
     // Definir todos los modelos para esta base de datos
-    const models = {
+    models = {
       Admin: conn.model("admin", AdminSchema),
       Config: conn.model("config", ConfigSchema),
       Documento: conn.model("document", DocumentoSchema),
@@ -73,6 +94,8 @@ async function initializeAllDatabases() {
   }
 
   console.log("Carga de modelos completada para todas las bases de datos");
+
+  console.log("Carga de modelos de Instituciones completada");
 }
 
 /**

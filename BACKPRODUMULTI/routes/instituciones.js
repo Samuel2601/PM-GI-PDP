@@ -3,14 +3,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const router = express.Router();
+const modelsService = require("../service/models.service");
 
-// Modelos
-const InstitucionSchema = require("../models/Institucion");
-const AdminInstitutoSchema = require("../models/AdminInstituto");
-
-// Crear modelos
-const Instituto = mongoose.model("Instituto", InstitucionSchema);
-const AdminInstituto = mongoose.model("AdminInstituto", AdminInstitutoSchema);
+const models = modelsService.getModels("Instituciones");
+if (!models) {
+  throw new Error(`No se pudieron cargar los modelos para la base ${dbName}`);
+}
+const { Instituto, AdminInstituto } = models;
 
 // Ruta para obtener el tipo de escuela
 router.get("/instituciones/tipo-escuela", async (req, res) => {
@@ -23,7 +22,7 @@ router.get("/instituciones/tipo-escuela", async (req, res) => {
         .json({ message: "El parámetro base es requerido." });
     }
 
-    // Buscar el administrador por base
+    // Buscar el administrador por base de la institución
     const admin = await AdminInstituto.findOne({ base });
     if (!admin) {
       return res.status(404).json({ message: "Administrador no encontrado." });

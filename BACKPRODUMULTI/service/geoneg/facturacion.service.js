@@ -1,7 +1,14 @@
 // services/facturacion.service.js
 
-const { Instituto } = require("../../models/Institucion");
 const modelsService = require("../models.service");
+const models = modelsService.getModels("Instituciones");
+if (!models) {
+  throw new Error(`No se pudieron cargar los modelos para la base ${dbName}`);
+}
+if (models.Instituto) {
+  console.log("Instituto cargado");
+}
+const { Instituto } = models;
 
 class FacturacionService {
   // Método principal para generar factura con nuevo proveedor
