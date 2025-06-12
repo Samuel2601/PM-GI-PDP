@@ -20,7 +20,7 @@ class FacturacionService {
         Comprobante: this.crearComprobante(pago, subtotal),
         ComprobanteProducto: this.mapearDetallesProductos(detalles, fechas),
         PagosCXC: await this.mapearPagos(pago, detalles, dbName),
-        Sesion: this.crearDatosSesion(dbName),
+        Sesion: await this.crearDatosSesion(dbName),
       };
     } catch (error) {
       console.error("Error al armar documento para nuevo proveedor:", error);
