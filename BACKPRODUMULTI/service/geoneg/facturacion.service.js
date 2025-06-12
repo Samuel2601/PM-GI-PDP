@@ -328,14 +328,14 @@ class FacturacionService {
     if (!institucion) {
       throw new Error("Institución no encontrada");
     }
-
+    console.log("Institucion", institucion);
     const configBase = configuracionesSesion[institucion.apiKey];
     if (!configBase) {
       throw new Error(
         `Configuración de sesión no definida para apiKey ${institucion.apiKey}`
       );
     }
-
+    console.log("configBase", configBase);
     return {
       ...configBase,
       FechaSistema: this.formatearFechaYYYYMMDD(new Date()),
