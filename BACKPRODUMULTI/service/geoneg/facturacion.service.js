@@ -1,5 +1,6 @@
 // services/facturacion.service.js
 
+const { Instituto } = require("../../models/Institucion");
 const modelsService = require("../models.service");
 
 class FacturacionService {
