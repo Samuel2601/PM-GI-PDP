@@ -10,6 +10,30 @@ if (models.Instituto) {
 }
 const { Instituto } = models;
 
+const configuracionesSesion = {
+  311505: {
+    IdInstitucion: 311505,
+    IdOficina: 335006,
+    CodigoEmpresa: "0891792143001",
+    IdPerfilUsuario: 0,
+    Identificacion: "0891792143001",
+    CodigoPerfil: "0",
+    IdUsuario: 3271,
+    IdEmpresaOperadora: 1655,
+  },
+  316598: {
+    IdInstitucion: 316598,
+    IdOficina: 340206,
+    CodigoEmpresa: "0891723830001",
+    IdPerfilUsuario: 0,
+    Identificacion: "0891723830001",
+    CodigoPerfil: "0",
+    IdUsuario: 3292,
+    IdEmpresaOperadora: 1659,
+  },
+  // Puedes seguir agregando más configuraciones aquí
+};
+
 class FacturacionService {
   // Método principal para generar factura con nuevo proveedor
   async generarDocumentoNuevoProveedor(pago, detalles, dbName) {
@@ -299,33 +323,7 @@ class FacturacionService {
     }
   }
 
-  // Archivo: sesionService.js
-
   async crearDatosSesion(dbName) {
-    const configuracionesSesion = {
-      311505: {
-        IdInstitucion: 311505,
-        IdOficina: 335006,
-        CodigoEmpresa: "0891792143001",
-        IdPerfilUsuario: 0,
-        Identificacion: "0891792143001",
-        CodigoPerfil: "0",
-        IdUsuario: 3271,
-        IdEmpresaOperadora: 1655,
-      },
-      316598: {
-        IdInstitucion: 316598,
-        IdOficina: 340206,
-        CodigoEmpresa: "0891723830001",
-        IdPerfilUsuario: 0,
-        Identificacion: "0891723830001",
-        CodigoPerfil: "0",
-        IdUsuario: 3292,
-        IdEmpresaOperadora: 1659,
-      },
-      // Puedes seguir agregando más configuraciones aquí
-    };
-
     const institucion = await Instituto.findOne({ base: dbName });
     if (!institucion) {
       throw new Error("Institución no encontrada");
