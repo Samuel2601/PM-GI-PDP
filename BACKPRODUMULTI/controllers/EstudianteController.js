@@ -1269,7 +1269,7 @@ const getXml_Ride = async function (req, res) {
 
   try {
     const id = req.params["id"];
-
+    const dbName = req.user.base;
     // Generar fecha actual en formato YYYY-MM-DD
     const fechaActual = new Date().toISOString().split("T")[0];
 
@@ -1281,21 +1281,7 @@ const getXml_Ride = async function (req, res) {
       Fecha2: "2020/01/01",
       Parametro1: id,
       Parametro2: "",
-      Sesion: {
-        IdInstitucion: 311505,
-        IdOficina: 335006,
-        CodigoEmpresa: "0891792143001",
-        IdPerfilUsuario: 0,
-        Identificacion: "0891792143001",
-        CodigoPerfil: "0",
-        IdUsuario: 3271,
-        FechaSistema: fechaActual, // Usar fecha actual
-        NombreCompletoUsuario: "",
-        NombreCortoUsuario: "uesarevalo",
-        IdTransaccion: 0,
-        IPEstacion: "0.00",
-        IdEmpresaOperadora: 1655,
-      },
+      Sesion: await facturacionService.crearDatosSesion(dbName),
     };
 
     const response = await axios.post(apiUrl, data, {
