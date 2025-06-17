@@ -383,26 +383,12 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
    * Check if pension is valid for payment
    */
   isPensionValid(i: number): boolean {
+    console.log('Pension', this.pension[i]);
     // Simplified validation logic
     const pension = this.pension[i];
 
-    // Check if there are remaining payments
-    const isValid =
-      pension.meses <= 10 ||
-      (pension.matricula !== 1 && pension.paga_mat === 0) ||
-      (pension.extrapagos === undefined &&
-        pension.idanio_lectivo.extrapagos !== undefined) ||
-      JSON.parse(pension.idanio_lectivo.extrapagos || '[]').length !==
-        JSON.parse(pension.extrapagos || '[]').length;
-
-    if (isValid) {
-      this.setupPensionData(i);
-      return true;
-    } else {
-      this.idpension = false;
-      this.disableActionButtons();
-      return false;
-    }
+    this.setupPensionData(i);
+    return true;
   }
 
   /**
@@ -681,6 +667,7 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
         }
       }
     });
+    console.log(this.fecha);
   }
 
   /**
@@ -1154,7 +1141,7 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
    * Utiliza caché para evitar llamadas redundantes en un período corto de tiempo
    */
   private obtenerDetallesOrdenes(): Observable<any> {
-    // Si no hay ID de pensión, retornar un observable vacío
+    /*// Si no hay ID de pensión, retornar un observable vacío
     if (!this.idpension) {
       return EMPTY;
     }
@@ -1196,7 +1183,7 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
     console.log(
       'Realizando llamada al API para obtener detalles de órdenes:',
       this.idpension
-    );
+    );*/
 
     // Si no hay caché válida o no pasa las validaciones, hacer la llamada al servicio
     return this._adminService
@@ -1204,6 +1191,7 @@ export class CreatePaymentsComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         tap((response) => {
+          console.log('Respuesta obtenida:', response);
           // Verificar que la respuesta es válida antes de almacenarla en caché
           if (
             response &&

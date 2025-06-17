@@ -3339,12 +3339,22 @@ const eliminar_orden_admin = async function (req, res) {
       const { Registro, Pago, Config, Pension, Documento, Dpago } = models;
 
       var id = req.params["id"];
+
+      // CORRECCIÓN: Asegurar que el ID sea un ObjectId válido
+      const ObjectId = require("mongoose").Types.ObjectId;
+      const pagoId = new ObjectId(id);
+
       //registra el pago
-      var pagos = await Pago.findById(id);
+      var pagos = await Pago.findById(pagoId);
 
       if (pagos.estado == "Registrado") {
         //busca los detalles de pago
-        var dpagos = await Dpago.find({ pago: id });
+        var dpagos = await Dpago.find({ pago: pagoId });
+
+        console.log(
+          `Encontrados ${dpagos.length} detalles de pago para eliminar`
+        );
+
         try {
           for (var dp of dpagos) {
             let aux = await Pension.find({ _id: dp.idpension }).populate(
@@ -3361,7 +3371,7 @@ const eliminar_orden_admin = async function (req, res) {
                 npagos: new_pago,
               }
             );
-            //
+
             //registro de detalle de pago
             let registro = {};
             registro.estudiante = pagos.estudiante;
@@ -3371,6 +3381,7 @@ const eliminar_orden_admin = async function (req, res) {
             registro.descripcion = JSON.stringify(dp);
 
             await Registro.create(registro);
+
             if (dp.tipo == 0) {
               if (dp.estado.search("Abono") == -1) {
                 await Pension.updateOne(
@@ -3382,9 +3393,7 @@ const eliminar_orden_admin = async function (req, res) {
               }
             } else if (dp.tipo > 0 && dp.tipo <= 11) {
               if (dp.estado.search("Abono") == -1) {
-                //var cn = await Config.find().sort({ createdAt: -1 }); //await Config.findById({_id:'61abe55d2dce63583086f108'});
                 let config = aux[0].idanio_lectivo;
-                //let config = await Config.findById({_id:'61abe55d2dce63583086f108'});
                 if (
                   aux[0].condicion_beca == "Si" &&
                   dp.valor != config.pension
@@ -3425,12 +3434,7 @@ const eliminar_orden_admin = async function (req, res) {
             } else {
               try {
                 if (dp.estado.search("Abono") == -1) {
-                  //var aux = await Pension.find({ _id: dp.idpension }).populate('idanio_lectivo');
-
-                  //var cn = await Config.find().sort({ createdAt: -1 }); //await Config.findById({_id:'61abe55d2dce63583086f108'});
                   let config = aux[0].idanio_lectivo;
-
-                  //let config = await Config.findById({_id:'61abe55d2dce63583086f108'});
                   var auxpagos = [];
                   if (config.extrapagos) {
                     var auxpagos = JSON.parse(config.extrapagos);
@@ -3466,39 +3470,55 @@ const eliminar_orden_admin = async function (req, res) {
                 res.status(200).send({ message: "Algo salió mal" + error });
               }
             }
-            //await Dpago.findOneAndDelete(dp._id);
+
+            // CORRECCIÓN: Eliminar cada detalle de pago individualmente
+            console.log(`Eliminando detalle de pago: ${dp._id}`);
+            await Dpago.findOneAndDelete({ _id: dp._id });
           }
         } catch (error) {
           console.log(error);
           res.status(200).send({ message: "Algo salió mal" + error });
         }
 
-        //remueve detalles de pago
+        // CORRECCIÓN: Verificar que se eliminaron todos los detalles
+        const dpagosRestantes = await Dpago.find({ pago: pagoId });
+        if (dpagosRestantes.length > 0) {
+          console.log(
+            `Aún quedan ${dpagosRestantes.length} detalles de pago. Eliminando con deleteMany...`
+          );
+          const deleteResult = await Dpago.deleteMany({ pago: pagoId });
+          console.log(
+            `Eliminados ${deleteResult.deletedCount} detalles de pago con deleteMany`
+          );
+        }
 
-        await Dpago.deleteMany({ pago: id });
+        // Registro de auditoría del pago principal
         let registro = {};
         registro.estudiante = pagos.estudiante;
         registro.admin = req.user.sub;
         registro.tipo = "Elimino";
         registro.descripcion = JSON.stringify(pagos);
         await Registro.create(registro);
-        //elimina el pago
-        var pago = await Pago.deleteOne({ _id: id });
 
-        res.status(200).send({ message: "Eliminado con exito" });
+        //elimina el pago principal
+        var pago = await Pago.deleteOne({ _id: pagoId });
+        console.log(`Pago principal eliminado: ${pago.deletedCount} registros`);
+
+        res.status(200).send({ message: "Eliminado con éxito" });
       } else {
         res.status(200).send({
-          message: "No puedes eliminar está orden, ya ah sido emitido ",
+          message: "No puedes eliminar esta orden, ya ha sido emitida",
         });
       }
     } catch (error) {
       console.log(error);
-      res.status(200).send({ message: "Algo salió mal" + error });
+      res.status(500).send({ message: "Algo salió mal: " + error });
     }
   } else {
     res.status(500).send({ message: "NoAccess" });
   }
 };
+
 const eliminar_orden_pm = async function (req, res) {
   if (req.user) {
     try {
