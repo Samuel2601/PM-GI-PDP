@@ -1395,62 +1395,111 @@ const obtener_documento_admin = async function (req, res) {
   }
 };
 
+// Solución 1: Modificar actualizar_documento_admin para preservar valor_origen
 const actualizar_documento_admin = async function (req, res) {
-  if (req.user) {
-    try {
-      const dbName = req.user.base;
-
-      // Obtener los modelos para esta base de datos
-      const models = modelsService.getModels(dbName);
-
-      if (!models) {
-        throw new Error(
-          `No se pudieron cargar los modelos para la base ${dbName}`
-        );
-      }
-
-      // Usar los modelos ya inicializados
-      const { Documento, Dpago } = models;
-
-      let id = req.params["id"];
-      let data = req.body;
-      let admin = await Documento.findById(id);
-      let pagos = await Dpago.find({ documetno: id });
-      var a = 0;
-      for (var p of pagos) {
-        a += p.valor;
-      }
-      if (data.valor >= a - 0.1) {
-        let reg = await Documento.updateOne(
-          { _id: id },
-          {
-            documento: data.documento,
-            cuenta: data.cuenta,
-            valor: data.valor - a,
-            contenido: data.contenido,
-            f_deposito: data.f_deposito,
-            contenido: data.contenido,
-          }
-        );
-        let registro = {};
-        registro.admin = req.user.sub;
-        registro.tipo = "actualizo";
-        registro.descripcion = JSON.stringify(admin) + JSON.stringify(data);
-        await Registro.create(registro);
-        res.status(200).send({ data: reg });
-      } else {
-        res.status(200).send({
-          message:
-            "El número de pagos realizados con este documento es mayor al que le asignas",
-        });
-      }
-    } catch (error) {
-      res.status(200).send({ message: "Algo salió mal" });
-    }
-  } else {
+  if (!req.user) {
     res.status(500).send({ message: "NoAccess" });
   }
+
+  try {
+    const dbName = req.user.base;
+    const models = modelsService.getModels(dbName);
+
+    if (!models) {
+      throw new Error(
+        `No se pudieron cargar los modelos para la base ${dbName}`
+      );
+    }
+
+    const { Documento, Dpago, Registro } = models;
+
+    let id = req.params["id"];
+    let data = req.body;
+    let admin = await Documento.findById(id);
+    let pagos = await Dpago.find({ documento: id }); // Corregido 'documetno' por 'documento'
+
+    var totalPagado = 0;
+    for (var p of pagos) {
+      totalPagado += p.valor;
+    }
+    if (data.valor && data.valor < 0) {
+      return res.status(400).send({
+        message: "El valor no puede ser negativo",
+      });
+    }
+
+    // NUEVA LÓGICA: Preservar valor_origen
+    let valor_origen_actual = admin.valor_origen;
+
+    // Si no existe valor_origen, establecerlo con el valor actual del documento
+    if (!valor_origen_actual || valor_origen_actual === 0) {
+      // Buscar el valor original en Registro
+      try {
+        const registroOriginal = await Registro.findOne({
+          tipo: "creo",
+          descripcion: { $regex: admin.documento.toString() },
+        });
+
+        if (registroOriginal) {
+          const descripcionParseada = JSON.parse(registroOriginal.descripcion);
+          valor_origen_actual = parseFloat(descripcionParseada.valor);
+        } else {
+          // Si no se encuentra en registro, usar el valor actual como origen
+          valor_origen_actual = admin.valor + totalPagado;
+        }
+      } catch (error) {
+        valor_origen_actual = admin.valor + totalPagado;
+      }
+    }
+
+    // Calcular el nuevo stock basado en el valor original preservado
+    const nuevoStock = data.valor - totalPagado;
+
+    if (nuevoStock < 0) {
+      return res.status(400).send({
+        message: "El nuevo stock no puede ser negativo",
+      });
+    }
+
+    let reg = await Documento.updateOne(
+      { _id: id },
+      {
+        documento: data.documento,
+        cuenta: data.cuenta,
+        valor: nuevoStock,
+        valor_origen: data.valor, // Nuevo valor original
+        contenido: data.contenido,
+        f_deposito: data.f_deposito,
+      }
+    );
+
+    // Registrar la actualización con información detallada
+    let registro = {
+      admin: req.user.sub,
+      tipo: "actualizo_documento",
+      descripcion: JSON.stringify({
+        documento_id: id,
+        valores_anteriores: {
+          valor: admin.valor,
+          valor_origen: admin.valor_origen || valor_origen_actual,
+        },
+        valores_nuevos: {
+          valor: nuevoStock,
+          valor_origen: data.valor,
+        },
+        total_pagado: totalPagado,
+        timestamp: new Date(),
+      }),
+    };
+
+    await Registro.create(registro);
+    res.status(200).send({ data: reg });
+  } catch (error) {
+    console.error("Error en actualizar_documento_admin:", error);
+    res.status(500).send({ message: "Algo salió mal" });
+  }
 };
+
 const verificar_token = async function (req, res) {
   if (req.user) {
     res.status(200).send({ data: req.user });
@@ -3620,6 +3669,7 @@ const registroCompraManualEstudiante = async function (req, res) {
   } = models;
 
   const session = null; // await mongoose.startSession();
+  let pagoCreado = null;
 
   try {
     // session.startTransaction();
@@ -3630,6 +3680,8 @@ const registroCompraManualEstudiante = async function (req, res) {
       session
     );
 
+    pagoCreado = pago; // Guardar referencia para posible limpieza
+
     const dpagosValidos = await procesarDetallesPagos(
       detalles,
       config,
@@ -3638,16 +3690,59 @@ const registroCompraManualEstudiante = async function (req, res) {
       session
     );
 
+    // VALIDACIÓN CRÍTICA: Verificar que se crearon Dpagos
     if (dpagosValidos.length === 0) {
-      throw new Error("No se pudieron registrar los pagos");
+      // Verificar en la base de datos si realmente no hay Dpagos asociados
+      const dpagosEnBD = await Dpago.find({ pago: pago._id });
+
+      if (dpagosEnBD.length === 0) {
+        // No hay Dpagos, eliminar el pago y registros asociados
+        await limpiarPagoSinDetalles(pago._id, req.user.sub, models);
+        throw new Error(
+          "No se pudieron registrar los pagos. El pago ha sido eliminado."
+        );
+      }
+
+      // Si hay Dpagos en BD pero no en el array, usar los de BD
+      dpagosValidos.push(...dpagosEnBD);
     }
 
     await actualizarPagoTotal(pago, dpagosValidos, models, session);
 
+    // VALIDACIÓN FINAL: Verificar nuevamente que el pago tiene Dpagos asociados
+    const verificacionFinal = await Dpago.find({ pago: pago._id });
+    if (verificacionFinal.length === 0) {
+      await limpiarPagoSinDetalles(pago._id, req.user.sub, models);
+      throw new Error(
+        "Error de consistencia: Pago sin detalles detectado y eliminado."
+      );
+    }
+
     //await session.commitTransaction();
-    res.status(200).send({ pago, message: "Registrado correctamente" });
+    res.status(200).send({
+      pago,
+      message: "Registrado correctamente",
+      dpagos_count: verificacionFinal.length,
+    });
   } catch (error) {
     console.error("Error en registro de compra:", error);
+
+    // Si hay un pago creado y hay error, verificar si necesita limpieza
+    if (pagoCreado) {
+      try {
+        const dpagosExistentes = await Dpago.find({ pago: pagoCreado._id });
+        if (dpagosExistentes.length === 0) {
+          console.log(
+            "Limpiando pago sin detalles debido a error:",
+            pagoCreado._id
+          );
+          await limpiarPagoSinDetalles(pagoCreado._id, req.user.sub, models);
+        }
+      } catch (cleanupError) {
+        console.error("Error en limpieza de pago:", cleanupError);
+      }
+    }
+
     if (session && session.inTransaction()) {
       //  await session.abortTransaction();
     }
@@ -3660,6 +3755,38 @@ const registroCompraManualEstudiante = async function (req, res) {
     }
   }
 };
+
+// Nueva función para limpiar pagos sin detalles
+async function limpiarPagoSinDetalles(pagoId, usuarioId, models) {
+  const { Pago, Registro } = models;
+
+  try {
+    console.log("Eliminando pago sin detalles:", pagoId);
+
+    // Eliminar registros asociados al pago
+    await Registro.deleteMany({
+      admin: usuarioId,
+      descripcion: { $regex: pagoId.toString() },
+    });
+
+    // Eliminar el pago
+    const resultado = await Pago.deleteOne({ _id: pagoId });
+
+    console.log("Pago eliminado:", resultado);
+
+    // Crear registro de limpieza
+    await Registro.create([
+      {
+        admin: usuarioId,
+        tipo: "limpieza",
+        descripcion: `Pago ${pagoId} eliminado por falta de detalles válidos`,
+      },
+    ]);
+  } catch (error) {
+    console.error("Error en limpieza de pago sin detalles:", error);
+    throw error;
+  }
+}
 
 async function crearPagoYRegistro(req, models, session) {
   const { Pago, Registro } = models;
