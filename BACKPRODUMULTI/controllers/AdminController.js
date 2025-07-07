@@ -3979,7 +3979,7 @@ async function actualizarStockDocumento(element, models, session) {
     }
 
     const nuevoStock = parseFloat((valorOriginal - totalPagado).toFixed(2));
-    //console.log("Nuevo stock: ", nuevoStock, pagosPrevios.length);
+    console.log("Nuevo stock: ", nuevoStock, pagosPrevios.length);
     if (nuevoStock < -0.01) {
       throw new Error("El pago excede el stock disponible");
     }
