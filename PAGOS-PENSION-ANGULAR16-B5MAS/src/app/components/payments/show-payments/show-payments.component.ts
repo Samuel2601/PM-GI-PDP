@@ -441,6 +441,162 @@ export class ShowPaymentsComponent implements OnInit {
     }
   }
 
+  /**
+   * Valida una cédula ecuatoriana usando el algoritmo oficial
+   */
+  validarCedulaEcuatoriana(cedula: string): boolean {
+    if (!cedula || cedula.length !== 10) return false;
+
+    const digitos = cedula.split('').map(Number);
+    const provincia = parseInt(cedula.substr(0, 2));
+    const tercerDigito = digitos[2];
+
+    // Solo validar personas naturales ecuatorianas
+    if (tercerDigito < 0 || tercerDigito > 5) return false;
+
+    // Validaciones básicas para ecuatorianos
+    if (provincia < 1 || provincia > 24) return false;
+
+    // Algoritmo de validación
+    let suma = 0;
+    for (let i = 0; i < 9; i++) {
+      let digito = digitos[i];
+      if (i % 2 === 0) {
+        digito *= 2;
+        if (digito > 9) digito -= 9;
+      }
+      suma += digito;
+    }
+
+    const digitoVerificador = (10 - (suma % 10)) % 10;
+    return digitoVerificador === digitos[9];
+  }
+
+  /**
+   * Valida cédula de extranjero (formato básico)
+   * Los extranjeros tienen tercer dígito 7 u 8
+   */
+  validarCedulaExtranjero(cedula: string): boolean {
+    if (!cedula || cedula.length !== 10) return false;
+
+    const tercerDigito = parseInt(cedula[2]);
+
+    // Debe ser 7 u 8 para extranjeros
+    if (tercerDigito !== 7 && tercerDigito !== 8) return false;
+
+    // Validación básica: todos dígitos numéricos
+    return /^\d{10}$/.test(cedula);
+  }
+
+  /**
+   * Determina el tipo de contribuyente según el tercer dígito
+   */
+  determinarTipoContribuyente(
+    identificacion: string
+  ): 'NATURAL' | 'PUBLICO' | 'JURIDICA' | 'EXTRANJERO' | 'INVALIDO' {
+    if (identificacion.length < 10) return 'INVALIDO';
+
+    const tercerDigito = parseInt(identificacion[2]);
+
+    if (tercerDigito >= 0 && tercerDigito <= 5) {
+      return 'NATURAL';
+    } else if (tercerDigito === 6) {
+      return 'PUBLICO';
+    } else if (tercerDigito === 7 || tercerDigito === 8) {
+      return 'EXTRANJERO';
+    } else if (tercerDigito === 9) {
+      return 'JURIDICA';
+    } else {
+      return 'INVALIDO';
+    }
+  }
+
+  /**
+   * Crea el objeto cliente validado según el tipo de contribuyente
+   */
+  crearClienteValidado(pago: any): Cliente {
+    const dniCompleto = pago.estudiante.dni_factura;
+    const cedula = dniCompleto.substr(0, 10);
+    const tipoContribuyente = this.determinarTipoContribuyente(cedula);
+
+    console.log(`Procesando: ${dniCompleto}`);
+    console.log(`Cédula extraída: ${cedula}`);
+    console.log(`Tipo detectado: ${tipoContribuyente}`);
+
+    if (tipoContribuyente === 'NATURAL') {
+      // Persona Natural Ecuatoriana - Validar cédula
+      const esValidaCedula = this.validarCedulaEcuatoriana(cedula);
+
+      if (!esValidaCedula) {
+        throw new Error(`Cédula ecuatoriana inválida: ${cedula}`);
+      }
+
+      return {
+        cedula: cedula,
+        razon_social: pago.estudiante.nombres_factura,
+        telefonos: pago.estudiante.telefono,
+        direccion: pago.estudiante.direccion,
+        tipo: 'N',
+        email: pago.estudiante.email_padre,
+        es_extranjero: false,
+        ruc: dniCompleto.length > 10 ? dniCompleto : null,
+      };
+    } else if (tipoContribuyente === 'EXTRANJERO') {
+      // Persona Natural Extranjera - Validar formato
+      const esValidaCedula = this.validarCedulaExtranjero(cedula);
+
+      if (!esValidaCedula) {
+        throw new Error(`Cédula de extranjero inválida: ${cedula}`);
+      }
+
+      console.log('Configurando como Persona Natural Extranjera');
+
+      return {
+        cedula: cedula,
+        razon_social: pago.estudiante.nombres_factura,
+        telefonos: pago.estudiante.telefono,
+        direccion: pago.estudiante.direccion,
+        tipo: 'N', // Sigue siendo Natural pero extranjero
+        email: pago.estudiante.email_padre,
+        es_extranjero: true, // ✅ Marcar como extranjero
+        ruc: dniCompleto.length > 10 ? dniCompleto : null,
+      };
+    } else if (tipoContribuyente === 'JURIDICA') {
+      // Persona Jurídica - NO incluir campo cédula
+      console.log('Configurando como Persona Jurídica (sin campo cédula)');
+
+      return {
+        cedula: null, // ❌ NO incluir campo cedula para jurídicas
+        // ❌ NO incluir campo cedula para jurídicas
+        razon_social: pago.estudiante.nombres_factura,
+        telefonos: pago.estudiante.telefono,
+        direccion: pago.estudiante.direccion,
+        tipo: 'J',
+        email: pago.estudiante.email_padre,
+        es_extranjero: false,
+        ruc: dniCompleto.length > 10 ? dniCompleto : null,
+      };
+    } else if (tipoContribuyente === 'PUBLICO') {
+      // Sector Público - Tratar como jurídica
+      console.log('Configurando como Sector Público (sin campo cédula)');
+
+      return {
+        cedula: null, // ❌ NO incluir campo cedula para públicas
+        razon_social: pago.estudiante.nombres_factura,
+        telefonos: pago.estudiante.telefono,
+        direccion: pago.estudiante.direccion,
+        tipo: 'J',
+        email: pago.estudiante.email_padre,
+        es_extranjero: false,
+        ruc: dniCompleto.length > 10 ? dniCompleto : null,
+      };
+    } else {
+      throw new Error(
+        `Tipo de identificación no válido: ${cedula} (tipo: ${tipoContribuyente})`
+      );
+    }
+  }
+
   async armado_Documento_envio_Contifico(
     pago: any,
     detalles: any[]
@@ -461,7 +617,9 @@ export class ShowPaymentsComponent implements OnInit {
       }
 
       const account = accounts[0]; // Usar la primera cuenta bancaria disponible
-      const cliente: Cliente = {
+      const cliente: Cliente = this.crearClienteValidado(pago);
+
+      /*{
         cedula: pago.estudiante.dni_factura.substr(0, 10),
         razon_social: pago.estudiante.nombres_factura,
         telefonos: pago.estudiante.telefono,
@@ -474,7 +632,7 @@ export class ShowPaymentsComponent implements OnInit {
 
       if (pago.estudiante.dni_factura.length > 10) {
         cliente.ruc = pago.estudiante.dni_factura;
-      }
+      }*/
 
       const vendedor: Vendedor = {
         cedula: pago.encargado.dni,
@@ -609,7 +767,7 @@ export class ShowPaymentsComponent implements OnInit {
     this._transactionService
       .createDocument(documento, this.pago._id)
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           if (response) {
             console.log('Documento creado con éxito', response);
             this.mensajes.creacion = 'Documento creado exitosamente';
@@ -631,7 +789,7 @@ export class ShowPaymentsComponent implements OnInit {
             );
           }
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error en la creación del documento:', error);
           let errorMessage =
             'Ocurrió un error desconocido. Por favor, inténtelo más tarde.';
@@ -686,7 +844,7 @@ export class ShowPaymentsComponent implements OnInit {
           this.mensajes.emision = 'Documento emitido exitosamente al SRI';
           /*setTimeout(() => location.reload(), 5000);*/
         },
-        error: (error) => {
+        error: (error: any) => {
           this.mensajes.emision = 'Error al emitir al SRI: ' + error.message;
         },
         complete: () => {
@@ -757,7 +915,7 @@ export class ShowPaymentsComponent implements OnInit {
                 ? response.data.PathRIDE
                 : null;
             },
-            error: (error) => {
+            error: (error: any) => {
               this.mensajes.emision =
                 'Error al generar el documento: ' + error.message;
               this.showErrorToast(error.message);
@@ -796,7 +954,7 @@ export class ShowPaymentsComponent implements OnInit {
   private async procesarRutaYDocumento(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this._route.params.pipe(takeUntil(this.destroy$)).subscribe({
-        next: async (params) => {
+        next: async (params: any) => {
           try {
             this.id = params['id'];
             await this.init_data();
@@ -805,7 +963,7 @@ export class ShowPaymentsComponent implements OnInit {
             reject(error);
           }
         },
-        error: (error) => reject(error),
+        error: (error: any) => reject(error),
       });
     });
   }
@@ -1006,7 +1164,7 @@ export class ShowPaymentsComponent implements OnInit {
           .obtener_detalles_ordenes_estudiante(this.id, this.token)
           .pipe(
             timeout(10000), // 10 segundos de timeout
-            catchError((error) => {
+            catchError((error: any) => {
               if (this.dataInitRetryCount < this.maxRetries) {
                 this.dataInitRetryCount++;
                 console.warn(
@@ -1184,7 +1342,7 @@ export class ShowPaymentsComponent implements OnInit {
     if (this.error_constru == '' && JSON.stringify(this.registro) != '{}') {
       this._adminService
         .marcar_finalizado_orden(this.pago._id, this.registro, this.token)
-        .subscribe((response) => {
+        .subscribe((response: any) => {
           //console.log(response);
           if (response.message) {
             iziToast.info({
@@ -1822,7 +1980,7 @@ export class ShowPaymentsComponent implements OnInit {
       this.registro.codigoTipocomprobante = 35;
       this._adminService
         .marcar_finalizado_orden(this.pago._id, this.registro, this.token)
-        .subscribe((response) => {
+        .subscribe((response: any) => {
           //console.log(response);
           if (response.message) {
             iziToast.info({
@@ -1836,7 +1994,7 @@ export class ShowPaymentsComponent implements OnInit {
                 this.registro,
                 this.token
               )
-              .subscribe((response) => {
+              .subscribe((response: any) => {
                 iziToast.success({
                   title: 'ÉXITOSO',
                   position: 'topRight',
@@ -2298,11 +2456,11 @@ export class ShowPaymentsComponent implements OnInit {
               this.token
             )
             .subscribe({
-              next: (respuesta) => {
+              next: (respuesta: any) => {
                 console.log('Respuesta de actualización:', respuesta);
                 // aquí puedes mostrar un toast u otra acción
               },
-              error: (err) => {
+              error: (err: any) => {
                 console.error('Error al actualizar id_contifico:', err);
                 // puedes mostrar un mensaje de error aquí también
               },
@@ -2320,7 +2478,7 @@ export class ShowPaymentsComponent implements OnInit {
           );
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error en la creación del documento:', error);
         let errorMessage =
           'Ocurrió un error desconocido. Por favor, inténtelo más tarde.';

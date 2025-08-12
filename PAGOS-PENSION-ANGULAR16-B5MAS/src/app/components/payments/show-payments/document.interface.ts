@@ -24,7 +24,7 @@ export interface Documento {
 
 export interface Cliente {
   ruc: string | null;
-  cedula: string;
+  cedula: string | null;
   razon_social: string;
   telefonos?: string;
   direccion?: string;
