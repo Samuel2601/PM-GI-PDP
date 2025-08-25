@@ -494,21 +494,39 @@ export class ShowPaymentsComponent implements OnInit {
   determinarTipoContribuyente(
     identificacion: string
   ): 'NATURAL' | 'PUBLICO' | 'JURIDICA' | 'EXTRANJERO' | 'INVALIDO' {
-    if (identificacion.length < 10) return 'INVALIDO';
+    if (!identificacion) return 'INVALIDO';
 
-    const tercerDigito = parseInt(identificacion[2]);
+    // --- CASO 1: CÉDULA ---
+    if (/^\d{10}$/.test(identificacion)) {
+      const provincia = parseInt(identificacion.substring(0, 2), 10);
+      if (provincia < 1 || provincia > 24) return 'INVALIDO';
 
-    if (tercerDigito >= 0 && tercerDigito <= 5) {
+      // Aquí puedes validar dígito verificador (módulo 10) si quieres robustez
       return 'NATURAL';
-    } else if (tercerDigito === 6) {
-      return 'PUBLICO';
-    } else if (tercerDigito === 7 || tercerDigito === 8) {
-      return 'EXTRANJERO';
-    } else if (tercerDigito === 9) {
-      return 'JURIDICA';
-    } else {
-      return 'INVALIDO';
     }
+
+    // --- CASO 2: RUC ---
+    if (/^\d{13}$/.test(identificacion)) {
+      const tercerDigito = parseInt(identificacion[2], 10);
+
+      if (tercerDigito >= 0 && tercerDigito <= 5) {
+        return 'NATURAL'; // RUC natural
+      } else if (tercerDigito === 6) {
+        return 'PUBLICO'; // RUC sector público
+      } else if (tercerDigito === 9) {
+        return 'JURIDICA'; // RUC sociedades privadas
+      } else {
+        return 'EXTRANJERO'; // Otros dígitos (7 u 8)
+      }
+    }
+
+    // --- CASO 3: DOCUMENTOS ALFANUMÉRICOS ---
+    if (/^[A-Z0-9]+$/i.test(identificacion)) {
+      return 'EXTRANJERO';
+    }
+
+    // --- CASO 4: TODO LO DEMÁS ---
+    return 'INVALIDO';
   }
 
   /**
