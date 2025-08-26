@@ -452,7 +452,7 @@ export class ShowPaymentsComponent implements OnInit {
     const tercerDigito = digitos[2];
 
     // Solo validar personas naturales ecuatorianas
-    if (tercerDigito < 0 || tercerDigito > 5) return false;
+    //if (tercerDigito < 0 || tercerDigito > 5) return false;
 
     // Validaciones básicas para ecuatorianos
     if (provincia < 1 || provincia > 24) return false;
@@ -1640,7 +1640,7 @@ export class ShowPaymentsComponent implements OnInit {
           this.pago.estudiante.telefono?.toString() ?? '9999999999',
         emailEstudiante: this.pago.estudiante.email?.toString() ?? '',
         cedulaPadre: this.pago.estudiante.dni_padre.toString() ?? '',
-        nombrePadre: this.pago.estudiante.nombres_padre.toString() ?? '' ?? '',
+        nombrePadre: this.pago.estudiante.nombres_padre.toString() ?? '',
         facturarA: this.pago.estudiante.dni_factura.toString() ?? '',
         codigoTipocomprobante: parseInt(this.pago.tipo_documento),
         subtotal: 0, //parseFloat(this.pago.total_pagar.toFixed(2));
