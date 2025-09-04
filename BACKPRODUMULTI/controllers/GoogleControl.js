@@ -1,11 +1,11 @@
-const fs = require('fs').promises;
-const path = require('path');
-const process = require('process');
-const {authenticate} = require('@google-cloud/local-auth');
-const {google} = require('googleapis');
+const fs = require("fs").promises;
+const path = require("path");
+const process = require("process");
+const { authenticate } = require("@google-cloud/local-auth");
+const { google } = require("googleapis");
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/admin.directory.user'];
+const SCOPES = ["https://www.googleapis.com/auth/admin.directory.user"];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
@@ -17,9 +17,9 @@ const SCOPES = ['https://www.googleapis.com/auth/admin.directory.user'];
  *
  * @return {Promise<OAuth2Client|null>}
  */
-async function loadSavedCredentialsIfExist(TOKEN_PATH) {
+async function loadSavedCredentialsIfExist(tokenPath) {
   try {
-    const content = await fs.readFile(TOKEN_PATH);
+    const content = await fs.readFile(tokenPath);
     const credentials = JSON.parse(content);
     return google.auth.fromJSON(credentials);
   } catch (err) {
@@ -33,40 +33,48 @@ async function loadSavedCredentialsIfExist(TOKEN_PATH) {
  * @param {OAuth2Client} client
  * @return {Promise<void>}
  */
-async function saveCredentials(client) {
-  const content = await fs.readFile(CREDENTIALS_PATH);
+async function saveCredentials(client, credentialsPath, tokenPath) {
+  console.log("Guardando credenciales en:", tokenPath);
+
+  const content = await fs.readFile(credentialsPath, "utf8");
   const keys = JSON.parse(content);
   const key = keys.installed || keys.web;
-  const payload = JSON.stringify({
-    type: 'authorized_user',
-    client_id: key.client_id,
-    client_secret: key.client_secret,
-    refresh_token: client.credentials.refresh_token,
-  });
-  await fs.writeFile(TOKEN_PATH, payload);
+
+  const payload = JSON.stringify(
+    {
+      type: "authorized_user",
+      client_id: key.client_id,
+      client_secret: key.client_secret,
+      refresh_token: client.credentials.refresh_token,
+    },
+    null,
+    2 // para que quede formateado
+  );
+
+  await fs.writeFile(tokenPath, payload, "utf8");
 }
 
 /**
  * Load or request or authorization to call APIs.
  *
  */
-async function authorize(TOKEN_PATH,CREDENTIALS_PATH) {
+async function authorize(tokenPath, credentialsPath) {
   try {
-    let client = await loadSavedCredentialsIfExist(TOKEN_PATH);
+    let client = await loadSavedCredentialsIfExist(tokenPath);
     if (client) {
       return client;
     }
     client = await authenticate({
       scopes: SCOPES,
-      keyfilePath: CREDENTIALS_PATH,
+      keyfilePath: credentialsPath,
     });
     if (client.credentials) {
-      await saveCredentials(client);
+      await saveCredentials(client, credentialsPath, tokenPath);
     }
     return client;
   } catch (error) {
-    return error
-  }  
+    return error;
+  }
 }
 
 /**
@@ -75,21 +83,21 @@ async function authorize(TOKEN_PATH,CREDENTIALS_PATH) {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 async function listUsers(auth) {
-  console.log('Listar');
-  const service = google.admin({version: 'directory_v1', auth});
+  console.log("Listar");
+  const service = google.admin({ version: "directory_v1", auth });
   const res = await service.users.list({
-    customer: 'my_customer',
+    customer: "my_customer",
     maxResults: 12,
-    orderBy: 'email',
+    orderBy: "email",
   });
 
   const users = res.data.users;
   if (!users || users.length === 0) {
-    console.log('No users found.');
+    console.log("No users found.");
     return;
   }
 
-  console.log('Users:(',users.length,')');
+  console.log("Users:(", users.length, ")");
   users.forEach((user) => {
     console.log(`${user.primaryEmail} (${user.name.fullName})`);
   });
@@ -99,145 +107,157 @@ async function listUsers(auth) {
 //authorize().then(listUsers).catch(console.error);
 
 async function findUser(auth, userEmail) {
-    const service = google.admin({ version: 'directory_v1', auth });
-    try {
-      const res = await service.users.get({
-        userKey: userEmail,
-      });
-  
-      const user = res.data;
-      console.log('Usuario encontrado:');
-      console.log(user);
-      return user;
-    } catch (error) {
-      console.error('Error al buscar el usuario:', error.message);
-    }
+  const service = google.admin({ version: "directory_v1", auth });
+  try {
+    const res = await service.users.get({
+      userKey: userEmail,
+    });
+
+    const user = res.data;
+    console.log("Usuario encontrado:");
+    console.log(user);
+    return user;
+  } catch (error) {
+    console.error("Error al buscar el usuario:", error.message);
   }
-  // Uso de la función findUser
-const userEmailToFind = 'estudiante.prueba.1@egbfcristorey.edu.ec'; // Reemplaza con el correo del usuario que deseas buscar
+}
+// Uso de la función findUser
+const userEmailToFind = "estudiante.prueba.1@egbfcristorey.edu.ec"; // Reemplaza con el correo del usuario que deseas buscar
 //authorize().then((auth) => findUser(auth, userEmailToFind)).catch(console.error);
 
-async function suspendUser(auth, userEmail,estado) {
-    const service = google.admin({ version: 'directory_v1', auth });
-    try {
-      // Buscar el usuario
+async function suspendUser(auth, userEmail, estado) {
+  const service = google.admin({ version: "directory_v1", auth });
+  try {
+    // Buscar el usuario
+    const res = await service.users.get({
+      userKey: userEmail,
+    });
+
+    const user = res.data;
+
+    if (!user) {
+      console.log("Usuario no encontrado.");
+      return;
+    } else if (!user.isAdmin) {
+      // Suspende al usuario
+      const u = await service.users.update({
+        userKey: userEmail,
+        resource: { suspended: estado },
+      });
+
+      console.log("Usuario suspendido:");
+      console.log(u.data.suspended);
+    }
+  } catch (error) {
+    console.error("Error al suspender al usuario:", error.message);
+  }
+}
+
+// Uso de la función suspendUser
+const userEmailToSuspend = "estudiante.prueba.1@egbfcristorey.edu.ec"; // Reemplaza con el correo del usuario que deseas suspender
+//authorize().then((auth) => suspendUser(auth,userEmailToSuspend,true)).catch(console.error);
+
+async function suspendUserMasivo(auth, userEmails, estado) {
+  const service = google.admin({ version: "directory_v1", auth });
+  try {
+    let resp = [];
+    // Obtén información de los usuarios a suspender
+    for (const userEmail of userEmails) {
       const res = await service.users.get({
         userKey: userEmail,
       });
-  
       const user = res.data;
-  
-      if (!user) {
-        console.log('Usuario no encontrado.');
-        return;
-      }else if(!user.isAdmin){
+      if (user && !user.isAdmin) {
+        //usersToSuspend.push({ primaryEmail: userEmail, suspended: estado });
 
-        // Suspende al usuario
-        const u= await service.users.update({
-            userKey: userEmail,
-            resource: { suspended: estado },
+        const u = await service.users.update({
+          userKey: userEmail,
+          resource: { suspended: estado },
         });
-  
-      console.log('Usuario suspendido:');
-      console.log(u.data.suspended);
+        resp.push({ userEmail: userEmail, suspended: u.data.suspended });
+        console.log("Usuario suspendido:");
+        console.log(userEmail, u.data.suspended);
+      } else {
+        console.log(`Usuario ${userEmail} no encontrado.`);
       }
-  
-    } catch (error) {
-      console.error('Error al suspender al usuario:', error.message);
     }
+    return resp;
+  } catch (error) {
+    console.error("Error al suspender usuarios:", error.message);
   }
-  
-  // Uso de la función suspendUser
-  const userEmailToSuspend = 'estudiante.prueba.1@egbfcristorey.edu.ec'; // Reemplaza con el correo del usuario que deseas suspender
-  //authorize().then((auth) => suspendUser(auth,userEmailToSuspend,true)).catch(console.error);
+}
 
-  async function suspendUserMasivo(auth, userEmails,estado) {
-    const service = google.admin({ version: 'directory_v1', auth });
+// Uso de la función suspendUser
+//const usersEmailToSuspend = ['estudiante.prueba.1@egbfcristorey.edu.ec','pruebaestudiaestudiante.prueba.2@egbfcristorey.edu.ec']; // Reemplaza con el correo del usuario que deseas suspender
+//authorize().then((auth) => suspendUserMasivo(auth, usersEmailToSuspend,true)).catch(console.error);
+
+const cambiarEstadoGoogle = async function (req, res) {
+  if (req.user) {
+    let data = req.body;
     try {
-      let resp=[];
-        // Obtén información de los usuarios a suspender
-        for (const userEmail of userEmails) {
-          const res = await service.users.get({
-            userKey: userEmail,
-          });
-          const user = res.data;
-          if (user&&!user.isAdmin) {
-            //usersToSuspend.push({ primaryEmail: userEmail, suspended: estado });
+      if (data.array && data.estado != undefined) {
+        const tokenPath = path.join(
+          process.cwd(),
+          "controllers/" + req.user.base + "/token.json"
+        );
+        const credentialsPath = path.join(
+          process.cwd(),
+          "controllers/" + req.user.base + "/credentials.json"
+        );
+        const client = await authorize(tokenPath, credentialsPath);
+        const users = await suspendUserMasivo(client, data.array, data.estado);
 
-            const u= await service.users.update({
-                userKey: userEmail,
-                resource: { suspended: estado },
-            });
-            resp.push({userEmail:userEmail,suspended:u.data.suspended});
-          console.log('Usuario suspendido:');
-          console.log(userEmail,u.data.suspended);
-            
-          } else {
-            console.log(`Usuario ${userEmail} no encontrado.`);
-          }
-          
-        }
-        return resp;
-      } catch (error) {
-        console.error('Error al suspender usuarios:', error.message);
+        res.status(200).send({ users: users });
+      } else {
+        // Se mantiene el código de estado 200, pero deberías proporcionar un mensaje
+        res.status(200).send({
+          message: "Datos incompletos",
+          array: data.array,
+          estado: data.estado,
+        });
       }
-  }
-  
-  // Uso de la función suspendUser
-  //const usersEmailToSuspend = ['estudiante.prueba.1@egbfcristorey.edu.ec','pruebaestudiaestudiante.prueba.2@egbfcristorey.edu.ec']; // Reemplaza con el correo del usuario que deseas suspender
-  //authorize().then((auth) => suspendUserMasivo(auth, usersEmailToSuspend,true)).catch(console.error);
-
-  const cambiarEstadoGoogle = async function (req, res) {
-    if (req.user) {
-      let data = req.body;
-      try {
-        if (data.array && data.estado!=undefined) {
-          const TOKEN_PATH = path.join(process.cwd(), 'controllers/'+req.user.base+'/token.json');
-          const CREDENTIALS_PATH = path.join(process.cwd(), 'controllers/'+req.user.base+'/credentials.json');
-          const client = await authorize(TOKEN_PATH, CREDENTIALS_PATH);
-          const users = await suspendUserMasivo(client, data.array, data.estado);
-  
-          res.status(200).send({ users: users });
-        } else {
-          // Se mantiene el código de estado 200, pero deberías proporcionar un mensaje
-          res.status(200).send({ message: 'Datos incompletos',array:data.array,estado:data.estado});
-        }
-      } catch (error) {
-        // Se utiliza el código de estado 200 para indicar que hubo un error en el servidor
-        res.status(500).send({ error: error });
-      }
-    } else {
-      // Se utiliza el código de estado 403 para indicar falta de acceso
-      res.status(403).send({ message: 'NoAccess' });
+    } catch (error) {
+      // Se utiliza el código de estado 200 para indicar que hubo un error en el servidor
+      res.status(500).send({ error: error });
     }
-  };
-
-  const consultarEstadoGoogle = async function (req, res) {
-    if (req.user) {
-      var id = req.params['id'];
-      console.log(id);
-      try {
-        if (id) {
-          const TOKEN_PATH = path.join(process.cwd(), 'controllers/'+req.user.base+'/token.json');
-          const CREDENTIALS_PATH = path.join(process.cwd(), 'controllers/'+req.user.base+'/credentials.json');
-          const client = await authorize(TOKEN_PATH, CREDENTIALS_PATH);
-          const users = await findUser(client, id);
-  
-          res.status(200).send({ users: users });
-        } else {
-          // Se mantiene el código de estado 200, pero deberías proporcionar un mensaje
-          res.status(200).send({ message: 'Datos incompletos' });
-        }
-      } catch (error) {
-        // Se utiliza el código de estado 200 para indicar que hubo un error en el servidor
-        res.status(500).send({ error: error });
-      }
-    } else {
-      // Se utiliza el código de estado 403 para indicar falta de acceso
-      res.status(403).send({ message: 'NoAccess' });
-    }
-  };
-  module.exports = {
-    cambiarEstadoGoogle,
-    consultarEstadoGoogle
+  } else {
+    // Se utiliza el código de estado 403 para indicar falta de acceso
+    res.status(403).send({ message: "NoAccess" });
   }
+};
+
+const consultarEstadoGoogle = async function (req, res) {
+  if (req.user) {
+    var id = req.params["id"];
+    console.log(id);
+    try {
+      if (id) {
+        const TOKEN_PATH = path.join(
+          process.cwd(),
+          "controllers/" + req.user.base + "/token.json"
+        );
+        const CREDENTIALS_PATH = path.join(
+          process.cwd(),
+          "controllers/" + req.user.base + "/credentials.json"
+        );
+        const client = await authorize(TOKEN_PATH, CREDENTIALS_PATH);
+        const users = await findUser(client, id);
+
+        res.status(200).send({ users: users });
+      } else {
+        // Se mantiene el código de estado 200, pero deberías proporcionar un mensaje
+        res.status(200).send({ message: "Datos incompletos" });
+      }
+    } catch (error) {
+      // Se utiliza el código de estado 200 para indicar que hubo un error en el servidor
+      res.status(500).send({ error: error });
+    }
+  } else {
+    // Se utiliza el código de estado 403 para indicar falta de acceso
+    res.status(403).send({ message: "NoAccess" });
+  }
+};
+module.exports = {
+  cambiarEstadoGoogle,
+  consultarEstadoGoogle,
+};
