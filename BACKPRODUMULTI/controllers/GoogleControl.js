@@ -3,6 +3,7 @@ const path = require("path");
 const process = require("process");
 const { authenticate } = require("@google-cloud/local-auth");
 const { google } = require("googleapis");
+const EduOlivoController = require("./eduolivoControll");
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ["https://www.googleapis.com/auth/admin.directory.user"];
@@ -207,7 +208,14 @@ const cambiarEstadoGoogle = async function (req, res) {
         const client = await authorize(tokenPath, credentialsPath);
         const users = await suspendUserMasivo(client, data.array, data.estado);
 
-        res.status(200).send({ users: users });
+        // Ejecutar operación en EduOlivo
+        const eduolivoResult =
+          await EduOlivoController.cambiarEstadoMasivoEduOlivo(
+            data.array,
+            !data.estado
+          );
+
+        res.status(200).send({ users: users, eduolivo: eduolivoResult });
       } else {
         // Se mantiene el código de estado 200, pero deberías proporcionar un mensaje
         res.status(200).send({

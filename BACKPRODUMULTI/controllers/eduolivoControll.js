@@ -3,8 +3,9 @@ const path = require("path");
 require("dotenv").config();
 
 // Configuración base para la API de EduOlivo
-const EDUOLIVO_BASE_URL = "https://backend.eduolivo.com/api/v1";
-const ACCESS_TOKEN = process.env.access_token;
+const EDUOLIVO_BASE_URL =
+  process.env.EDUOLIVO_BASE_URL || "https://backend.eduolivo.com/api/v1";
+const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 
 /**
  * Buscar un usuario por email en EduOlivo
@@ -13,32 +14,45 @@ const ACCESS_TOKEN = process.env.access_token;
  */
 async function buscarUsuarioEduOlivo(email) {
   try {
-    const response = await axios.get(`${EDUOLIVO_BASE_URL}/users`, {
-      params: {
-        pageSize: 10,
-        page: 1,
-        search: email,
-      },
-      headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const normalizedEmail = email.trim().toLowerCase();
 
-    // Buscar el usuario exacto en los resultados
-    const usuarios = response.data.data || response.data;
-    if (Array.isArray(usuarios)) {
-      const usuarioEncontrado = usuarios.find(
-        (user) => user.email.toLowerCase() === email.toLowerCase()
+    console.log(`[EduOlivo] Buscando usuario: ${normalizedEmail}`);
+
+    const { data: apiResponse } = await axios.get(
+      `${EDUOLIVO_BASE_URL}/users`,
+      {
+        params: { pageSize: 10, page: 1, search: normalizedEmail },
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const usuarios = apiResponse?.data?.data;
+    if (!Array.isArray(usuarios)) {
+      console.warn(
+        `[EduOlivo] Respuesta inesperada para ${normalizedEmail}`,
+        apiResponse
       );
-      return usuarioEncontrado || null;
+      return null;
     }
 
-    return null;
+    const usuario = usuarios.find(
+      (u) => u.email?.toLowerCase() === normalizedEmail
+    );
+
+    if (!usuario) {
+      console.log(`[EduOlivo] Usuario no encontrado: ${normalizedEmail}`);
+      return null;
+    }
+
+    console.log(`[EduOlivo] Usuario encontrado: ${usuario.email}`);
+    return usuario;
   } catch (error) {
     console.error(
-      `Error al buscar usuario ${email} en EduOlivo:`,
-      error.message
+      `[EduOlivo] Error al buscar ${email}:`,
+      error.response?.data || error.message
     );
     return null;
   }
@@ -52,10 +66,15 @@ async function buscarUsuarioEduOlivo(email) {
  */
 async function cambiarEstadoUsuarioEduOlivo(userId, activo) {
   try {
+    console.log(
+      `[EduOlivo] Cambiando estado de usuario ${userId} a ${
+        activo ? "activo" : "desactivado"
+      }`
+    );
     const response = await axios.put(
       `${EDUOLIVO_BASE_URL}/users/${userId}`,
       {
-        active: activo,
+        active: activo, // Cambiado de "activo" a "active"
       },
       {
         headers: {
