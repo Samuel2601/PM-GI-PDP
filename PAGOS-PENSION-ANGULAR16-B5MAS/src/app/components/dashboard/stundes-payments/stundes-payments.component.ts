@@ -131,12 +131,23 @@ export class StundesPaymentsComponent implements OnInit, AfterViewChecked {
   public load_data = true;
   public info: any;
   public auxtiprep = 'Genero';
+  readonly GOOGLE_BASES = ['CRISTOREY', 'ESTRELLAMAR', 'NUEVOECUADOR'];
 
   async valildationEspecialidad() {
-    const user_data = JSON.parse(localStorage.getItem('user_data') || '');
-    if (user_data.base === 'CRISTOREY') {
+    const userDataStr = localStorage.getItem('user_data');
+
+    if (!userDataStr) {
+      console.warn('No user_data found in localStorage');
+      return;
+    }
+
+    const user_data = JSON.parse(userDataStr);
+
+    // Verificación más segura
+    if (user_data?.base && this.GOOGLE_BASES.includes(user_data.base)) {
       this.load_google = true;
     }
+
     //console.log(user_data);
     await this._institucionService
       .getTypeInstitucion(user_data.base)

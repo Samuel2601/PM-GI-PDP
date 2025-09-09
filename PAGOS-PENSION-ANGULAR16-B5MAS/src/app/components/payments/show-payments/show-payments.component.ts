@@ -543,14 +543,17 @@ export class ShowPaymentsComponent implements OnInit {
 
     if (tipoContribuyente === 'NATURAL') {
       // Persona Natural Ecuatoriana - Validar cédula
-      const esValidaCedula = this.validarCedulaEcuatoriana(cedula);
+      const esValidaCedula =
+        dniCompleto.length === 10
+          ? this.validarCedulaEcuatoriana(cedula)
+          : true;
 
       if (!esValidaCedula) {
         throw new Error(`Cédula ecuatoriana inválida: ${cedula}`);
       }
 
       return {
-        cedula: cedula,
+        cedula: dniCompleto.length === 10 ? cedula : null,
         razon_social: pago.estudiante.nombres_factura,
         telefonos: pago.estudiante.telefono,
         direccion: pago.estudiante.direccion,
